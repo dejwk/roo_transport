@@ -1,0 +1,33 @@
+{
+    "name": "roo_transport",
+    "description": "Reliable transport (sockets, streams) over Serial and ESP-NOW.",
+    "keywords": [
+    ],
+    "authors": [
+        {
+            "name": "Dawid Kurzyniec",
+            "email": "dejwk.oss@gmail.com",
+            "maintainer": true
+        }
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dejwk/roo_transport"
+    },
+    "version": "1.0.0",
+    "homepage": "https://github.com/dejwk/roo_transport",
+    "frameworks": [
+        "Arduino"
+    ],
+    "build": {
+        "srcDir": "src",
+        "srcFilter": "+<*> -<examples> -<benchmarks> -<doc> -<test>"
+    },
+    "examples": [
+        "examples/**/*.ino"
+    ],
+    "dependencies": {
+        "dejwk/roo_io": ">=1.1.0",
+        "dejwk/roo_io_arduino": ">0"
+    }
+}
