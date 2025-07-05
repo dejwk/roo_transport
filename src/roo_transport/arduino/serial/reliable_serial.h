@@ -62,8 +62,8 @@ class ReliableSerial {
 
   // Stream overrides.
 
-  std::shared_ptr<Connection> connect();
-  std::shared_ptr<Connection> connectAsync();
+  Connection* connect();
+  Connection* connectAsync();
 
   uint32_t packets_sent() const { return channel_.packets_sent(); }
   uint32_t packets_delivered() const { return channel_.packets_delivered(); }

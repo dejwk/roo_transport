@@ -17,8 +17,7 @@ ReliableSerial::ReliableSerial(decltype(Serial1)& serial,
       input_(serial),
       sender_(output_),
       receiver_(input_),
-      channel_(sender_, receiver_, sendbuf_log2, recvbuf_log2),
-      connection_(nullptr) {
+      channel_(sender_, receiver_, sendbuf_log2, recvbuf_log2) {
 #ifdef ESP32
   serial.onReceive([this]() { channel_.tryRecv(); });
 #endif
@@ -57,14 +56,13 @@ int ReliableSerial::Connection::availableForWrite() {
 
 void ReliableSerial::Connection::flush() { out().flush(); }
 
-std::shared_ptr<ReliableSerial::Connection> ReliableSerial::connectAsync() {
+ReliableSerial::Connection* ReliableSerial::connectAsync() {
   uint32_t my_stream_id = channel_.connect();
-  connection_.reset(new Connection(channel_, my_stream_id));
-  return connection_;
+  return new Connection(channel_, my_stream_id);
 }
 
-std::shared_ptr<ReliableSerial::Connection> ReliableSerial::connect() {
-  std::shared_ptr<ReliableSerial::Connection> conn = connectAsync();
+ReliableSerial::Connection* ReliableSerial::connect() {
+  ReliableSerial::Connection* conn = connectAsync();
   conn->awaitConnected();
   return conn;
 }
