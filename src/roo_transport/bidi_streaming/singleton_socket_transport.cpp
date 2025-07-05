@@ -1,0 +1,28 @@
+#include "roo_transport/bidi_streaming/singleton_socket_transport.h"
+
+namespace roo_io {
+
+SingletonSocketTransport::SingletonSocketTransport(
+    roo_io::PacketSender& sender, roo_io::PacketReceiver& receiver,
+    unsigned int sendbuf_log2, unsigned int recvbuf_log2, std::string label)
+    : sender_(sender),
+      receiver_(receiver),
+      channel_(sender_, receiver_, sendbuf_log2, recvbuf_log2) {
+}
+
+void SingletonSocketTransport::readData() {
+  channel_.tryRecv();
+}
+
+SingletonSocket* SingletonSocketTransport::connectAsync() {
+  uint32_t my_stream_id = channel_.connect();
+  return new SingletonSocket(channel_, my_stream_id);
+}
+
+SingletonSocket* SingletonSocketTransport::connect() {
+  SingletonSocket* conn = connectAsync();
+  conn->awaitConnected();
+  return conn;
+}
+
+}  // namespace roo_io
