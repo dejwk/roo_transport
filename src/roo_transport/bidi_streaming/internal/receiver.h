@@ -11,18 +11,19 @@ namespace internal {
 class Receiver {
  public:
   enum State {
-    // Indicates that we are not connecting. Handshake not sent.
+    // Connect was not locally called; no handshake shall be initialized.
     kIdle = 0,
 
-    // Indicates that we have sent a handshake and are still awaiting the peer's
-    // stream ID and seq.
+    // Indicates that the connect has been called but we have not yet received
+    // the the peer's stream ID and seq.
     kConnecting = 1,
 
     // Indicates that we received the peer's stream ID and seq, allowing us
     // to receive messages from it.
     kConnected = 2,
 
-    // Indicates that peer has abruptly terminated a previously valid connection.
+    // Indicates that peer has abruptly terminated a previously valid
+    // connection.
     kBroken = 3,
   };
 
