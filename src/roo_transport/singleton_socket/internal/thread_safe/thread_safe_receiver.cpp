@@ -1,7 +1,7 @@
-#include "roo_transport/bidi_streaming/internal/thread_safe/compile_guard.h"
+#include "roo_transport/singleton_socket/internal/thread_safe/compile_guard.h"
 #ifdef ROO_USE_THREADS
 
-#include "roo_transport/bidi_streaming/internal/thread_safe/thread_safe_receiver.h"
+#include "roo_transport/singleton_socket/internal/thread_safe/thread_safe_receiver.h"
 
 namespace roo_io {
 namespace internal {

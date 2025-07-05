@@ -1,9 +1,9 @@
 #include <memory>
 
 #include "roo_io/core/output_stream.h"
-#include "roo_transport/bidi_streaming/internal/thread_safe/channel.h"
-#include "roo_transport/bidi_streaming/internal/thread_safe/channel_input.h"
-#include "roo_transport/bidi_streaming/internal/thread_safe/channel_output.h"
+#include "roo_transport/singleton_socket/internal/thread_safe/channel.h"
+#include "roo_transport/singleton_socket/internal/thread_safe/channel_input.h"
+#include "roo_transport/singleton_socket/internal/thread_safe/channel_output.h"
 
 namespace roo_io {
 

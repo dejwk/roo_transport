@@ -1,4 +1,4 @@
-#include "roo_transport/bidi_streaming/singleton_socket.h"
+#include "roo_transport/singleton_socket/singleton_socket.h"
 
 namespace roo_io {
 

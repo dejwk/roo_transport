@@ -1,6 +1,6 @@
 #pragma once
 
-#include "roo_transport/bidi_streaming/internal/seq_num.h"
+#include "roo_transport/singleton_socket/internal/seq_num.h"
 
 namespace roo_io {
 namespace internal {

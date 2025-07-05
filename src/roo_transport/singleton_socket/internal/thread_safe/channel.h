@@ -1,7 +1,7 @@
 #include <memory>
 #pragma once
 
-#include "roo_transport/bidi_streaming/internal/thread_safe/compile_guard.h"
+#include "roo_transport/singleton_socket/internal/thread_safe/compile_guard.h"
 #ifdef ROO_USE_THREADS
 
 #include "roo_io/core/input_stream.h"
@@ -12,15 +12,15 @@
 #include "roo_threads.h"
 #include "roo_threads/mutex.h"
 #include "roo_threads/thread.h"
-#include "roo_transport/bidi_streaming/internal/in_buffer.h"
-#include "roo_transport/bidi_streaming/internal/out_buffer.h"
-#include "roo_transport/bidi_streaming/internal/receiver.h"
-#include "roo_transport/bidi_streaming/internal/ring_buffer.h"
-#include "roo_transport/bidi_streaming/internal/seq_num.h"
-#include "roo_transport/bidi_streaming/internal/thread_safe/outgoing_data_ready_notification.h"
-#include "roo_transport/bidi_streaming/internal/thread_safe/thread_safe_receiver.h"
-#include "roo_transport/bidi_streaming/internal/thread_safe/thread_safe_transmitter.h"
-#include "roo_transport/bidi_streaming/internal/transmitter.h"
+#include "roo_transport/singleton_socket/internal/in_buffer.h"
+#include "roo_transport/singleton_socket/internal/out_buffer.h"
+#include "roo_transport/singleton_socket/internal/receiver.h"
+#include "roo_transport/singleton_socket/internal/ring_buffer.h"
+#include "roo_transport/singleton_socket/internal/seq_num.h"
+#include "roo_transport/singleton_socket/internal/thread_safe/outgoing_data_ready_notification.h"
+#include "roo_transport/singleton_socket/internal/thread_safe/thread_safe_receiver.h"
+#include "roo_transport/singleton_socket/internal/thread_safe/thread_safe_transmitter.h"
+#include "roo_transport/singleton_socket/internal/transmitter.h"
 #include "roo_transport/packets/packet_receiver.h"
 #include "roo_transport/packets/packet_sender.h"
 

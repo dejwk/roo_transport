@@ -1,4 +1,4 @@
-#include "roo_transport/bidi_streaming/internal/transmitter.h"
+#include "roo_transport/singleton_socket/internal/transmitter.h"
 
 #include "roo_backport.h"
 #include "roo_backport/byte.h"

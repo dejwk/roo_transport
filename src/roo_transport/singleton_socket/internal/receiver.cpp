@@ -1,7 +1,7 @@
-#include "roo_transport/bidi_streaming/internal/receiver.h"
+#include "roo_transport/singleton_socket/internal/receiver.h"
 
 #include "roo_io/memory/store.h"
-#include "roo_transport/bidi_streaming/internal/protocol.h"
+#include "roo_transport/singleton_socket/internal/protocol.h"
 
 namespace roo_io {
 namespace internal {

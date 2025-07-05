@@ -2,7 +2,7 @@
 
 #include "roo_backport.h"
 #include "roo_backport/byte.h"
-#include "roo_transport/bidi_streaming/internal/seq_num.h"
+#include "roo_transport/singleton_socket/internal/seq_num.h"
 #include "roo_logging.h"
 
 namespace roo_io {

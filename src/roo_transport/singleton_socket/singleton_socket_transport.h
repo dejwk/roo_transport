@@ -1,8 +1,8 @@
 #include <memory>
 
 #include "roo_io/core/output_stream.h"
-#include "roo_transport/bidi_streaming/internal/thread_safe/channel.h"
-#include "roo_transport/bidi_streaming/singleton_socket.h"
+#include "roo_transport/singleton_socket/internal/thread_safe/channel.h"
+#include "roo_transport/singleton_socket/singleton_socket.h"
 
 namespace roo_io {
 

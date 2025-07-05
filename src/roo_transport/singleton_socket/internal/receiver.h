@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include "roo_transport/bidi_streaming/internal/in_buffer.h"
-#include "roo_transport/bidi_streaming/internal/ring_buffer.h"
+#include "roo_transport/singleton_socket/internal/in_buffer.h"
+#include "roo_transport/singleton_socket/internal/ring_buffer.h"
 
 namespace roo_io {
 namespace internal {
