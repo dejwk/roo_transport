@@ -43,8 +43,14 @@ class ReliableSerial {
     // serial.
     roo_io::OutputStream& out() { return out_; }
 
+    bool isConnecting();
+
+    void awaitConnected();
+    bool awaitConnected(roo_time::Interval timeout);
+
    private:
     Channel& channel_;
+    uint32_t my_stream_id_;
     ChannelInput in_;
     ChannelOutput out_;
   };
@@ -60,6 +66,7 @@ class ReliableSerial {
   // Stream overrides.
 
   std::shared_ptr<Connection> connect();
+  std::shared_ptr<Connection> connectAsync();
 
   uint32_t packets_sent() const { return channel_.packets_sent(); }
   uint32_t packets_delivered() const { return channel_.packets_delivered(); }

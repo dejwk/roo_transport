@@ -113,7 +113,31 @@ uint32_t Channel::connect() {
   next_scheduled_handshake_update_ = roo_time::Uptime::Start();
   // We need to send that handshake message.
   outgoing_data_ready_.notify();
+  connected_cv_.notify_all();
   return my_stream_id_;
+}
+
+bool Channel::isConnecting(uint32_t stream_id) {
+  roo::lock_guard<roo::mutex> guard(handshake_mutex_);
+  return my_stream_id_ == stream_id && peer_stream_id_ == 0;
+}
+
+void Channel::awaitConnected(uint32_t stream_id) {
+  roo::unique_lock<roo::mutex> guard(handshake_mutex_);
+  while (isConnecting(stream_id)) {
+    connected_cv_.wait(guard);
+  }
+}
+
+bool Channel::awaitConnected(uint32_t stream_id, roo_time::Interval timeout) {
+  roo::unique_lock<roo::mutex> guard(handshake_mutex_);
+  roo_time::Uptime when = roo_time::Uptime::Now() + timeout;
+  while (isConnecting(stream_id)) {
+    if (connected_cv_.wait_until(guard, when) == roo::cv_status::timeout) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool Channel::loop() {
@@ -156,7 +180,7 @@ size_t Channel::conn(roo::byte* buf, long& next_send_micros) {
   auto transmitter_state = transmitter_.state();
   if (transmitter_state == internal::Transmitter::kIdle ||
       transmitter_state == internal::Transmitter::kBroken) {
-    // Ignore handshake requests until we're connecting.
+    // Don't send handshake requests until we're connecting.
     return 0;
   }
   if (transmitter_state == internal::Transmitter::kConnected &&
@@ -203,10 +227,10 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
 #ifdef ROO_USE_THREADS
   roo::lock_guard<roo::mutex> guard(handshake_mutex_);
 #endif
-// LOG(INFO) << "Handshake packet received: peer_seq_num="
-//            << peer_seq_num << ", peer_stream_id=" << peer_stream_id
-//            << ", ack_stream_id=" << ack_stream_id
-//            << ", want_ack=" << want_ack;
+  // LOG(INFO) << "Handshake packet received: peer_seq_num="
+  //            << peer_seq_num << ", peer_stream_id=" << peer_stream_id
+  //            << ", ack_stream_id=" << ack_stream_id
+  //            << ", want_ack=" << want_ack;
   switch (receiver_.state()) {
     case internal::Receiver::kConnecting: {
       peer_stream_id_ = peer_stream_id;
@@ -217,6 +241,7 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
         transmitter_.setConnected();
       }
       needs_handshake_ack_ = want_ack;
+      connected_cv_.notify_all();
       break;
     }
     case internal::Receiver::kConnected: {
@@ -235,12 +260,14 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
             transmitter_.reset();
             my_stream_id_ = 0;
           }
+          connected_cv_.notify_all();
           receiver_.setBroken();
           break;
         }
         transmitter_.reset();
         my_stream_id_ = 0;
         receiver_.reset();
+        connected_cv_.notify_all();
         break;
       }
       if (ack_stream_id == my_stream_id_) {

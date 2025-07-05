@@ -6,6 +6,7 @@ namespace roo_io {
 
 ReliableSerial::Connection::Connection(Channel& channel, uint32_t my_stream_id)
     : channel_(channel),
+      my_stream_id_(my_stream_id),
       in_(channel_, my_stream_id),
       out_(channel_, my_stream_id) {}
 
@@ -58,10 +59,28 @@ int ReliableSerial::Connection::availableForWrite() {
 
 void ReliableSerial::Connection::flush() { out().flush(); }
 
-std::shared_ptr<ReliableSerial::Connection> ReliableSerial::connect() {
+std::shared_ptr<ReliableSerial::Connection> ReliableSerial::connectAsync() {
   uint32_t my_stream_id = channel_.connect();
   connection_.reset(new Connection(channel_, my_stream_id));
   return connection_;
+}
+
+std::shared_ptr<ReliableSerial::Connection> ReliableSerial::connect() {
+  std::shared_ptr<ReliableSerial::Connection> conn = connectAsync();
+  conn->awaitConnected();
+  return conn;
+}
+
+bool ReliableSerial::Connection::isConnecting() {
+  return channel_.isConnecting(my_stream_id_);
+}
+
+void ReliableSerial::Connection::awaitConnected() {
+  channel_.awaitConnected(my_stream_id_);
+}
+
+bool ReliableSerial::Connection::awaitConnected(roo_time::Interval timeout) {
+  return channel_.awaitConnected(my_stream_id_, timeout);
 }
 
 }  // namespace roo_io

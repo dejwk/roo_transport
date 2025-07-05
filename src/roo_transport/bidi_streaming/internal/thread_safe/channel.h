@@ -8,6 +8,10 @@
 #include "roo_io/core/output_stream.h"
 #include "roo_io/memory/load.h"
 #include "roo_io/memory/store.h"
+#include "roo_logging.h"
+#include "roo_threads.h"
+#include "roo_threads/mutex.h"
+#include "roo_threads/thread.h"
 #include "roo_transport/bidi_streaming/internal/in_buffer.h"
 #include "roo_transport/bidi_streaming/internal/out_buffer.h"
 #include "roo_transport/bidi_streaming/internal/receiver.h"
@@ -19,10 +23,6 @@
 #include "roo_transport/bidi_streaming/internal/transmitter.h"
 #include "roo_transport/packets/packet_receiver.h"
 #include "roo_transport/packets/packet_sender.h"
-#include "roo_logging.h"
-#include "roo_threads.h"
-#include "roo_threads/mutex.h"
-#include "roo_threads/thread.h"
 
 namespace roo_io {
 
@@ -91,6 +91,11 @@ class Channel {
   // Returns a newly-generated my_stream_id.
   uint32_t connect();
 
+  bool isConnecting(uint32_t my_stream_id);
+
+  void awaitConnected(uint32_t my_stream_id);
+  bool awaitConnected(uint32_t my_stream_id, roo_time::Interval timeout);
+
  private:
   friend class SenderThread;
 
@@ -141,6 +146,8 @@ class Channel {
   roo::thread sender_thread_;
 
   mutable roo::mutex handshake_mutex_;
+
+  roo::condition_variable connected_cv_;
 #endif
 };
 
