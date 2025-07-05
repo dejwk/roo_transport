@@ -11,7 +11,7 @@ class SingletonSocketTransport {
   SingletonSocketTransport(roo_io::PacketSender& sender,
                            roo_io::PacketReceiver& receiver,
                            unsigned int sendbuf_log2, unsigned int recvbuf_log2,
-                           std::string label);
+                           std::string label = "");
 
   void begin() { channel_.begin(); }
 

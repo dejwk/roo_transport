@@ -16,10 +16,10 @@ class SingletonSocket {
   // Status status() const;
 
   // Obtains the input stream that can be used to read from the socket.
-  roo_io::InputStream& in() { return in_; }
+  roo_io::ChannelInput& in() { return in_; }
 
   // Obtains the output stream that can be used to write to the socket.
-  roo_io::OutputStream& out() { return out_; }
+  roo_io::ChannelOutput& out() { return out_; }
 
   bool isConnecting();
 
