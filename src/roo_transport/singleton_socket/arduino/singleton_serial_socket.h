@@ -3,8 +3,7 @@
 #if (defined ARDUINO)
 
 #include "Arduino.h"
-#include "roo_transport/singleton_socket/internal/thread_safe/channel_input.h"
-#include "roo_transport/singleton_socket/internal/thread_safe/channel_output.h"
+
 #include "roo_transport/singleton_socket/singleton_socket.h"
 
 namespace roo_transport {
@@ -34,11 +33,11 @@ class SingletonSerialSocket : public Stream {
 
   // Obtains the input stream that can be used to read from the reliable
   // serial.
-  ChannelInput& in() { return socket_.in(); }
+  SocketInputStream& in() { return socket_.in(); }
 
   // Obtains the output stream that can be used to write to the reliable
   // serial.
-  ChannelOutput& out() { return socket_.out(); }
+  SocketOutputStream& out() { return socket_.out(); }
 
   bool isConnecting();
 

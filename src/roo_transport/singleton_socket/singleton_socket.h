@@ -16,10 +16,10 @@ class SingletonSocket {
   // Status status() const;
 
   // Obtains the input stream that can be used to read from the socket.
-  ChannelInput& in() { return in_; }
+  SocketInputStream& in() { return in_; }
 
   // Obtains the output stream that can be used to write to the socket.
-  ChannelOutput& out() { return out_; }
+  SocketOutputStream& out() { return out_; }
 
   bool isConnecting();
 
