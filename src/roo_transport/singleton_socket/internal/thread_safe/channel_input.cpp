@@ -42,7 +42,7 @@ void ChannelInput::onReceive(internal::ThreadSafeReceiver::RecvCb recv_cb) {
   channel_->onReceive(recv_cb, my_stream_id_, status_);
 }
 
-int ChannelInput::available() {
+size_t ChannelInput::available() {
   if (status_ != kOk) return 0;
   return channel_->availableForRead(my_stream_id_, status_);
 }

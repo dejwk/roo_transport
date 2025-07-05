@@ -5,10 +5,11 @@
 
 #include "roo_io/core/input_stream.h"
 #include "roo_transport/singleton_socket/internal/thread_safe/channel.h"
+#include "roo_transport/socket_input_stream.h"
 
 namespace roo_io {
 
-class ChannelInput : public roo_io::InputStream {
+class ChannelInput : public roo_transport::SocketInputStream {
  public:
   ChannelInput() : channel_(nullptr), my_stream_id_(0), status_(kClosed) {}
 
@@ -23,11 +24,11 @@ class ChannelInput : public roo_io::InputStream {
 
   size_t tryRead(roo::byte* buf, size_t count) override;
 
-  void onReceive(internal::ThreadSafeReceiver::RecvCb recv_cb);
+  void onReceive(roo_transport::SocketInputStream::ReceiveCb recv_cb) override;
 
-  int available();
-  int read();
-  int peek();
+  size_t available() override;
+  int read() override;
+  int peek() override;
 
   roo_io::Status status() const override { return status_; }
 

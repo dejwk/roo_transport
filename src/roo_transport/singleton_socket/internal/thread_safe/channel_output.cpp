@@ -31,7 +31,7 @@ size_t ChannelOutput::tryWrite(const roo::byte* buf, size_t count) {
   return channel_->tryWrite(buf, count, my_stream_id_, status_);
 }
 
-int ChannelOutput::availableForWrite() {
+size_t ChannelOutput::availableForWrite() {
   if (status_ != kOk) return 0;
   return channel_->availableForWrite(my_stream_id_, status_);
 }
