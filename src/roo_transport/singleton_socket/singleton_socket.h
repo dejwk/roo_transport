@@ -1,4 +1,4 @@
-#include <memory>
+#pragma once
 
 #include "roo_io/core/output_stream.h"
 #include "roo_transport/singleton_socket/internal/thread_safe/channel.h"

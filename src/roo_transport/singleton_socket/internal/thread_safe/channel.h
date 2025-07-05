@@ -27,7 +27,7 @@
 namespace roo_io {
 
 // Helper class to implement reliable bidirectional streaming over lossy
-// packet-based transport. Used as a building block of ReliableSerial.
+// packet-based transport. Used as a building block of SingletonSerial.
 class Channel {
  public:
   Channel(roo_io::PacketSender& sender, roo_io::PacketReceiver& receiver,
