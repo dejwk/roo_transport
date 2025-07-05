@@ -30,9 +30,6 @@ namespace roo_io {
 // packet-based transport. Used as a building block of ReliableSerial.
 class Channel {
  public:
-  // Can be supplied to be notified when the peer reconnects.
-  using ConnectionCb = std::function<void()>;
-
   Channel(roo_io::PacketSender& sender, roo_io::PacketReceiver& receiver,
           unsigned int sendbuf_log2, unsigned int recvbuf_log2);
 

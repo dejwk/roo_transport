@@ -15,8 +15,6 @@ namespace roo_io {
 
 class ReliableSerial {
  public:
-  using ConnectionCb = Channel::ConnectionCb;
-
   class Connection : public Stream {
    public:
     Connection(Channel& channel, uint32_t my_stream_id);
