@@ -6,7 +6,7 @@
 #include "roo_transport/packets/loopback/loopback_packet_receiver.h"
 #include "roo_transport/packets/packet_sender.h"
 
-namespace roo_io {
+namespace roo_transport {
 
 class LoopbackPacketSender : public PacketSender {
  public:
@@ -24,4 +24,4 @@ class LoopbackPacketSender : public PacketSender {
   LoopbackPacketReceiver& receiver_;
 };
 
-}  // namespace roo_io
+}  // namespace roo_transport

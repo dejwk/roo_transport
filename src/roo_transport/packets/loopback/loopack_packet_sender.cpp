@@ -1,7 +1,7 @@
 #include "roo_transport/packets/loopback/loopback_packet_sender.h"
 #include "roo_logging.h"
 
-namespace roo_io {
+namespace roo_transport {
 
 LoopbackPacketSender::LoopbackPacketSender(LoopbackPacketReceiver& receiver)
     : receiver_(receiver) {}
@@ -15,4 +15,4 @@ void LoopbackPacketSender::send(const roo::byte* buf, size_t len) {
   receiver_.packetReceived(buf, len);
 }
 
-}  // namespace roo_io
+}  // namespace roo_transport

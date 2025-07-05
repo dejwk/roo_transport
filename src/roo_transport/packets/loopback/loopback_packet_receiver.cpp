@@ -5,7 +5,7 @@
 #include "roo_io/third_party/nanocobs/cobs.h"
 #include "roo_logging.h"
 
-namespace roo_io {
+namespace roo_transport {
 
 LoopbackPacketReceiver::LoopbackPacketReceiver(ReceiverFn receiver_fn)
     : receiver_fn_(std::move(receiver_fn)),
@@ -31,4 +31,4 @@ bool LoopbackPacketReceiver::tryReceive() {
   return true;
 }
 
-}  // namespace roo_io
+}  // namespace roo_transport

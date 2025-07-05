@@ -2,9 +2,11 @@
 
 #include <memory>
 
+#include "roo_backport.h"
+#include "roo_backport/byte.h"
 #include "roo_io/core/input_stream.h"
 
-namespace roo_io {
+namespace roo_transport {
 
 // Abstraction to receive packets sent by PacketSenter.
 //
@@ -15,7 +17,7 @@ namespace roo_io {
 class PacketReceiver {
  public:
   // Callback type to be called when a packet arrives.
-  using ReceiverFn = std::function<void(const byte*, size_t)>;
+  using ReceiverFn = std::function<void(const roo::byte*, size_t)>;
 
   // Must be called when there might be new data to read from the input
   // stream. Returns true if a packet was received; false otherwise.
@@ -25,4 +27,4 @@ class PacketReceiver {
   virtual void setReceiverFn(ReceiverFn receiver_fn) = 0;
 };
 
-}  // namespace roo_io
+}  // namespace roo_transport

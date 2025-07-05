@@ -3,11 +3,11 @@
 #include "roo_transport/singleton_socket/internal/thread_safe/compile_guard.h"
 #ifdef ROO_USE_THREADS
 
+#include "roo_io/status.h"
 #include "roo_transport/singleton_socket/internal/receiver.h"
 #include "roo_transport/singleton_socket/internal/thread_safe/outgoing_data_ready_notification.h"
-#include "roo_io/status.h"
 
-namespace roo_io {
+namespace roo_transport {
 namespace internal {
 
 class ThreadSafeReceiver {
@@ -25,18 +25,20 @@ class ThreadSafeReceiver {
   void setBroken();
 
   size_t read(roo::byte* buf, size_t count, uint32_t my_stream_id,
-              Status& stream_status);
+              roo_io::Status& stream_status);
 
   size_t tryRead(roo::byte* buf, size_t count, uint32_t my_stream_id,
-                 Status& stream_status);
+                 roo_io::Status& stream_status);
 
-  int peek(uint32_t my_stream_id, Status& stream_status);
+  int peek(uint32_t my_stream_id, roo_io::Status& stream_status);
 
-  size_t availableForRead(uint32_t my_stream_id, Status& stream_status) const;
+  size_t availableForRead(uint32_t my_stream_id,
+                          roo_io::Status& stream_status) const;
 
-  void markInputClosed(uint32_t my_stream_id, Status& stream_status);
+  void markInputClosed(uint32_t my_stream_id, roo_io::Status& stream_status);
 
-  void onReceive(RecvCb recv_cb, uint32_t my_stream_id, Status& stream_status);
+  void onReceive(RecvCb recv_cb, uint32_t my_stream_id,
+                 roo_io::Status& stream_status);
 
   void reset();
   void init(uint32_t my_stream_id);
@@ -72,7 +74,7 @@ class ThreadSafeReceiver {
   // when status is kOk; false otherwise.
   //
   // Must be called with mutex_ held.
-  bool checkConnectionStatus(uint32_t my_stream_id, Status& status) const;
+  bool checkConnectionStatus(uint32_t my_stream_id, roo_io::Status& status) const;
 
   internal::Receiver receiver_;
 
@@ -88,6 +90,6 @@ class ThreadSafeReceiver {
 };
 
 }  // namespace internal
-}  // namespace roo_io
+}  // namespace roo_transport
 
 #endif  // ROO_USE_THREADS

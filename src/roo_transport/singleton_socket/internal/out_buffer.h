@@ -5,7 +5,7 @@
 #include "roo_transport/singleton_socket/internal/seq_num.h"
 #include "roo_logging.h"
 
-namespace roo_io {
+namespace roo_transport {
 namespace internal {
 
 class OutBuffer {
@@ -95,4 +95,4 @@ class OutBuffer {
 };
 
 }  // namespace internal
-}  // namespace roo_io
+}  // namespace roo_transport

@@ -4,7 +4,7 @@
 
 #include "Arduino.h"
 
-namespace roo_io {
+namespace roo_transport {
 
 SingletonSerial::SingletonSerial(decltype(Serial1)& serial,
                                  unsigned int sendbuf_log2,
@@ -31,6 +31,6 @@ SingletonSerialSocket SingletonSerial::connect() {
   return SingletonSerialSocket(std::move(socket));
 }
 
-}  // namespace roo_io
+}  // namespace roo_transport
 
 #endif  // defined(ARDUINO)

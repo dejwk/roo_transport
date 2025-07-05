@@ -3,11 +3,11 @@
 #include "roo_transport/singleton_socket/internal/thread_safe/compile_guard.h"
 #ifdef ROO_USE_THREADS
 
+#include "roo_io/status.h"
 #include "roo_transport/singleton_socket/internal/thread_safe/outgoing_data_ready_notification.h"
 #include "roo_transport/singleton_socket/internal/transmitter.h"
-#include "roo_io/status.h"
 
-namespace roo_io {
+namespace roo_transport {
 namespace internal {
 
 class ThreadSafeTransmitter {
@@ -31,20 +31,22 @@ class ThreadSafeTransmitter {
   }
 
   size_t write(const roo::byte* buf, size_t count, uint32_t my_stream_id,
-               Status& stream_status);
+               roo_io::Status& stream_status);
 
   size_t tryWrite(const roo::byte* buf, size_t count, uint32_t my_stream_id,
-                  Status& stream_status);
+                  roo_io::Status& stream_status);
 
-  size_t availableForWrite(uint32_t my_stream_id, Status& stream_status) const;
+  size_t availableForWrite(uint32_t my_stream_id,
+                           roo_io::Status& stream_status) const;
 
-  void flush(uint32_t my_stream_id, Status& stream_status);
+  void flush(uint32_t my_stream_id, roo_io::Status& stream_status);
 
-  bool hasPendingData(uint32_t my_stream_id, Status& stream_status) const;
+  bool hasPendingData(uint32_t my_stream_id,
+                      roo_io::Status& stream_status) const;
 
   // Closes the stream and blocks until all the data has been confirmed by the
   // recipient.
-  void close(uint32_t my_stream_id, Status& stream_status);
+  void close(uint32_t my_stream_id, roo_io::Status& stream_status);
 
   void setConnected() {
     roo::lock_guard<roo::mutex> guard(mutex_);
@@ -88,7 +90,8 @@ class ThreadSafeTransmitter {
   // mismatch). It returns true when status is kOk; false otherwise.
   //
   // Must be called with mutex_ held.
-  bool checkConnectionStatus(uint32_t my_stream_id, Status& status) const;
+  bool checkConnectionStatus(uint32_t my_stream_id,
+                             roo_io::Status& status) const;
 
   internal::Transmitter transmitter_;
 
@@ -106,6 +109,6 @@ class ThreadSafeTransmitter {
 };
 
 }  // namespace internal
-}  // namespace roo_io
+}  // namespace roo_transport
 
 #endif  // ROO_USE_THREADS

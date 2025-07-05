@@ -3,7 +3,7 @@
 #include "roo_backport.h"
 #include "roo_backport/byte.h"
 
-namespace roo_io {
+namespace roo_transport {
 namespace internal {
 
 Transmitter::Transmitter(unsigned int sendbuf_log2)
@@ -263,4 +263,4 @@ bool Transmitter::ack(uint16_t seq_id, const roo::byte* ack_bitmap,
 }
 
 }  // namespace internal
-}  // namespace roo_io
+}  // namespace roo_transport

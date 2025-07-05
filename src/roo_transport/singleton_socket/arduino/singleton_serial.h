@@ -10,7 +10,7 @@
 #include "roo_transport/singleton_socket/arduino/singleton_serial_socket.h"
 #include "roo_transport/singleton_socket/singleton_socket_transport.h"
 
-namespace roo_io {
+namespace roo_transport {
 
 class SingletonSerial {
  public:
@@ -35,12 +35,12 @@ class SingletonSerial {
  private:
   roo_io::ArduinoStreamOutputStream output_;
   roo_io::ArduinoStreamInputStream input_;
-  roo_io::PacketSenderOverStream sender_;
-  roo_io::PacketReceiverOverStream receiver_;
+  PacketSenderOverStream sender_;
+  PacketReceiverOverStream receiver_;
 
   SingletonSocketTransport transport_;
 };
 
-}  // namespace roo_io
+}  // namespace roo_transport
 
 #endif  // defined(ARDUINO)

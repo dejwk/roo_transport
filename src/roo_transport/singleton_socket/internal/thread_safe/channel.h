@@ -12,6 +12,8 @@
 #include "roo_threads.h"
 #include "roo_threads/mutex.h"
 #include "roo_threads/thread.h"
+#include "roo_transport/packets/packet_receiver.h"
+#include "roo_transport/packets/packet_sender.h"
 #include "roo_transport/singleton_socket/internal/in_buffer.h"
 #include "roo_transport/singleton_socket/internal/out_buffer.h"
 #include "roo_transport/singleton_socket/internal/receiver.h"
@@ -21,16 +23,14 @@
 #include "roo_transport/singleton_socket/internal/thread_safe/thread_safe_receiver.h"
 #include "roo_transport/singleton_socket/internal/thread_safe/thread_safe_transmitter.h"
 #include "roo_transport/singleton_socket/internal/transmitter.h"
-#include "roo_transport/packets/packet_receiver.h"
-#include "roo_transport/packets/packet_sender.h"
 
-namespace roo_io {
+namespace roo_transport {
 
 // Helper class to implement reliable bidirectional streaming over lossy
 // packet-based transport. Used as a building block of SingletonSerial.
 class Channel {
  public:
-  Channel(roo_io::PacketSender& sender, roo_io::PacketReceiver& receiver,
+  Channel(PacketSender& sender, PacketReceiver& receiver,
           unsigned int sendbuf_log2, unsigned int recvbuf_log2);
 
   void begin();
@@ -38,31 +38,32 @@ class Channel {
   uint32_t my_stream_id() const;
 
   size_t write(const roo::byte* buf, size_t count, uint32_t my_stream_id,
-               Status& stream_status);
+               roo_io::Status& stream_status);
 
   size_t tryWrite(const roo::byte* buf, size_t count, uint32_t my_stream_id,
-                  Status& stream_status);
+                  roo_io::Status& stream_status);
 
   size_t read(roo::byte* buf, size_t count, uint32_t my_stream_id,
-              Status& stream_status);
+              roo_io::Status& stream_status);
 
   size_t tryRead(roo::byte* buf, size_t count, uint32_t my_stream_id,
-                 Status& stream_status);
+                 roo_io::Status& stream_status);
 
   // Returns -1 if no data available to read immediately.
-  int peek(uint32_t my_stream_id, Status& stream_status);
+  int peek(uint32_t my_stream_id, roo_io::Status& stream_status);
 
-  size_t availableForRead(uint32_t my_stream_id, Status& stream_status) const;
+  size_t availableForRead(uint32_t my_stream_id,
+                          roo_io::Status& stream_status) const;
 
-  void flush(uint32_t my_stream_id, Status& stream_status);
+  void flush(uint32_t my_stream_id, roo_io::Status& stream_status);
 
-  void close(uint32_t my_stream_id, Status& stream_status);
+  void close(uint32_t my_stream_id, roo_io::Status& stream_status);
 
-  void closeInput(uint32_t my_stream_id, Status& stream_status);
+  void closeInput(uint32_t my_stream_id, roo_io::Status& stream_status);
 
   // Registers callback to be invoked when new data is available for reading.
   void onReceive(internal::ThreadSafeReceiver::RecvCb recv_cb,
-                 uint32_t my_stream_id, Status& stream_status);
+                 uint32_t my_stream_id, roo_io::Status& stream_status);
 
   bool loop();
 
@@ -74,7 +75,8 @@ class Channel {
 
   // The lower bound of bytes that are guaranteed to be writable without
   // blocking.
-  size_t availableForWrite(uint32_t my_stream_id, Status& stream_status) const;
+  size_t availableForWrite(uint32_t my_stream_id,
+                           roo_io::Status& stream_status) const;
 
   uint32_t packets_sent() const { return transmitter_.packets_sent(); }
 
@@ -108,8 +110,8 @@ class Channel {
 
   size_t conn(roo::byte* buf, long& next_send_micros);
 
-  roo_io::PacketSender& packet_sender_;
-  roo_io::PacketReceiver& packet_receiver_;
+  PacketSender& packet_sender_;
+  PacketReceiver& packet_receiver_;
 
   // Signals the sender thread that there are packets to send.
   internal::OutgoingDataReadyNotification outgoing_data_ready_;
@@ -145,6 +147,6 @@ class Channel {
 #endif
 };
 
-}  // namespace roo_io
+}  // namespace roo_transport
 
 #endif  // ROO_USE_THREADS

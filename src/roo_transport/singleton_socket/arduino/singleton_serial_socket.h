@@ -7,7 +7,7 @@
 #include "roo_transport/singleton_socket/internal/thread_safe/channel_output.h"
 #include "roo_transport/singleton_socket/singleton_socket.h"
 
-namespace roo_io {
+namespace roo_transport {
 
 class SingletonSerialSocket : public Stream {
  public:
@@ -34,11 +34,11 @@ class SingletonSerialSocket : public Stream {
 
   // Obtains the input stream that can be used to read from the reliable
   // serial.
-  roo_io::ChannelInput& in() { return socket_.in(); }
+  ChannelInput& in() { return socket_.in(); }
 
   // Obtains the output stream that can be used to write to the reliable
   // serial.
-  roo_io::ChannelOutput& out() { return socket_.out(); }
+  ChannelOutput& out() { return socket_.out(); }
 
   bool isConnecting();
 
@@ -52,6 +52,6 @@ class SingletonSerialSocket : public Stream {
   SingletonSocket socket_;
 };
 
-}  // namespace roo_io
+}  // namespace roo_transport
 
 #endif  // defined(ARDUINO)

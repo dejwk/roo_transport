@@ -3,17 +3,17 @@
 
 #include "roo_transport/singleton_socket/internal/thread_safe/channel_input.h"
 
-namespace roo_io {
+namespace roo_transport {
 
 void ChannelInput::close() {
-  if (status_ != kOk && status_ != kEndOfStream) return;
+  if (status_ != roo_io::kOk && status_ != roo_io::kEndOfStream) return;
   channel_->closeInput(my_stream_id_, status_);
-  if (status_ != kOk && status_ != kEndOfStream) return;
-  status_ = kClosed;
+  if (status_ != roo_io::kOk && status_ != roo_io::kEndOfStream) return;
+  status_ = roo_io::kClosed;
 }
 
 size_t ChannelInput::read(roo::byte* buf, size_t count) {
-  if (count == 0 || status_ != kOk) return 0;
+  if (count == 0 || status_ != roo_io::kOk) return 0;
   return channel_->read(buf, count, my_stream_id_, status_);
   // // processor_.loop();
   // while (true) {
@@ -34,7 +34,7 @@ size_t ChannelInput::read(roo::byte* buf, size_t count) {
 }
 
 size_t ChannelInput::tryRead(roo::byte* buf, size_t count) {
-  if (count == 0 || status_ != kOk) return 0;
+  if (count == 0 || status_ != roo_io::kOk) return 0;
   return channel_->tryRead(buf, count, my_stream_id_, status_);
 }
 
@@ -43,12 +43,12 @@ void ChannelInput::onReceive(internal::ThreadSafeReceiver::RecvCb recv_cb) {
 }
 
 size_t ChannelInput::available() {
-  if (status_ != kOk) return 0;
+  if (status_ != roo_io::kOk) return 0;
   return channel_->availableForRead(my_stream_id_, status_);
 }
 
 int ChannelInput::read() {
-  if (status_ != kOk) return 0;
+  if (status_ != roo_io::kOk) return 0;
   roo::byte result;
   size_t count = channel_->tryRead(&result, 1, my_stream_id_, status_);
   if (count > 0) return (int)result;
@@ -56,12 +56,12 @@ int ChannelInput::read() {
 }
 
 int ChannelInput::peek() {
-  if (status_ != kOk) return -1;
+  if (status_ != roo_io::kOk) return -1;
   int result = channel_->peek(my_stream_id_, status_);
   if (result >= 0) return result;
   return -1;
 }
 
-}  // namespace roo_io
+}  // namespace roo_transport
 
 #endif  // ROO_USE_THREADS

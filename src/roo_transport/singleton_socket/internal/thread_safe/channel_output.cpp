@@ -3,10 +3,10 @@
 
 #include "roo_transport/singleton_socket/internal/thread_safe/channel_output.h"
 
-namespace roo_io {
+namespace roo_transport {
 
 size_t ChannelOutput::write(const roo::byte* buf, size_t count) {
-  if (status_ != kOk) return 0;
+  if (status_ != roo_io::kOk) return 0;
   if (count == 0) return 0;
   return channel_->write(buf, count, my_stream_id_, status_);
   // while (true) {
@@ -27,26 +27,26 @@ size_t ChannelOutput::write(const roo::byte* buf, size_t count) {
 }
 
 size_t ChannelOutput::tryWrite(const roo::byte* buf, size_t count) {
-  if (status_ != kOk) return 0;
+  if (status_ != roo_io::kOk) return 0;
   return channel_->tryWrite(buf, count, my_stream_id_, status_);
 }
 
 size_t ChannelOutput::availableForWrite() {
-  if (status_ != kOk) return 0;
+  if (status_ != roo_io::kOk) return 0;
   return channel_->availableForWrite(my_stream_id_, status_);
 }
 
 void ChannelOutput::flush() {
-  if (status_ != kOk) return;
+  if (status_ != roo_io::kOk) return;
   channel_->flush(my_stream_id_, status_);
 }
 
 void ChannelOutput::close() {
-  if (status_ != kOk) return;
+  if (status_ != roo_io::kOk) return;
   channel_->close(my_stream_id_, status_);
-  if (status_ == kOk) status_ = kClosed;
+  if (status_ == roo_io::kOk) status_ = roo_io::kClosed;
 }
 
-}  // namespace roo_io
+}  // namespace roo_transport
 
 #endif  // ROO_USE_THREADS

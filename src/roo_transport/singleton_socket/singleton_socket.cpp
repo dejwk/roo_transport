@@ -1,6 +1,6 @@
 #include "roo_transport/singleton_socket/singleton_socket.h"
 
-namespace roo_io {
+namespace roo_transport {
 
 SingletonSocket::SingletonSocket() : channel_(nullptr), my_stream_id_(0) {}
 
@@ -24,4 +24,4 @@ bool SingletonSocket::awaitConnected(roo_time::Interval timeout) {
   return channel_->awaitConnected(my_stream_id_, timeout);
 }
 
-}  // namespace roo_io
+}  // namespace roo_transport

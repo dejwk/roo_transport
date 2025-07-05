@@ -1,18 +1,17 @@
 #include "roo_transport/singleton_socket/singleton_socket_transport.h"
 
-namespace roo_io {
+namespace roo_transport {
 
-SingletonSocketTransport::SingletonSocketTransport(
-    roo_io::PacketSender& sender, roo_io::PacketReceiver& receiver,
-    unsigned int sendbuf_log2, unsigned int recvbuf_log2, std::string label)
+SingletonSocketTransport::SingletonSocketTransport(PacketSender& sender,
+                                                   PacketReceiver& receiver,
+                                                   unsigned int sendbuf_log2,
+                                                   unsigned int recvbuf_log2,
+                                                   std::string label)
     : sender_(sender),
       receiver_(receiver),
-      channel_(sender_, receiver_, sendbuf_log2, recvbuf_log2) {
-}
+      channel_(sender_, receiver_, sendbuf_log2, recvbuf_log2) {}
 
-void SingletonSocketTransport::readData() {
-  channel_.tryRecv();
-}
+void SingletonSocketTransport::readData() { channel_.tryRecv(); }
 
 SingletonSocket SingletonSocketTransport::connectAsync() {
   uint32_t my_stream_id = channel_.connect();
@@ -25,8 +24,6 @@ SingletonSocket SingletonSocketTransport::connect() {
   return conn;
 }
 
-void SingletonSocketTransport::loop() {
-  channel_.loop();
-}
+void SingletonSocketTransport::loop() { channel_.loop(); }
 
-}  // namespace roo_io
+}  // namespace roo_transport

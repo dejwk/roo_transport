@@ -3,7 +3,7 @@
 
 #include "roo_transport/singleton_socket/internal/thread_safe/thread_safe_receiver.h"
 
-namespace roo_io {
+namespace roo_transport {
 namespace internal {
 
 ThreadSafeReceiver::ThreadSafeReceiver(
@@ -38,25 +38,26 @@ void ThreadSafeReceiver::setBroken() {
 }
 
 bool ThreadSafeReceiver::checkConnectionStatus(uint32_t my_stream_id,
-                                               Status& status) const {
+                                               roo_io::Status& status) const {
   if (my_stream_id != receiver_.my_stream_id()) {
-    status = kConnectionError;
+    status = roo_io::kConnectionError;
     return false;
   }
   if (receiver_.state() == Receiver::kIdle) {
-    status = kConnectionError;
+    status = roo_io::kConnectionError;
     return false;
   }
   if (receiver_.eos()) {
-    status = kEndOfStream;
+    status = roo_io::kEndOfStream;
     return false;
   }
-  status = kOk;
+  status = roo_io::kOk;
   return true;
 }
 
 size_t ThreadSafeReceiver::read(roo::byte* buf, size_t count,
-                                uint32_t my_stream_id, Status& stream_status) {
+                                uint32_t my_stream_id,
+                                roo_io::Status& stream_status) {
   if (count == 0) return 0;
   roo::unique_lock<roo::mutex> guard(mutex_);
   if (!checkConnectionStatus(my_stream_id, stream_status)) return 0;
@@ -76,7 +77,7 @@ size_t ThreadSafeReceiver::read(roo::byte* buf, size_t count,
 
 size_t ThreadSafeReceiver::tryRead(roo::byte* buf, size_t count,
                                    uint32_t my_stream_id,
-                                   Status& stream_status) {
+                                   roo_io::Status& stream_status) {
   if (count == 0) return 0;
   roo::lock_guard<roo::mutex> guard(mutex_);
   if (!checkConnectionStatus(my_stream_id, stream_status)) return 0;
@@ -88,21 +89,22 @@ size_t ThreadSafeReceiver::tryRead(roo::byte* buf, size_t count,
   return total_read;
 }
 
-int ThreadSafeReceiver::peek(uint32_t my_stream_id, Status& stream_status) {
+int ThreadSafeReceiver::peek(uint32_t my_stream_id,
+                             roo_io::Status& stream_status) {
   roo::lock_guard<roo::mutex> guard(mutex_);
   if (!checkConnectionStatus(my_stream_id, stream_status)) return -1;
   return receiver_.peek();
 }
 
-size_t ThreadSafeReceiver::availableForRead(uint32_t my_stream_id,
-                                            Status& stream_status) const {
+size_t ThreadSafeReceiver::availableForRead(
+    uint32_t my_stream_id, roo_io::Status& stream_status) const {
   roo::lock_guard<roo::mutex> guard(mutex_);
   if (!checkConnectionStatus(my_stream_id, stream_status)) return 0;
   return receiver_.availableForRead();
 }
 
 void ThreadSafeReceiver::markInputClosed(uint32_t my_stream_id,
-                                         Status& stream_status) {
+                                         roo_io::Status& stream_status) {
   roo::lock_guard<roo::mutex> guard(mutex_);
   if (!checkConnectionStatus(my_stream_id, stream_status)) return;
   bool outgoing_data_ready = false;
@@ -113,7 +115,7 @@ void ThreadSafeReceiver::markInputClosed(uint32_t my_stream_id,
 }
 
 void ThreadSafeReceiver::onReceive(RecvCb recv_cb, uint32_t my_stream_id,
-                                   Status& stream_status) {
+                                   roo_io::Status& stream_status) {
   if (!checkConnectionStatus(my_stream_id, stream_status)) return;
   recv_cb_ = recv_cb;
   recv_cb_stream_id_ = my_stream_id;
@@ -171,6 +173,6 @@ bool ThreadSafeReceiver::handleDataPacket(uint16_t seq_id,
 }
 
 }  // namespace internal
-}  // namespace roo_io
+}  // namespace roo_transport
 
 #endif  // ROO_USE_THREADS

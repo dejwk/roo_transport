@@ -4,7 +4,7 @@
 #include "roo_transport/singleton_socket/internal/protocol.h"
 #include "roo_transport/singleton_socket/internal/thread_safe/channel.h"
 
-namespace roo_io {
+namespace roo_transport {
 
 namespace {
 
@@ -22,7 +22,7 @@ roo_time::Interval Backoff(int retry_count) {
 
 }  // namespace
 
-Channel::Channel(roo_io::PacketSender& sender, roo_io::PacketReceiver& receiver,
+Channel::Channel(PacketSender& sender, PacketReceiver& receiver,
                  unsigned int sendbuf_log2, unsigned int recvbuf_log2)
     : packet_sender_(sender),
       packet_receiver_(receiver),
@@ -43,53 +43,53 @@ Channel::Channel(roo_io::PacketSender& sender, roo_io::PacketReceiver& receiver,
 }
 
 size_t Channel::write(const roo::byte* buf, size_t count, uint32_t my_stream_id,
-                      Status& stream_status) {
+                      roo_io::Status& stream_status) {
   return transmitter_.write(buf, count, my_stream_id, stream_status);
 }
 
 size_t Channel::tryWrite(const roo::byte* buf, size_t count,
-                         uint32_t my_stream_id, Status& stream_status) {
+                         uint32_t my_stream_id, roo_io::Status& stream_status) {
   return transmitter_.tryWrite(buf, count, my_stream_id, stream_status);
 }
 
 size_t Channel::read(roo::byte* buf, size_t count, uint32_t my_stream_id,
-                     Status& stream_status) {
+                     roo_io::Status& stream_status) {
   return receiver_.read(buf, count, my_stream_id, stream_status);
 }
 
 size_t Channel::tryRead(roo::byte* buf, size_t count, uint32_t my_stream_id,
-                        Status& stream_status) {
+                        roo_io::Status& stream_status) {
   return receiver_.tryRead(buf, count, my_stream_id, stream_status);
 }
 
-int Channel::peek(uint32_t my_stream_id, Status& stream_status) {
+int Channel::peek(uint32_t my_stream_id, roo_io::Status& stream_status) {
   return receiver_.peek(my_stream_id, stream_status);
 }
 
 size_t Channel::availableForRead(uint32_t my_stream_id,
-                                 Status& stream_status) const {
+                                 roo_io::Status& stream_status) const {
   return receiver_.availableForRead(my_stream_id, stream_status);
 }
 
-void Channel::flush(uint32_t my_stream_id, Status& stream_status) {
+void Channel::flush(uint32_t my_stream_id, roo_io::Status& stream_status) {
   transmitter_.flush(my_stream_id, stream_status);
 }
 
-void Channel::close(uint32_t my_stream_id, Status& stream_status) {
+void Channel::close(uint32_t my_stream_id, roo_io::Status& stream_status) {
   transmitter_.close(my_stream_id, stream_status);
 }
 
-void Channel::closeInput(uint32_t my_stream_id, Status& stream_status) {
+void Channel::closeInput(uint32_t my_stream_id, roo_io::Status& stream_status) {
   receiver_.markInputClosed(my_stream_id, stream_status);
 }
 
 void Channel::onReceive(internal::ThreadSafeReceiver::RecvCb recv_cb,
-                        uint32_t my_stream_id, Status& stream_status) {
+                        uint32_t my_stream_id, roo_io::Status& stream_status) {
   receiver_.onReceive(recv_cb, my_stream_id, stream_status);
 }
 
 size_t Channel::availableForWrite(uint32_t my_stream_id,
-                                  Status& stream_status) const {
+                                  roo_io::Status& stream_status) const {
   return transmitter_.availableForWrite(my_stream_id, stream_status);
 }
 
@@ -356,6 +356,6 @@ void Channel::begin() {
   // sender_thread_ = roo::thread(SendLoop, this);
 }
 
-}  // namespace roo_io
+}  // namespace roo_transport
 
 #endif  // ROO_USE_THREADS

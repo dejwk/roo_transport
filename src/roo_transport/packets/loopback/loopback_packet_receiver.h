@@ -4,7 +4,7 @@
 
 #include "roo_transport/packets/packet_receiver.h"
 
-namespace roo_io {
+namespace roo_transport {
 
 class LoopbackPacketReceiver : public PacketReceiver {
  public:
@@ -26,4 +26,4 @@ class LoopbackPacketReceiver : public PacketReceiver {
   size_t size_;
 };
 
-}  // namespace roo_io
+}  // namespace roo_transport

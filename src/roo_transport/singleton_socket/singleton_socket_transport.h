@@ -4,12 +4,11 @@
 #include "roo_transport/singleton_socket/internal/thread_safe/channel.h"
 #include "roo_transport/singleton_socket/singleton_socket.h"
 
-namespace roo_io {
+namespace roo_transport {
 
 class SingletonSocketTransport {
  public:
-  SingletonSocketTransport(roo_io::PacketSender& sender,
-                           roo_io::PacketReceiver& receiver,
+  SingletonSocketTransport(PacketSender& sender, PacketReceiver& receiver,
                            unsigned int sendbuf_log2, unsigned int recvbuf_log2,
                            std::string label = "");
 
@@ -29,11 +28,10 @@ class SingletonSocketTransport {
   void loop();
 
  private:
-
-  roo_io::PacketSender& sender_;
-  roo_io::PacketReceiver& receiver_;
+  PacketSender& sender_;
+  PacketReceiver& receiver_;
 
   Channel channel_;
 };
 
-}  // namespace roo_io
+}  // namespace roo_transport

@@ -5,10 +5,10 @@
 #include "roo_io/third_party/nanocobs/cobs.h"
 #include "roo_logging.h"
 
-namespace roo_io {
+namespace roo_transport {
 
-PacketSenderOverStream::PacketSenderOverStream(OutputStream& out)
-    : out_(out), buf_(new byte[256]) {}
+PacketSenderOverStream::PacketSenderOverStream(roo_io::OutputStream& out)
+    : out_(out), buf_(new roo::byte[256]) {}
 
 void PacketSenderOverStream::send(const roo::byte* buf, size_t len) {
   // We will use 4 bytes for checksum, and 2 bytes for COBS overhead.
@@ -22,4 +22,4 @@ void PacketSenderOverStream::send(const roo::byte* buf, size_t len) {
   out_.writeFully(buf_.get(), len + 6);
 }
 
-}  // namespace roo_io
+}  // namespace roo_transport

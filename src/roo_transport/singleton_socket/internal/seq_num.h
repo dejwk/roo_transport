@@ -4,7 +4,7 @@
 
 #include "roo_logging.h"
 
-namespace roo_io {
+namespace roo_transport {
 namespace internal {
 
 // This class implements a sequence number that wraps around at 2^16.
@@ -74,10 +74,10 @@ class SeqNum {
 };
 
 }  // namespace internal
-}  // namespace roo_io
+}  // namespace roo_transport
 
 inline roo_logging::Stream& operator<<(roo_logging::Stream& os,
-                                       roo_io::internal::SeqNum seq) {
+                                       roo_transport::internal::SeqNum seq) {
   os << seq.raw();
   return os;
 }

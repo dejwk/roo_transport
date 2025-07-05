@@ -3,7 +3,7 @@
 
 #include "roo_transport/singleton_socket/internal/thread_safe/thread_safe_transmitter.h"
 
-namespace roo_io {
+namespace roo_transport {
 namespace internal {
 
 ThreadSafeTransmitter::ThreadSafeTransmitter(
@@ -11,21 +11,21 @@ ThreadSafeTransmitter::ThreadSafeTransmitter(
     internal::OutgoingDataReadyNotification& outgoing_data_ready)
     : transmitter_(sendbuf_log2), outgoing_data_ready_(outgoing_data_ready) {}
 
-bool ThreadSafeTransmitter::checkConnectionStatus(uint32_t my_stream_id,
-                                                  Status& status) const {
+bool ThreadSafeTransmitter::checkConnectionStatus(
+    uint32_t my_stream_id, roo_io::Status& status) const {
   if (transmitter_.state() == Transmitter::kBroken ||
       (transmitter_.state() != Transmitter::kIdle &&
        my_stream_id != transmitter_.my_stream_id())) {
-    status = kConnectionError;
+    status = roo_io::kConnectionError;
     return false;
   }
-  status = kOk;
+  status = roo_io::kOk;
   return true;
 }
 
 size_t ThreadSafeTransmitter::write(const roo::byte* buf, size_t count,
                                     uint32_t my_stream_id,
-                                    Status& stream_status) {
+                                    roo_io::Status& stream_status) {
   roo::unique_lock<roo::mutex> guard(mutex_);
   if (!checkConnectionStatus(my_stream_id, stream_status)) return 0;
   while (true) {
@@ -46,7 +46,7 @@ size_t ThreadSafeTransmitter::write(const roo::byte* buf, size_t count,
 
 size_t ThreadSafeTransmitter::tryWrite(const roo::byte* buf, size_t count,
                                        uint32_t my_stream_id,
-                                       Status& stream_status) {
+                                       roo_io::Status& stream_status) {
   roo::lock_guard<roo::mutex> guard(mutex_);
   if (!checkConnectionStatus(my_stream_id, stream_status)) return 0;
   bool outgoing_data_ready = false;
@@ -59,7 +59,7 @@ size_t ThreadSafeTransmitter::tryWrite(const roo::byte* buf, size_t count,
 }
 
 void ThreadSafeTransmitter::flush(uint32_t my_stream_id,
-                                  Status& stream_status) {
+                                  roo_io::Status& stream_status) {
   roo::lock_guard<roo::mutex> guard(mutex_);
   if (!checkConnectionStatus(my_stream_id, stream_status)) return;
   if (transmitter_.flush()) {
@@ -67,15 +67,15 @@ void ThreadSafeTransmitter::flush(uint32_t my_stream_id,
   }
 }
 
-bool ThreadSafeTransmitter::hasPendingData(uint32_t my_stream_id,
-                                           Status& stream_status) const {
+bool ThreadSafeTransmitter::hasPendingData(
+    uint32_t my_stream_id, roo_io::Status& stream_status) const {
   if (!checkConnectionStatus(my_stream_id, stream_status)) return false;
   roo::lock_guard<roo::mutex> guard(mutex_);
   return transmitter_.hasPendingData();
 }
 
 void ThreadSafeTransmitter::close(uint32_t my_stream_id,
-                                  Status& stream_status) {
+                                  roo_io::Status& stream_status) {
   roo::unique_lock<roo::mutex> guard(mutex_);
   if (!checkConnectionStatus(my_stream_id, stream_status)) return;
   transmitter_.close();
@@ -86,8 +86,8 @@ void ThreadSafeTransmitter::close(uint32_t my_stream_id,
   }
 }
 
-size_t ThreadSafeTransmitter::availableForWrite(uint32_t my_stream_id,
-                                                Status& stream_status) const {
+size_t ThreadSafeTransmitter::availableForWrite(
+    uint32_t my_stream_id, roo_io::Status& stream_status) const {
   roo::lock_guard<roo::mutex> guard(mutex_);
   if (!checkConnectionStatus(my_stream_id, stream_status)) return 0;
   return transmitter_.availableForWrite();
@@ -130,6 +130,6 @@ void ThreadSafeTransmitter::ack(uint16_t seq_id, const roo::byte* ack_bitmap,
 }
 
 }  // namespace internal
-}  // namespace roo_io
+}  // namespace roo_transport
 
 #endif  // ROO_USE_THREADS

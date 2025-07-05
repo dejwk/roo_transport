@@ -4,7 +4,7 @@
 
 #include <cstddef>
 
-namespace roo_io {
+namespace roo_transport {
 
 SingletonSerialSocket::SingletonSerialSocket() : socket_() {}
 
@@ -56,12 +56,12 @@ size_t SingletonSerialSocket::timedRead(roo::byte* buf, size_t count,
                                         roo_time::Interval timeout) {
   roo_time::Uptime start = roo_time::Uptime::Now();
   size_t total = 0;
-  if (in().status() != kOk) return -1;
+  if (in().status() != roo_io::kOk) return -1;
   while (count > 0) {
     for (int i = 0; i < 100; ++i) {
       size_t result = in().tryRead(buf, count);
       if (result == 0) {
-        if (in().status() != kOk) return -1;
+        if (in().status() != roo_io::kOk) return -1;
         socket_.channel_->loop();
       } else {
         total += result;
@@ -75,6 +75,6 @@ size_t SingletonSerialSocket::timedRead(roo::byte* buf, size_t count,
   return total;
 }
 
-}  // namespace roo_io
+}  // namespace roo_transport
 
 #endif

@@ -1,17 +1,21 @@
 #include "roo_transport/packets/over_stream/packet_receiver_over_stream.h"
 
+#include "roo_backport.h"
+#include "roo_backport/byte.h"
+#include "roo_collections.h"
 #include "roo_collections/hash.h"
+#include "roo_io.h"
 #include "roo_io/memory/load.h"
 #include "roo_io/third_party/nanocobs/cobs.h"
 #include "roo_logging.h"
 
-namespace roo_io {
+namespace roo_transport {
 
-PacketReceiverOverStream::PacketReceiverOverStream(InputStream& in,
+PacketReceiverOverStream::PacketReceiverOverStream(roo_io::InputStream& in,
                                                    ReceiverFn receiver_fn)
     : in_(in),
-      buf_(new byte[256]),
-      tmp_(new byte[256]),
+      buf_(new roo::byte[256]),
+      tmp_(new roo::byte[256]),
       pos_(0),
       receiver_fn_(std::move(receiver_fn)),
       bytes_received_(0),
@@ -25,10 +29,10 @@ bool PacketReceiverOverStream::tryReceive() {
   size_t len = in_.tryRead(tmp_.get(), 256);
   bytes_received_ += len;
   bool received = false;
-  byte* data = &tmp_[0];
+  roo::byte* data = &tmp_[0];
   while (len > 0) {
     // Find the possible packet delimiter (zero byte).
-    const byte* delim = std::find(data, data + len, byte{0});
+    const roo::byte* delim = std::find(data, data + len, roo::byte{0});
     size_t increment = delim - data;
     bool finished = (increment < len);
     if (finished) {
@@ -82,7 +86,7 @@ bool PacketReceiverOverStream::tryReceive() {
   return received;
 }
 
-void PacketReceiverOverStream::processPacket(byte* buf, size_t size) {
+void PacketReceiverOverStream::processPacket(roo::byte* buf, size_t size) {
   if (cobs_decode_tinyframe(buf, size) != COBS_RET_SUCCESS) {
     // Invalid payload (COBS decoding failed). Dropping packet.
     return;
@@ -100,4 +104,4 @@ void PacketReceiverOverStream::processPacket(byte* buf, size_t size) {
   if (receiver_fn_ != nullptr) receiver_fn_(&buf[1], size - 6);
 }
 
-}  // namespace roo_io
+}  // namespace roo_transport

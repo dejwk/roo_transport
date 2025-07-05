@@ -5,7 +5,7 @@
 #include "roo_transport/singleton_socket/internal/out_buffer.h"
 #include "roo_transport/singleton_socket/internal/ring_buffer.h"
 
-namespace roo_io {
+namespace roo_transport {
 namespace internal {
 
 class Transmitter {
@@ -117,4 +117,4 @@ class Transmitter {
 };
 
 }  // namespace internal
-}  // namespace roo_io
+}  // namespace roo_transport

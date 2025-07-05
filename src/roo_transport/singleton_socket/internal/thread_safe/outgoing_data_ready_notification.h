@@ -7,7 +7,7 @@
 #include "roo_threads/condition_variable.h"
 #include "roo_threads/mutex.h"
 
-namespace roo_io {
+namespace roo_transport {
 namespace internal {
 
 class OutgoingDataReadyNotification {
@@ -38,6 +38,6 @@ class OutgoingDataReadyNotification {
 };
 
 }  // namespace internal
-}  // namespace roo_io
+}  // namespace roo_transport
 
 #endif  // ROO_USE_THREADS

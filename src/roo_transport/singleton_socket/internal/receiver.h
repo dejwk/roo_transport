@@ -5,7 +5,7 @@
 #include "roo_transport/singleton_socket/internal/in_buffer.h"
 #include "roo_transport/singleton_socket/internal/ring_buffer.h"
 
-namespace roo_io {
+namespace roo_transport {
 namespace internal {
 
 class Receiver {
@@ -108,4 +108,4 @@ class Receiver {
 };
 
 }  // namespace internal
-}  // namespace roo_io
+}  // namespace roo_transport

@@ -4,7 +4,7 @@
 
 #include "roo_io/core/output_stream.h"
 
-namespace roo_io {
+namespace roo_transport {
 
 // Abstraction for sending packets over some medium.
 //
@@ -26,4 +26,4 @@ class PacketSender {
   virtual void flush() {}
 };
 
-}  // namespace roo_io
+}  // namespace roo_transport

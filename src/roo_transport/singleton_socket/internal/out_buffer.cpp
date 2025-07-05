@@ -4,7 +4,7 @@
 #include "roo_io/memory/store.h"
 #include "roo_transport/singleton_socket/internal/protocol.h"
 
-namespace roo_io {
+namespace roo_transport {
 namespace internal {
 
 void OutBuffer::init(SeqNum seq_id) {
@@ -46,4 +46,4 @@ void OutBuffer::markFinal() {
 }
 
 }  // namespace internal
-}  // namespace roo_io
+}  // namespace roo_transport

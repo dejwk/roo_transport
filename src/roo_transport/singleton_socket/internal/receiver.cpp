@@ -3,7 +3,7 @@
 #include "roo_io/memory/store.h"
 #include "roo_transport/singleton_socket/internal/protocol.h"
 
-namespace roo_io {
+namespace roo_transport {
 namespace internal {
 
 Receiver::Receiver(unsigned int recvbuf_log2)
@@ -280,4 +280,4 @@ bool Receiver::handleDataPacket(uint16_t seq_id, const roo::byte* payload,
 }
 
 }  // namespace internal
-}  // namespace roo_io
+}  // namespace roo_transport

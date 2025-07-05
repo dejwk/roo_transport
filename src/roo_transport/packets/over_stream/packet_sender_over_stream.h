@@ -2,10 +2,12 @@
 
 #include <memory>
 
+#include "roo_backport.h"
+#include "roo_backport/byte.h"
 #include "roo_io/core/output_stream.h"
 #include "roo_transport/packets/packet_sender.h"
 
-namespace roo_io {
+namespace roo_transport {
 
 // Implements data integrity (ensures data correctness) over a potentially
 // unreliable underlying stream, such as UART/Serial.
@@ -21,7 +23,7 @@ class PacketSenderOverStream : public PacketSender {
   // Creates the sender that will write packets to the underlying output stream
   // (which is assumed to be possibly unreliable, e.g. possibly dropping,
   // confusing, or reordering data.)
-  PacketSenderOverStream(OutputStream& out);
+  PacketSenderOverStream(roo_io::OutputStream& out);
 
   // Sends the specified data packet.
   void send(const roo::byte* buf, size_t len) override;
@@ -29,9 +31,9 @@ class PacketSenderOverStream : public PacketSender {
   void flush() override { out_.flush(); }
 
  private:
-  OutputStream& out_;
+  roo_io::OutputStream& out_;
   // Work buffer, allocated in the constructor.
-  std::unique_ptr<byte[]> buf_;
+  std::unique_ptr<roo::byte[]> buf_;
 };
 
-}  // namespace roo_io
+}  // namespace roo_transport

@@ -2,7 +2,7 @@
 
 #include "roo_transport/singleton_socket/internal/seq_num.h"
 
-namespace roo_io {
+namespace roo_transport {
 namespace internal {
 
 // Values are significant; must be 0-15, not change. They are used in the
@@ -70,4 +70,4 @@ inline uint16_t FormatPacketHeader(SeqNum seq, PacketType type) {
 }
 
 }  // namespace internal
-}  // namespace roo_io
+}  // namespace roo_transport

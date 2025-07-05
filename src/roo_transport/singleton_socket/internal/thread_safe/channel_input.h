@@ -7,16 +7,17 @@
 #include "roo_transport/singleton_socket/internal/thread_safe/channel.h"
 #include "roo_transport/socket_input_stream.h"
 
-namespace roo_io {
+namespace roo_transport {
 
 class ChannelInput : public roo_transport::SocketInputStream {
  public:
-  ChannelInput() : channel_(nullptr), my_stream_id_(0), status_(kClosed) {}
+  ChannelInput()
+      : channel_(nullptr), my_stream_id_(0), status_(roo_io::kClosed) {}
 
   ChannelInput(Channel& channel, uint32_t my_stream_id)
       : channel_(&channel),
         my_stream_id_(my_stream_id),
-        status_(my_stream_id == 0 ? kClosed : kOk) {}
+        status_(my_stream_id == 0 ? roo_io::kClosed : roo_io::kOk) {}
 
   void close() override;
 
@@ -38,6 +39,6 @@ class ChannelInput : public roo_transport::SocketInputStream {
   roo_io::Status status_;
 };
 
-}  // namespace roo_io
+}  // namespace roo_transport
 
 #endif  // ROO_USE_THREADS
