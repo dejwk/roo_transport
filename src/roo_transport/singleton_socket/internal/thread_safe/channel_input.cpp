@@ -62,29 +62,6 @@ int ChannelInput::peek() {
   return -1;
 }
 
-size_t ChannelInput::timedRead(roo::byte* buf, size_t count,
-                               roo_time::Interval timeout) {
-  roo_time::Uptime start = roo_time::Uptime::Now();
-  size_t total = 0;
-  if (status_ != kOk) return -1;
-  while (count > 0) {
-    for (int i = 0; i < 100; ++i) {
-      size_t result = tryRead(buf, count);
-      if (result == 0) {
-        if (status_ != kOk) return -1;
-        channel_->loop();
-      } else {
-        total += result;
-        count -= result;
-      }
-      if (count == 0) return total;
-    }
-    if (roo_time::Uptime::Now() - start > timeout) break;
-    delay(1);
-  }
-  return total;
-}
-
 }  // namespace roo_io
 
 #endif  // ROO_USE_THREADS

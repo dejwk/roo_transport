@@ -2,6 +2,8 @@
 
 #include "roo_transport/singleton_socket/arduino/singleton_serial_socket.h"
 
+#include <cstddef>
+
 namespace roo_io {
 
 SingletonSerialSocket::SingletonSerialSocket() : socket_() {}
@@ -20,13 +22,11 @@ int SingletonSerialSocket::read() { return in().read(); }
 int SingletonSerialSocket::peek() { return in().peek(); }
 
 size_t SingletonSerialSocket::readBytes(char* buffer, size_t length) {
-  return in().timedRead((roo::byte*)buffer, length,
-                        roo_time::Millis(getTimeout()));
+  return timedRead((roo::byte*)buffer, length, roo_time::Millis(getTimeout()));
 }
 
 size_t SingletonSerialSocket::readBytes(uint8_t* buffer, size_t length) {
-  return in().timedRead((roo::byte*)buffer, length,
-                        roo_time::Millis(getTimeout()));
+  return timedRead((roo::byte*)buffer, length, roo_time::Millis(getTimeout()));
 }
 
 size_t SingletonSerialSocket::write(uint8_t val) {
@@ -50,6 +50,29 @@ void SingletonSerialSocket::awaitConnected() { socket_.awaitConnected(); }
 
 bool SingletonSerialSocket::awaitConnected(roo_time::Interval timeout) {
   return socket_.awaitConnected(timeout);
+}
+
+size_t SingletonSerialSocket::timedRead(roo::byte* buf, size_t count,
+                                        roo_time::Interval timeout) {
+  roo_time::Uptime start = roo_time::Uptime::Now();
+  size_t total = 0;
+  if (in().status() != kOk) return -1;
+  while (count > 0) {
+    for (int i = 0; i < 100; ++i) {
+      size_t result = in().tryRead(buf, count);
+      if (result == 0) {
+        if (in().status() != kOk) return -1;
+        socket_.channel_->loop();
+      } else {
+        total += result;
+        count -= result;
+      }
+      if (count == 0) return total;
+    }
+    if (roo_time::Uptime::Now() - start > timeout) break;
+    delay(1);
+  }
+  return total;
 }
 
 }  // namespace roo_io

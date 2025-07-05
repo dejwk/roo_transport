@@ -27,6 +27,8 @@ class SingletonSocket {
   bool awaitConnected(roo_time::Interval timeout);
 
  private:
+  friend class SingletonSerialSocket;
+
   Channel* channel_;
   uint32_t my_stream_id_;
   ChannelInput in_;

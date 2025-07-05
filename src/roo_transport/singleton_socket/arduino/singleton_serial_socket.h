@@ -47,6 +47,8 @@ class SingletonSerialSocket : public Stream {
   bool awaitConnected(roo_time::Interval timeout);
 
  private:
+  size_t timedRead(roo::byte* buf, size_t count, roo_time::Interval timeout);
+
   SingletonSocket socket_;
 };
 

@@ -29,8 +29,6 @@ class ChannelInput : public roo_io::InputStream {
   int read();
   int peek();
 
-  size_t timedRead(roo::byte* buf, size_t count, roo_time::Interval timeout);
-
   roo_io::Status status() const override { return status_; }
 
  private:
