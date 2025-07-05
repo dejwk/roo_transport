@@ -3,7 +3,6 @@
 #if (defined ARDUINO)
 
 #include "Arduino.h"
-
 #include "roo_transport/singleton_socket/singleton_socket.h"
 
 namespace roo_transport {
