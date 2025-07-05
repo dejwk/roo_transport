@@ -34,8 +34,7 @@ class Channel {
   using ConnectionCb = std::function<void()>;
 
   Channel(roo_io::PacketSender& sender, roo_io::PacketReceiver& receiver,
-          unsigned int sendbuf_log2, unsigned int recvbuf_log2,
-          ConnectionCb connection_cb = nullptr);
+          unsigned int sendbuf_log2, unsigned int recvbuf_log2);
 
   void begin();
 
@@ -139,8 +138,6 @@ class Channel {
 
   // GUARDED_BY(handshake_mutex_).
   roo_time::Uptime next_scheduled_handshake_update_;
-
-  ConnectionCb connection_cb_;
 
 #ifdef ROO_USE_THREADS
   roo::thread sender_thread_;

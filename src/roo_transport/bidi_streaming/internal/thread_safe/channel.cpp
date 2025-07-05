@@ -23,8 +23,7 @@ roo_time::Interval Backoff(int retry_count) {
 }  // namespace
 
 Channel::Channel(roo_io::PacketSender& sender, roo_io::PacketReceiver& receiver,
-                 unsigned int sendbuf_log2, unsigned int recvbuf_log2,
-                 ConnectionCb connection_cb)
+                 unsigned int sendbuf_log2, unsigned int recvbuf_log2)
     : packet_sender_(sender),
       packet_receiver_(receiver),
       outgoing_data_ready_(),
@@ -35,7 +34,6 @@ Channel::Channel(roo_io::PacketSender& sender, roo_io::PacketReceiver& receiver,
       needs_handshake_ack_(false),
       successive_handshake_retries_(0),
       next_scheduled_handshake_update_(roo_time::Uptime::Start()),
-      connection_cb_(std::move(connection_cb)),
       sender_thread_() {
   CHECK_LE(sendbuf_log2, 12);
   CHECK_LE(sendbuf_log2, recvbuf_log2);

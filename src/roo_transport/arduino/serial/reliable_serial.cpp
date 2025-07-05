@@ -12,14 +12,12 @@ ReliableSerial::Connection::Connection(Channel& channel, uint32_t my_stream_id)
 
 ReliableSerial::ReliableSerial(decltype(Serial1)& serial,
                                unsigned int sendbuf_log2,
-                               unsigned int recvbuf_log2, std::string label,
-                               ConnectionCb connection_cb)
+                               unsigned int recvbuf_log2, std::string label)
     : output_(serial),
       input_(serial),
       sender_(output_),
       receiver_(input_),
-      channel_(sender_, receiver_, sendbuf_log2, recvbuf_log2,
-               std::move(connection_cb)),
+      channel_(sender_, receiver_, sendbuf_log2, recvbuf_log2),
       connection_(nullptr) {
 #ifdef ESP32
   serial.onReceive([this]() { channel_.tryRecv(); });

@@ -56,8 +56,7 @@ class ReliableSerial {
   };
 
   ReliableSerial(decltype(Serial1)& serial, unsigned int sendbuf_log2,
-                 unsigned int recvbuf_log2, std::string label,
-                 ConnectionCb connection_cb = nullptr);
+                 unsigned int recvbuf_log2, std::string label);
 
   void begin() { channel_.begin(); }
 
