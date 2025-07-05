@@ -19,7 +19,7 @@ SingletonSerial::SingletonSerial(decltype(Serial1)& serial,
 #endif
 }
 
-// void SingletonSerial::loop() { channel_.loop(); }
+void SingletonSerial::loop() { transport_.loop(); }
 
 SingletonSerialSocket SingletonSerial::connectAsync() {
   return SingletonSerialSocket(transport_.connect());

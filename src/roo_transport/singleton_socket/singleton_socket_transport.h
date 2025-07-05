@@ -25,7 +25,11 @@ class SingletonSocketTransport {
   uint32_t packets_delivered() const { return channel_.packets_delivered(); }
   uint32_t packets_received() const { return channel_.packets_received(); }
 
+  // For single-threaded systems only.
+  void loop();
+
  private:
+
   roo_io::PacketSender& sender_;
   roo_io::PacketReceiver& receiver_;
 

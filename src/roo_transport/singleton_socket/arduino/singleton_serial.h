@@ -19,8 +19,6 @@ class SingletonSerial {
 
   void begin() { transport_.begin(); }
 
-  // void loop();
-
   SingletonSerialSocket connect();
   SingletonSerialSocket connectAsync();
 
@@ -30,6 +28,9 @@ class SingletonSerial {
 
   size_t receiver_bytes_received() const { return receiver_.bytes_received(); }
   size_t receiver_bytes_accepted() const { return receiver_.bytes_accepted(); }
+
+  // For single-threaded systems only.
+  void loop();
 
  private:
   roo_io::ArduinoStreamOutputStream output_;

@@ -25,4 +25,8 @@ SingletonSocket SingletonSocketTransport::connect() {
   return conn;
 }
 
+void SingletonSocketTransport::loop() {
+  channel_.loop();
+}
+
 }  // namespace roo_io
