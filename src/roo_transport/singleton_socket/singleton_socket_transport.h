@@ -18,8 +18,8 @@ class SingletonSocketTransport {
   // Must be called when there is data to read.
   void readData();
 
-  SingletonSocket* connect();
-  SingletonSocket* connectAsync();
+  SingletonSocket connect();
+  SingletonSocket connectAsync();
 
   uint32_t packets_sent() const { return channel_.packets_sent(); }
   uint32_t packets_delivered() const { return channel_.packets_delivered(); }

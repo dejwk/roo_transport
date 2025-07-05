@@ -14,14 +14,14 @@ void SingletonSocketTransport::readData() {
   channel_.tryRecv();
 }
 
-SingletonSocket* SingletonSocketTransport::connectAsync() {
+SingletonSocket SingletonSocketTransport::connectAsync() {
   uint32_t my_stream_id = channel_.connect();
-  return new SingletonSocket(channel_, my_stream_id);
+  return SingletonSocket(channel_, my_stream_id);
 }
 
-SingletonSocket* SingletonSocketTransport::connect() {
-  SingletonSocket* conn = connectAsync();
-  conn->awaitConnected();
+SingletonSocket SingletonSocketTransport::connect() {
+  SingletonSocket conn = connectAsync();
+  conn.awaitConnected();
   return conn;
 }
 

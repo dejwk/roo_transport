@@ -9,6 +9,8 @@ namespace roo_io {
 
 class SingletonSocket {
  public:
+  SingletonSocket();
+
   SingletonSocket(Channel& channel, uint32_t my_stream_id);
 
   // Status status() const;
@@ -25,7 +27,7 @@ class SingletonSocket {
   bool awaitConnected(roo_time::Interval timeout);
 
  private:
-  Channel& channel_;
+  Channel* channel_;
   uint32_t my_stream_id_;
   ChannelInput in_;
   ChannelOutput out_;
