@@ -3,8 +3,10 @@
 #if (defined ARDUINO)
 
 #include "Arduino.h"
+#include "roo_io_arduino.h"
 #include "roo_io_arduino/stream/arduino_stream_input_stream.h"
 #include "roo_io_arduino/stream/arduino_stream_output_stream.h"
+#include "roo_transport.h"
 #include "roo_transport/packets/over_stream/packet_receiver_over_stream.h"
 #include "roo_transport/packets/over_stream/packet_sender_over_stream.h"
 #include "roo_transport/singleton_socket/arduino/singleton_serial_socket.h"
@@ -14,10 +16,10 @@ namespace roo_transport {
 
 class SingletonSerial {
  public:
-  SingletonSerial(decltype(Serial1)& serial, unsigned int sendbuf_log2,
-                  unsigned int recvbuf_log2, std::string label = "");
+  SingletonSerial(decltype(Serial1)& serial, unsigned int sendbuf_log2 = 4,
+                  unsigned int recvbuf_log2 = 4, std::string label = "");
 
-  void begin() { transport_.begin(); }
+  void begin();
 
   SingletonSerialSocket connect();
   SingletonSerialSocket connectAsync();
@@ -32,7 +34,10 @@ class SingletonSerial {
   // For single-threaded systems only.
   void loop();
 
+  SingletonSocketTransport& transport() { return transport_; }
+
  private:
+  decltype(Serial1)& serial_;
   roo_io::ArduinoStreamOutputStream output_;
   roo_io::ArduinoStreamInputStream input_;
   PacketSenderOverStream sender_;

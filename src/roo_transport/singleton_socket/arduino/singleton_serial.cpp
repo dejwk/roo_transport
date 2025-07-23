@@ -9,13 +9,17 @@ namespace roo_transport {
 SingletonSerial::SingletonSerial(decltype(Serial1)& serial,
                                  unsigned int sendbuf_log2,
                                  unsigned int recvbuf_log2, std::string label)
-    : output_(serial),
+    : serial_(serial),
+      output_(serial),
       input_(serial),
       sender_(output_),
       receiver_(input_),
-      transport_(sender_, receiver_, sendbuf_log2, recvbuf_log2) {
+      transport_(sender_, receiver_, sendbuf_log2, recvbuf_log2) {}
+
+void SingletonSerial::begin() {
+  transport_.begin();
 #ifdef ESP32
-  serial.onReceive([this]() { transport_.readData(); });
+  serial_.onReceive([this]() { transport_.readData(); });
 #endif
 }
 

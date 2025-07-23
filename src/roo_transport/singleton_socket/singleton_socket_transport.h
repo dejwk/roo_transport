@@ -1,3 +1,5 @@
+#pragma once
+
 #include <memory>
 
 #include "roo_io/core/output_stream.h"
