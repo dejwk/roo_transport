@@ -103,6 +103,8 @@ class Channel {
 
 #endif
 
+  bool isConnectingInternal(uint32_t my_stream_id);
+
   void packetReceived(const roo::byte* buf, size_t len);
 
   void handleHandshakePacket(uint16_t peer_seq_num, uint32_t peer_stream_id,

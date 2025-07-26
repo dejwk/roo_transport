@@ -4,6 +4,13 @@
 #include "roo_transport/singleton_socket/internal/protocol.h"
 #include "roo_transport/singleton_socket/internal/thread_safe/channel.h"
 
+#ifdef ESP32
+#include "esp_random.h"
+#define RANDOM_INTEGER esp_random
+#else
+#define RANDOM_INTEGER rand
+#endif
+
 namespace roo_transport {
 
 namespace {
@@ -16,7 +23,7 @@ roo_time::Interval Backoff(int retry_count) {
     delay = max_delay_us;
   }
   // Randomize by +=20%, to make unrelated retries spread more evenly in time.
-  delay += (float)delay * ((float)rand() / RAND_MAX - 0.5f) * 0.4f;
+  delay += (float)delay * ((float)RANDOM_INTEGER() / RAND_MAX - 0.5f) * 0.4f;
   return roo_time::Micros((uint64_t)delay);
 }
 
@@ -103,8 +110,8 @@ uint32_t Channel::connect() {
   my_stream_id_ = 0;
   peer_stream_id_ = 0;
   // The stream ID is a random number, but it can't be zero.
-  while (my_stream_id_ == 0) my_stream_id_ = rand();
-  transmitter_.init(my_stream_id_, rand() % 0x0FFF);
+  while (my_stream_id_ == 0) my_stream_id_ = RANDOM_INTEGER();
+  transmitter_.init(my_stream_id_, RANDOM_INTEGER() % 0x0FFF);
   receiver_.init(my_stream_id_);
   needs_handshake_ack_ = false;
   successive_handshake_retries_ = 0;
@@ -117,12 +124,16 @@ uint32_t Channel::connect() {
 
 bool Channel::isConnecting(uint32_t stream_id) {
   roo::lock_guard<roo::mutex> guard(handshake_mutex_);
+  return isConnectingInternal(stream_id);
+}
+
+bool Channel::isConnectingInternal(uint32_t stream_id) {
   return my_stream_id_ == stream_id && peer_stream_id_ == 0;
 }
 
 void Channel::awaitConnected(uint32_t stream_id) {
   roo::unique_lock<roo::mutex> guard(handshake_mutex_);
-  while (isConnecting(stream_id)) {
+  while (isConnectingInternal(stream_id)) {
     connected_cv_.wait(guard);
   }
 }
@@ -130,7 +141,7 @@ void Channel::awaitConnected(uint32_t stream_id) {
 bool Channel::awaitConnected(uint32_t stream_id, roo_time::Interval timeout) {
   roo::unique_lock<roo::mutex> guard(handshake_mutex_);
   roo_time::Uptime when = roo_time::Uptime::Now() + timeout;
-  while (isConnecting(stream_id)) {
+  while (isConnectingInternal(stream_id)) {
     if (connected_cv_.wait_until(guard, when) == roo::cv_status::timeout) {
       return false;
     }
@@ -248,8 +259,7 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
             transmitter_.state() == internal::Transmitter::kConnected))) {
         // The peer opened a new stream.
         if (!receiver_.done()) {
-          // LOG(WARNING) << "Disconnection detected: " << peer_stream_id_ << ",
-          // "
+          // LOG(WARNING) << "Disconnection detected: " << peer_stream_id_ << ", "
           //              << peer_stream_id;
           // Ignore until all in-flight packets have been delivered.
           if (transmitter_.state() == internal::Transmitter::kConnected) {
