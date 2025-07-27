@@ -70,6 +70,7 @@ class MessageTransportOverSingletonSocket : public MessageTransport {
           if (in().status() != roo_io::kOk) {
             pos_ = 0;
             LOG(ERROR) << "Error: " << in().status();
+            connect();
           }
           return;
         }
@@ -85,6 +86,7 @@ class MessageTransportOverSingletonSocket : public MessageTransport {
             pos_ = 0;
             incoming_size_ = -1;
             LOG(ERROR) << "Error: " << in().status();
+            connect();
           }
           return;
         }
