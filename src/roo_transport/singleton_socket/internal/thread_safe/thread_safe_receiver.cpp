@@ -25,16 +25,13 @@ void ThreadSafeReceiver::setConnected(SeqNum peer_seq_num) {
   outgoing_data_ready_.notify();
 }
 
-void ThreadSafeReceiver::setIdle() {
-  roo::lock_guard<roo::mutex> guard(mutex_);
-  receiver_.setIdle();
-  has_data_.notify_all();
-}
-
-void ThreadSafeReceiver::setBroken() {
+void ThreadSafeReceiver::setBroken(RecvCb& recv_cb) {
   roo::lock_guard<roo::mutex> guard(mutex_);
   receiver_.setBroken();
   has_data_.notify_all();
+  if (recv_cb_stream_id_ == receiver_.my_stream_id()) {
+    recv_cb = recv_cb_;
+  }
 }
 
 bool ThreadSafeReceiver::checkConnectionStatus(uint32_t my_stream_id,
@@ -116,6 +113,7 @@ void ThreadSafeReceiver::markInputClosed(uint32_t my_stream_id,
 
 void ThreadSafeReceiver::onReceive(RecvCb recv_cb, uint32_t my_stream_id,
                                    roo_io::Status& stream_status) {
+  roo::lock_guard<roo::mutex> guard(mutex_);
   if (!checkConnectionStatus(my_stream_id, stream_status)) return;
   recv_cb_ = recv_cb;
   recv_cb_stream_id_ = my_stream_id;
@@ -150,24 +148,17 @@ size_t ThreadSafeReceiver::updateRecvHimark(roo::byte* buf,
 
 bool ThreadSafeReceiver::handleDataPacket(uint16_t seq_id,
                                           const roo::byte* payload, size_t len,
-                                          bool is_final) {
+                                          bool is_final, RecvCb& recv_cb) {
   bool has_new_data_to_read = false;
   bool has_ack_to_send;
-  RecvCb recv_cb_to_call = nullptr;
-  {
-    roo::lock_guard<roo::mutex> guard(mutex_);
-    has_ack_to_send = receiver_.handleDataPacket(seq_id, payload, len, is_final,
-                                                 has_new_data_to_read);
-    if (has_new_data_to_read) {
-      has_data_.notify_all();
-    }
-    if (has_new_data_to_read &&
-        recv_cb_stream_id_ == receiver_.my_stream_id()) {
-      recv_cb_to_call = recv_cb_;
-    }
+  roo::lock_guard<roo::mutex> guard(mutex_);
+  has_ack_to_send = receiver_.handleDataPacket(seq_id, payload, len, is_final,
+                                               has_new_data_to_read);
+  if (has_new_data_to_read) {
+    has_data_.notify_all();
   }
-  if (recv_cb_to_call != nullptr) {
-    recv_cb_to_call();
+  if (has_new_data_to_read && recv_cb_stream_id_ == receiver_.my_stream_id()) {
+    recv_cb = recv_cb_;
   }
   return has_ack_to_send;
 }

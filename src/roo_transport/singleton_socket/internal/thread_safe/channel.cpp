@@ -11,6 +11,10 @@
 #define RANDOM_INTEGER rand
 #endif
 
+#if !defined(MLOG_roo_transport_reliable_channel_connection)
+#define MLOG_roo_transport_reliable_channel_connection 0
+#endif
+
 namespace roo_transport {
 
 namespace {
@@ -86,6 +90,7 @@ void Channel::close(uint32_t my_stream_id, roo_io::Status& stream_status) {
   transmitter_.close(my_stream_id, stream_status);
 }
 
+// Called by ChannelInput::close().
 void Channel::closeInput(uint32_t my_stream_id, roo_io::Status& stream_status) {
   receiver_.markInputClosed(my_stream_id, stream_status);
 }
@@ -111,6 +116,8 @@ uint32_t Channel::connect() {
   peer_stream_id_ = 0;
   // The stream ID is a random number, but it can't be zero.
   while (my_stream_id_ == 0) my_stream_id_ = RANDOM_INTEGER();
+  MLOG(roo_transport_reliable_channel_connection)
+      << "Transmitter and receiver are now connecting.";
   transmitter_.init(my_stream_id_, RANDOM_INTEGER() % 0x0FFF);
   receiver_.init(my_stream_id_);
   needs_handshake_ack_ = false;
@@ -183,9 +190,7 @@ long Channel::trySend() {
 bool Channel::tryRecv() { return packet_receiver_.tryReceive(); }
 
 size_t Channel::conn(roo::byte* buf, long& next_send_micros) {
-#ifdef ROO_USE_THREADS
   roo::lock_guard<roo::mutex> guard(handshake_mutex_);
-#endif
   auto transmitter_state = transmitter_.state();
   if (transmitter_state == internal::Transmitter::kIdle ||
       transmitter_state == internal::Transmitter::kBroken) {
@@ -222,31 +227,33 @@ size_t Channel::conn(roo::byte* buf, long& next_send_micros) {
       transmitter_state == internal::Transmitter::kConnected ? 0x0 : 0xFF,
       buf + 10);
   next_send_micros = std::min(next_send_micros, delay);
-  // LOG(INFO) << "Handshake packet sent: peer_seq_num="
-  //           << (header & 0x0FFF) << ", my_stream_id=" << my_stream_id_
-  //           << ", peer_stream_id=" << peer_stream_id_
-  //           << ", want_ack=" << (transmitter_state !=
-  //                               internal::Transmitter::kConnected);
+  MLOG(roo_transport_reliable_channel_connection)
+      << "Handshake packet sent: peer_seq_num=" << (header & 0x0FFF)
+      << ", my_stream_id=" << my_stream_id_
+      << ", peer_stream_id=" << peer_stream_id_ << ", want_ack="
+      << (transmitter_state != internal::Transmitter::kConnected);
   return 11;
 }
 
-void Channel::handleHandshakePacket(uint16_t peer_seq_num,
-                                    uint32_t peer_stream_id,
-                                    uint32_t ack_stream_id, bool want_ack) {
-#ifdef ROO_USE_THREADS
+void Channel::handleHandshakePacket(
+    uint16_t peer_seq_num, uint32_t peer_stream_id, uint32_t ack_stream_id,
+    bool want_ack, internal::ThreadSafeReceiver::RecvCb& recv_cb) {
   roo::lock_guard<roo::mutex> guard(handshake_mutex_);
-#endif
-  // LOG(INFO) << "Handshake packet received: peer_seq_num="
-  //            << peer_seq_num << ", peer_stream_id=" << peer_stream_id
-  //            << ", ack_stream_id=" << ack_stream_id
-  //            << ", want_ack=" << want_ack;
+  MLOG(roo_transport_reliable_channel_connection)
+      << "Handshake packet received: peer_seq_num=" << peer_seq_num
+      << ", peer_stream_id=" << peer_stream_id
+      << ", ack_stream_id=" << ack_stream_id << ", want_ack=" << want_ack;
   switch (receiver_.state()) {
     case internal::Receiver::kConnecting: {
       peer_stream_id_ = peer_stream_id;
       CHECK(receiver_.empty());
+      MLOG(roo_transport_reliable_channel_connection)
+          << "Receiver is now connected.";
       receiver_.setConnected(peer_seq_num);
 
       if (ack_stream_id == my_stream_id_) {
+        MLOG(roo_transport_reliable_channel_connection)
+            << "Transmitter is now connected.";
         transmitter_.setConnected();
       }
       needs_handshake_ack_ = want_ack;
@@ -259,19 +266,28 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
             transmitter_.state() == internal::Transmitter::kConnected))) {
         // The peer opened a new stream.
         if (!receiver_.done()) {
-          // LOG(WARNING) << "Disconnection detected: " << peer_stream_id_ << ", "
-          //              << peer_stream_id;
+          MLOG(roo_transport_reliable_channel_connection)
+              << "Disconnection detected: " << peer_stream_id_ << ", "
+              << peer_stream_id;
           // Ignore until all in-flight packets have been delivered.
           if (transmitter_.state() == internal::Transmitter::kConnected) {
+            MLOG(roo_transport_reliable_channel_connection)
+                << "Transmitter is now broken.";
             transmitter_.setBroken();
           } else {
+            MLOG(roo_transport_reliable_channel_connection)
+                << "Transmitter is now idle.";
             transmitter_.reset();
             my_stream_id_ = 0;
           }
           connected_cv_.notify_all();
-          receiver_.setBroken();
+          MLOG(roo_transport_reliable_channel_connection)
+              << "Receiver is now broken.";
+          receiver_.setBroken(recv_cb);
           break;
         }
+        MLOG(roo_transport_reliable_channel_connection)
+            << "Transmitter and receiver are now idle.";
         transmitter_.reset();
         my_stream_id_ = 0;
         receiver_.reset();
@@ -280,6 +296,8 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
       }
       if (ack_stream_id == my_stream_id_) {
         CHECK(my_stream_id_ != 0);
+        MLOG(roo_transport_reliable_channel_connection)
+            << "Transmitter is now connected.";
         transmitter_.setConnected();
       }
       needs_handshake_ack_ = want_ack;
@@ -288,6 +306,8 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
     case internal::Receiver::kIdle:
     case internal::Receiver::kBroken: {
       // We're idle; ignoring handshake;
+      MLOG(roo_transport_reliable_channel_connection)
+          << "Ignoring the handshake, since the receiver is not connecting.";
       break;
     }
     default: {
@@ -299,42 +319,46 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
 void Channel::packetReceived(const roo::byte* buf, size_t len) {
   uint16_t header = roo_io::LoadBeU16(buf);
   auto type = internal::GetPacketType(header);
+  internal::ThreadSafeReceiver::RecvCb recv_cb = nullptr;
   switch (type) {
     case internal::kDataAckPacket: {
       transmitter_.ack(header & 0x0FFF, buf + 2, len - 2);
-      return;
+      break;
     }
     case internal::kFlowControlPacket: {
       // Update to available slots received.
       transmitter_.updateRecvHimark(header & 0x0FFF);
-      return;
+      break;
     }
     case internal::kHandshakePacket: {
       if (len != 11) {
         // Malformed packet.
-        return;
+        break;
       }
       uint16_t peer_seq_num = header & 0x0FFF;
       uint32_t peer_stream_id = roo_io::LoadBeU32(buf + 2);
       uint32_t ack_stream_id = roo_io::LoadBeU32(buf + 6);
       bool want_ack = roo_io::LoadU8(buf + 10) != 0;
       handleHandshakePacket(peer_seq_num, peer_stream_id, ack_stream_id,
-                            want_ack);
+                            want_ack, recv_cb);
       if (want_ack) {
         outgoing_data_ready_.notify();
       }
-      return;
+      break;
     }
     case internal::kDataPacket:
     case internal::kFinPacket: {
       if (receiver_.handleDataPacket(header & 0x0FFF, buf + 2, len - 2,
-                                     type == internal::kFinPacket)) {
+                                     type == internal::kFinPacket, recv_cb)) {
         outgoing_data_ready_.notify();
       }
     }
     default: {
       // Unrecognized packet type; ignoring.
     }
+  }
+  if (recv_cb != nullptr) {
+    recv_cb();
   }
 }
 

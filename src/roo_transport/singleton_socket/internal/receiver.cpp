@@ -36,7 +36,10 @@ void Receiver::setIdle() {
 }
 
 void Receiver::setBroken() {
-  state_ = kBroken;
+  if (in_ring_.empty()) {
+    setIdle();
+    return;
+  }
   peer_closed_ = true;
   self_closed_ = false;
   end_of_stream_ = false;

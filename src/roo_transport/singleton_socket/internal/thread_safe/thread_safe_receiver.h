@@ -21,8 +21,7 @@ class ThreadSafeReceiver {
   Receiver::State state() const;
 
   void setConnected(SeqNum peer_seq_num);
-  void setIdle();
-  void setBroken();
+  void setBroken(RecvCb& recv_cb);
 
   size_t read(roo::byte* buf, size_t count, uint32_t my_stream_id,
               roo_io::Status& stream_status);
@@ -47,7 +46,7 @@ class ThreadSafeReceiver {
   size_t updateRecvHimark(roo::byte* buf, long& next_send_micros);
 
   bool handleDataPacket(uint16_t seq_id, const roo::byte* payload, size_t len,
-                        bool is_final);
+                        bool is_final, RecvCb& recv_cb);
 
   bool empty() const {
     roo::lock_guard<roo::mutex> guard(mutex_);

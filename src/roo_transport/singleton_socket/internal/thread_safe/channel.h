@@ -61,7 +61,11 @@ class Channel {
 
   void closeInput(uint32_t my_stream_id, roo_io::Status& stream_status);
 
-  // Registers callback to be invoked when new data is available for reading.
+  // Registers callback to be invoked when new data is available for reading, or
+  // the stream gets closed or broken, due to data received. Executes in the
+  // receiver thread, which stack must be appropriately provisioned to handle
+  // these callbacks. Does NOT get invoked in case of events that were triggered
+  // locally, e.g. an explicit socked input close.
   void onReceive(internal::ThreadSafeReceiver::RecvCb recv_cb,
                  uint32_t my_stream_id, roo_io::Status& stream_status);
 
@@ -108,7 +112,8 @@ class Channel {
   void packetReceived(const roo::byte* buf, size_t len);
 
   void handleHandshakePacket(uint16_t peer_seq_num, uint32_t peer_stream_id,
-                             uint32_t ack_stream_id, bool want_ack);
+                             uint32_t ack_stream_id, bool want_ack,
+                             internal::ThreadSafeReceiver::RecvCb& recv_cb);
 
   size_t conn(roo::byte* buf, long& next_send_micros);
 
