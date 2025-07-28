@@ -20,8 +20,8 @@ namespace roo_transport {
 namespace {
 
 roo_time::Interval Backoff(int retry_count) {
-  float min_delay_us = 1000.0f;       // 1ms
-  float max_delay_us = 100000000.0f;  // 100ms
+  float min_delay_us = 1000.0f;     // 1ms
+  float max_delay_us = 1000000.0f;  // 1s
   float delay = pow(1.33, retry_count) * min_delay_us;
   if (delay > max_delay_us) {
     delay = max_delay_us;
