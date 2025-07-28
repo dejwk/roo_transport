@@ -20,6 +20,11 @@ class SingletonSocketLoopback {
   roo_transport::SingletonSocketTransport& t1() { return t1_; }
   roo_transport::SingletonSocketTransport& t2() { return t2_; }
 
+  void begin() {
+    t1_.begin();
+    t2_.begin();
+  }
+
  private:
   roo_transport::LoopbackPacketReceiver recv1_;
   roo_transport::LoopbackPacketReceiver recv2_;
