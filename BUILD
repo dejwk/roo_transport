@@ -12,30 +12,10 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        "//lib/roo_io",
-        "//lib/roo_io_arduino",
-        "//lib/roo_logging",
-        "//lib/roo_threads",
-    ],
-)
-
-cc_library(
-    name = "testing",
-    srcs = glob(
-        [
-            "src/**/*.cpp",
-            "src/**/*.h",
-        ],
-        exclude = ["test/**"],
-    ),
-    defines = ["ROO_IO_TESTING"],
-    alwayslink = 1,
-    includes = [
-        "src",
-    ],
-    visibility = ["//visibility:public"],
-    deps = [
-        ":roo_io",
-        "//roo_testing:arduino_gtest_main",
+        "@roo_collections",
+        "@roo_io",
+        "@roo_io_arduino",
+        "@roo_logging",
+        "@roo_threads",
     ],
 )
