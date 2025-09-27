@@ -1,6 +1,8 @@
 #pragma once
 
+#include "roo_io.h"
 #include "roo_io/core/output_stream.h"
+#include "roo_transport.h"
 #include "roo_transport/singleton_socket/internal/thread_safe/channel.h"
 #include "roo_transport/singleton_socket/internal/thread_safe/channel_input.h"
 #include "roo_transport/singleton_socket/internal/thread_safe/channel_output.h"

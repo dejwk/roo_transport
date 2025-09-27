@@ -1,5 +1,6 @@
 #include "roo_transport/packets/loopback/loopback_packet_receiver.h"
 
+#include "roo_collections.h"
 #include "roo_collections/hash.h"
 #include "roo_io/memory/load.h"
 #include "roo_io/third_party/nanocobs/cobs.h"
