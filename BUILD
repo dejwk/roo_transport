@@ -19,3 +19,18 @@ cc_library(
         "@roo_threads",
     ],
 )
+
+cc_test(
+    name = "packets_over_stream_test",
+    srcs = [
+        "test/packets_over_stream_test.cpp",
+    ],
+    copts = ["-Iexternal/gtest/include"],
+    includes = ["src"],
+    linkstatic = 1,
+    deps = [
+        ":roo_transport",
+        "@roo_testing//:arduino_gtest_main",
+    ],
+    size = "small",
+)
