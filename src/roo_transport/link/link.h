@@ -13,16 +13,16 @@ class Link {
  public:
   Link();
 
-  Link(Channel& channel, uint32_t my_stream_id);
-
   // Status status() const;
 
-  // Obtains the input stream that can be used to read from the socket.
+  // Obtains the input stream that can be used to read from the link.
   SocketInputStream& in() { return in_; }
 
-  // Obtains the output stream that can be used to write to the socket.
+  // Obtains the output stream that can be used to write to the link.
   SocketOutputStream& out() { return out_; }
 
+  // Returns whether the link is currently in process of establishing a
+  // connection with the peer.
   bool isConnecting();
 
   void awaitConnected();
@@ -30,6 +30,9 @@ class Link {
 
  private:
   friend class SerialLink;
+  friend class LinkTransport;
+
+  Link(Channel& channel, uint32_t my_stream_id);
 
   Channel* channel_;
   uint32_t my_stream_id_;
