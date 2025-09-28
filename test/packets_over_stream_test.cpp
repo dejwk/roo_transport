@@ -1,4 +1,5 @@
 #include <memory>
+#include <unordered_map>
 
 #include "gtest/gtest.h"
 #include "roo_io/ringpipe/ringpipe.h"
@@ -14,6 +15,25 @@ class Packet {
  public:
   Packet(size_t size) : size_(size), data_(new roo::byte[size]) {}
 
+  Packet(const roo::byte* data, size_t size)
+      : size_(size), data_(new roo::byte[size]) {
+    memcpy(data_.get(), data, size);
+  }
+
+  Packet(const Packet& other)
+      : size_(other.size_), data_(new roo::byte[size_]) {
+    memcpy(data_.get(), other.data_.get(), size_);
+  }
+
+  Packet& operator=(const Packet& other) {
+    if (this != &other) {
+      size_ = other.size_;
+      data_.reset(new roo::byte[size_]);
+      memcpy(data_.get(), other.data_.get(), size_);
+    }
+    return *this;
+  }
+
   roo::byte* data() { return data_.get(); }
   const roo::byte* data() const { return data_.get(); }
   size_t size() const { return size_; }
@@ -23,6 +43,20 @@ class Packet {
   std::unique_ptr<roo::byte[]> data_;
 };
 
+inline bool operator==(const Packet& a, const Packet& b) {
+  if (a.size() != b.size()) return false;
+  return memcmp(a.data(), b.data(), a.size()) == 0;
+}
+
+struct PacketHash {
+  size_t operator()(const Packet& p) const {
+    return std::hash<std::string_view>()(
+        std::string_view(reinterpret_cast<const char*>(p.data()), p.size()));
+  }
+};
+
+inline bool operator!=(const Packet& a, const Packet& b) { return !(a == b); }
+
 Packet RandomPacket() {
   size_t size = 1 + (rand() % PacketSenderOverStream::kMaxPacketSize);
   Packet packet(size);
@@ -31,6 +65,48 @@ Packet RandomPacket() {
   }
   return packet;
 }
+
+namespace {
+std::unique_ptr<roo::byte[]> PerturbData(const roo::byte* data, size_t size,
+                                         int error_rate) {
+  std::unique_ptr<roo::byte[]> buf(new roo::byte[size]);
+  memcpy(buf.get(), data, size);
+  for (size_t i = 0; i < size; ++i) {
+    if ((rand() % 10000) < error_rate) {
+      buf[i] = static_cast<roo::byte>(rand() & 0xFF);
+    }
+  }
+  return buf;
+}
+
+class ErrorInjectingOutputStream : public roo_io::OutputStream {
+ public:
+  ErrorInjectingOutputStream(roo_io::OutputStream& out, int error_rate)
+      : out_(out), error_rate_(error_rate), counter_(0) {}
+
+  void setErrorRate(int error_rate) { error_rate_ = error_rate; }
+
+  size_t write(const roo::byte* data, size_t len) override {
+    std::unique_ptr<roo::byte[]> buf = PerturbData(data, len, error_rate_);
+    return out_.write(buf.get(), len);
+  }
+
+  size_t tryWrite(const roo::byte* data, size_t len) override {
+    std::unique_ptr<roo::byte[]> buf = PerturbData(data, len, error_rate_);
+    return out_.tryWrite(buf.get(), len);
+  }
+
+  roo_io::Status status() const override { return out_.status(); }
+
+  void close() override { out_.close(); }
+
+ private:
+  roo_io::OutputStream& out_;
+  int error_rate_;
+  int counter_;
+};
+
+}  // namespace
 
 TEST(PacketOverStream, SendReceive) {
   roo_io::RingPipe pipe(128);
@@ -68,6 +144,60 @@ TEST(PacketOverStream, SendReceive) {
   }
   EXPECT_EQ(received_count, num_packets);
   EXPECT_EQ(receiver.bytes_accepted(), receiver.bytes_received());
+  EXPECT_EQ(input_stream.status(), roo_io::kEndOfStream);
+  input_stream.close();
+  writer.join();
+}
+
+TEST(PacketOverStream, SendReceiveWithErrors) {
+  roo_io::RingPipe pipe(128);
+  roo_io::RingPipeInputStream input_stream(pipe);
+
+  PacketReceiverOverStream receiver(input_stream);
+
+  const size_t num_packets = 1000;
+  std::vector<Packet> packets;
+  for (size_t i = 0; i < num_packets; ++i) {
+    packets.push_back(RandomPacket());
+  }
+  std::unordered_map<Packet, int, PacketHash> packet_indexes;
+  for (size_t i = 0; i < num_packets; ++i) {
+    packet_indexes[packets[i]] = i;
+  }
+
+  roo::thread writer([&pipe, &packets]() {
+    roo_io::RingPipeOutputStream pipe_output_stream(pipe);
+    ErrorInjectingOutputStream output_stream(pipe_output_stream, 10);
+    PacketSenderOverStream sender(output_stream);
+    for (const auto& packet : packets) {
+      sender.send(packet.data(), packet.size());
+      roo::this_thread::yield();
+    }
+    sender.flush();
+    output_stream.close();
+  });
+
+  int last_received_index = -1;
+  size_t received_count = 0;
+  receiver.setReceiverFn([&](const roo::byte* buf, size_t len) {
+    Packet received(buf, len);
+    auto it = packet_indexes.find(received);
+    // We expect to receive only valid packets.
+    EXPECT_NE(it, packet_indexes.end());
+    int received_packet_index = it->second;
+    // The packets are expected to be received in order.
+    EXPECT_GT(received_packet_index, last_received_index);
+    last_received_index = received_packet_index;
+    received_count++;
+  });
+
+  while (input_stream.status() == roo_io::kOk) {
+    receiver.tryReceive();
+    roo::this_thread::yield();
+  }
+  // Some packets may have been lost due to errors.
+  EXPECT_LE(received_count, num_packets);
+  EXPECT_LE(receiver.bytes_accepted(), receiver.bytes_received());
   EXPECT_EQ(input_stream.status(), roo_io::kEndOfStream);
   input_stream.close();
   writer.join();
