@@ -7,9 +7,10 @@ namespace roo_transport {
 namespace internal {
 
 Receiver::Receiver(unsigned int recvbuf_log2)
-    : state_(kIdle),
-      peer_closed_(false),
+    : my_stream_id_(0),
+      state_(kIdle),
       self_closed_(false),
+      peer_closed_(false),
       end_of_stream_(false),
       in_buffers_(new InBuffer[1 << recvbuf_log2]),
       current_in_buffer_(nullptr),
