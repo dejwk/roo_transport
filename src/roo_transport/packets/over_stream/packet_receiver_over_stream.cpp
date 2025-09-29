@@ -11,21 +11,15 @@
 
 namespace roo_transport {
 
-PacketReceiverOverStream::PacketReceiverOverStream(roo_io::InputStream& in,
-                                                   ReceiverFn receiver_fn)
+PacketReceiverOverStream::PacketReceiverOverStream(roo_io::InputStream& in)
     : in_(in),
       buf_(new roo::byte[256]),
       tmp_(new roo::byte[256]),
       pos_(0),
-      receiver_fn_(std::move(receiver_fn)),
       bytes_received_(0),
       bytes_accepted_(0) {}
 
-void PacketReceiverOverStream::setReceiverFn(ReceiverFn receiver_fn) {
-  receiver_fn_ = std::move(receiver_fn);
-}
-
-bool PacketReceiverOverStream::tryReceive() {
+bool PacketReceiverOverStream::tryReceive(const ReceiverFn& receiver_fn) {
   size_t len = in_.tryRead(tmp_.get(), 256);
   bytes_received_ += len;
   bool received = false;
@@ -39,10 +33,10 @@ bool PacketReceiverOverStream::tryReceive() {
       ++increment;
       if (pos_ + increment <= 256) {
         if (pos_ == 0) {
-          processPacket(data, increment);
+          processPacket(data, increment, receiver_fn);
         } else {
           memcpy(&buf_[pos_], data, increment);
-          processPacket(buf_.get(), pos_ + increment);
+          processPacket(buf_.get(), pos_ + increment, receiver_fn);
         }
         received = true;
       }
@@ -86,7 +80,8 @@ bool PacketReceiverOverStream::tryReceive() {
   return received;
 }
 
-void PacketReceiverOverStream::processPacket(roo::byte* buf, size_t size) {
+void PacketReceiverOverStream::processPacket(roo::byte* buf, size_t size,
+                                             const ReceiverFn& receiver_fn) {
   if (cobs_decode_tinyframe(buf, size) != COBS_RET_SUCCESS) {
     // Invalid payload (COBS decoding failed). Dropping packet.
     return;
@@ -101,7 +96,7 @@ void PacketReceiverOverStream::processPacket(roo::byte* buf, size_t size) {
     }
     bytes_accepted_ += size;
   }
-  if (receiver_fn_ != nullptr) receiver_fn_(&buf[1], size - 6);
+  if (receiver_fn != nullptr) receiver_fn(&buf[1], size - 6);
 }
 
 }  // namespace roo_transport

@@ -10,9 +10,7 @@ class LoopbackPacketReceiver : public PacketReceiver {
  public:
   LoopbackPacketReceiver(ReceiverFn receiver_fn = nullptr);
 
-  bool tryReceive() override;
-
-  void setReceiverFn(ReceiverFn receiver_fn) override;
+  bool tryReceive(const ReceiverFn& receiver_fn) override;
 
  private:
   friend class LoopbackPacketSender;

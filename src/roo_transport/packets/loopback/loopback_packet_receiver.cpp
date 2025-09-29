@@ -9,24 +9,18 @@
 namespace roo_transport {
 
 LoopbackPacketReceiver::LoopbackPacketReceiver(ReceiverFn receiver_fn)
-    : receiver_fn_(std::move(receiver_fn)),
-      buffer_(new roo::byte[256]),
-      size_(0) {}
+    : receiver_fn_(receiver_fn), buffer_(new roo::byte[256]), size_(0) {}
 
 void LoopbackPacketReceiver::packetReceived(const roo::byte* buf, size_t size) {
   memcpy(buffer_.get(), buf, size);
   size_ = size;
-  tryReceive();
+  tryReceive(receiver_fn_);
 }
 
-void LoopbackPacketReceiver::setReceiverFn(ReceiverFn receiver_fn) {
-  receiver_fn_ = std::move(receiver_fn);
-}
-
-bool LoopbackPacketReceiver::tryReceive() {
+bool LoopbackPacketReceiver::tryReceive(const ReceiverFn& receiver_fn) {
   if (size_ == 0) return false;
-  if (receiver_fn_ != nullptr) {
-    receiver_fn_(buffer_.get(), size_);
+  if (receiver_fn != nullptr) {
+    receiver_fn(buffer_.get(), size_);
   }
   size_ = 0;
   return true;

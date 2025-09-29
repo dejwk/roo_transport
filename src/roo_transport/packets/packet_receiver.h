@@ -20,11 +20,11 @@ class PacketReceiver {
   using ReceiverFn = std::function<void(const roo::byte*, size_t)>;
 
   // Must be called when there might be new data to read from the input
-  // stream. Returns true if a packet was received; false otherwise.
-  virtual bool tryReceive() = 0;
-
-  // Sets the new receiver callback, overwriting the previous one (if any).
-  virtual void setReceiverFn(ReceiverFn receiver_fn) = 0;
+  // stream. If there is no data on the stream, returns immediately. Otherwise,
+  // processes up to 250 bytes of data, and calls the specified callback for
+  // each packet received. Returns true if at least one packet was received;
+  // false otherwise.
+  virtual bool tryReceive(const ReceiverFn& receiver_fn) = 0;
 };
 
 }  // namespace roo_transport

@@ -132,14 +132,15 @@ TEST(PacketOverStream, SendReceive) {
   });
 
   size_t received_count = 0;
-  receiver.setReceiverFn([&](const roo::byte* buf, size_t len) {
+
+  auto receive_fn = [&](const roo::byte* buf, size_t len) {
     EXPECT_EQ(len, packets[received_count].size());
     EXPECT_EQ(memcmp(buf, packets[received_count].data(), len), 0);
     received_count++;
-  });
+  };
 
   while (input_stream.status() == roo_io::kOk) {
-    receiver.tryReceive();
+    receiver.tryReceive(receive_fn);
     roo::this_thread::yield();
   }
   EXPECT_EQ(received_count, num_packets);
@@ -179,7 +180,8 @@ TEST(PacketOverStream, SendReceiveWithErrors) {
 
   int last_received_index = -1;
   size_t received_count = 0;
-  receiver.setReceiverFn([&](const roo::byte* buf, size_t len) {
+
+  auto receive_fn = [&](const roo::byte* buf, size_t len) {
     Packet received(buf, len);
     auto it = packet_indexes.find(received);
     // We expect to receive only valid packets.
@@ -189,10 +191,10 @@ TEST(PacketOverStream, SendReceiveWithErrors) {
     EXPECT_GT(received_packet_index, last_received_index);
     last_received_index = received_packet_index;
     received_count++;
-  });
+  };
 
   while (input_stream.status() == roo_io::kOk) {
-    receiver.tryReceive();
+    receiver.tryReceive(receive_fn);
     roo::this_thread::yield();
   }
   // Some packets may have been lost due to errors.
