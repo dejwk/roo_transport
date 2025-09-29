@@ -4,7 +4,7 @@ namespace roo_transport {
 
 LinkTransport::LinkTransport(PacketSender& sender, PacketReceiver& receiver,
                              unsigned int sendbuf_log2,
-                             unsigned int recvbuf_log2, std::string label)
+                             unsigned int recvbuf_log2)
     : sender_(sender),
       receiver_(receiver),
       channel_(sender_, receiver_, sendbuf_log2, recvbuf_log2) {}

@@ -11,8 +11,7 @@ namespace roo_transport {
 class LinkTransport {
  public:
   LinkTransport(PacketSender& sender, PacketReceiver& receiver,
-            unsigned int sendbuf_log2, unsigned int recvbuf_log2,
-            std::string label = "");
+                unsigned int sendbuf_log2, unsigned int recvbuf_log2);
 
   void begin() { channel_.begin(); }
 
