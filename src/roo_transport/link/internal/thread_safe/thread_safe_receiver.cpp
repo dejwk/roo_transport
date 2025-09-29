@@ -37,10 +37,14 @@ void ThreadSafeReceiver::setBroken(RecvCb& recv_cb) {
 bool ThreadSafeReceiver::checkConnectionStatus(uint32_t my_stream_id,
                                                roo_io::Status& status) const {
   if (my_stream_id != receiver_.my_stream_id()) {
+    // Peer reconnected with a new ID, and we already accepted. This connection
+    // is dead.
     status = roo_io::kConnectionError;
     return false;
   }
   if (receiver_.state() == Receiver::kIdle) {
+    // Peer reconnected with a new ID. We have not accepted yet, but this
+    // connection is dead.
     status = roo_io::kConnectionError;
     return false;
   }
