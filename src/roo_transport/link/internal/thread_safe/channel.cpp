@@ -37,6 +37,9 @@ Channel::Channel(PacketSender& sender, PacketReceiver& receiver,
                  unsigned int sendbuf_log2, unsigned int recvbuf_log2)
     : packet_sender_(sender),
       packet_receiver_(receiver),
+      receiver_fn_([this](const roo::byte* buf, size_t len) {
+        packetReceived(buf, len);
+      }),
       outgoing_data_ready_(),
       transmitter_(sendbuf_log2, outgoing_data_ready_),
       receiver_(recvbuf_log2, outgoing_data_ready_),
@@ -48,8 +51,6 @@ Channel::Channel(PacketSender& sender, PacketReceiver& receiver,
       sender_thread_() {
   CHECK_LE(sendbuf_log2, 12);
   CHECK_LE(sendbuf_log2, recvbuf_log2);
-  receiver.setReceiverFn(
-      [this](const roo::byte* buf, size_t len) { packetReceived(buf, len); });
   // while (my_stream_id_ == 0) my_stream_id_ = rand();
 }
 
@@ -129,18 +130,21 @@ uint32_t Channel::connect() {
   return my_stream_id_;
 }
 
-bool Channel::isConnecting(uint32_t stream_id) {
+LinkStatus Channel::getLinkStatus(uint32_t stream_id) {
   roo::lock_guard<roo::mutex> guard(handshake_mutex_);
-  return isConnectingInternal(stream_id);
+  return getLinkStatusInternal(stream_id);
 }
 
-bool Channel::isConnectingInternal(uint32_t stream_id) {
-  return my_stream_id_ == stream_id && peer_stream_id_ == 0;
+LinkStatus Channel::getLinkStatusInternal(uint32_t stream_id) {
+  if (my_stream_id_ == 0) return LinkStatus::kIdle;
+  if (my_stream_id_ != stream_id) return LinkStatus::kBroken;
+  return peer_stream_id_ == 0 ? LinkStatus::kConnecting
+                              : LinkStatus::kConnected;
 }
 
 void Channel::awaitConnected(uint32_t stream_id) {
   roo::unique_lock<roo::mutex> guard(handshake_mutex_);
-  while (isConnectingInternal(stream_id)) {
+  while (getLinkStatusInternal(stream_id) == LinkStatus::kConnecting) {
     connected_cv_.wait(guard);
   }
 }
@@ -148,7 +152,7 @@ void Channel::awaitConnected(uint32_t stream_id) {
 bool Channel::awaitConnected(uint32_t stream_id, roo_time::Interval timeout) {
   roo::unique_lock<roo::mutex> guard(handshake_mutex_);
   roo_time::Uptime when = roo_time::Uptime::Now() + timeout;
-  while (isConnectingInternal(stream_id)) {
+  while (getLinkStatusInternal(stream_id) == LinkStatus::kConnecting) {
     if (connected_cv_.wait_until(guard, when) == roo::cv_status::timeout) {
       return false;
     }
@@ -187,7 +191,7 @@ long Channel::trySend() {
   return next_send_micros;
 }
 
-bool Channel::tryRecv() { return packet_receiver_.tryReceive(); }
+bool Channel::tryRecv() { return packet_receiver_.tryReceive(receiver_fn_); }
 
 size_t Channel::conn(roo::byte* buf, long& next_send_micros) {
   roo::lock_guard<roo::mutex> guard(handshake_mutex_);

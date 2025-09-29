@@ -10,8 +10,9 @@ Link::Link(Channel& channel, uint32_t my_stream_id)
       in_(*channel_, my_stream_id),
       out_(*channel_, my_stream_id) {}
 
-bool Link::isConnecting() {
-  return channel_ == nullptr ? false : channel_->isConnecting(my_stream_id_);
+LinkStatus Link::status() const {
+  return channel_ == nullptr ? LinkStatus::kIdle
+                             : channel_->getLinkStatus(my_stream_id_);
 }
 
 void Link::awaitConnected() {

@@ -12,8 +12,6 @@
 #include "roo_threads.h"
 #include "roo_threads/mutex.h"
 #include "roo_threads/thread.h"
-#include "roo_transport/packets/packet_receiver.h"
-#include "roo_transport/packets/packet_sender.h"
 #include "roo_transport/link/internal/in_buffer.h"
 #include "roo_transport/link/internal/out_buffer.h"
 #include "roo_transport/link/internal/receiver.h"
@@ -23,6 +21,9 @@
 #include "roo_transport/link/internal/thread_safe/thread_safe_receiver.h"
 #include "roo_transport/link/internal/thread_safe/thread_safe_transmitter.h"
 #include "roo_transport/link/internal/transmitter.h"
+#include "roo_transport/link/link_status.h"
+#include "roo_transport/packets/packet_receiver.h"
+#include "roo_transport/packets/packet_sender.h"
 
 namespace roo_transport {
 
@@ -93,7 +94,7 @@ class Channel {
   // Returns a newly-generated my_stream_id.
   uint32_t connect();
 
-  bool isConnecting(uint32_t my_stream_id);
+  LinkStatus getLinkStatus(uint32_t my_stream_id);
 
   void awaitConnected(uint32_t my_stream_id);
   bool awaitConnected(uint32_t my_stream_id, roo_time::Interval timeout);
@@ -107,7 +108,7 @@ class Channel {
 
 #endif
 
-  bool isConnectingInternal(uint32_t my_stream_id);
+  LinkStatus getLinkStatusInternal(uint32_t my_stream_id);
 
   void packetReceived(const roo::byte* buf, size_t len);
 
@@ -119,6 +120,7 @@ class Channel {
 
   PacketSender& packet_sender_;
   PacketReceiver& packet_receiver_;
+  PacketReceiver::ReceiverFn receiver_fn_;
 
   // Signals the sender thread that there are packets to send.
   internal::OutgoingDataReadyNotification outgoing_data_ready_;

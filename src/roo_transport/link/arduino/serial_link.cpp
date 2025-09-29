@@ -40,7 +40,7 @@ int SerialLink::availableForWrite() { return out().availableForWrite(); }
 
 void SerialLink::flush() { out().flush(); }
 
-bool SerialLink::isConnecting() { return link_.isConnecting(); }
+LinkStatus SerialLink::status() const { return link_.status(); }
 
 void SerialLink::awaitConnected() { link_.awaitConnected(); }
 
