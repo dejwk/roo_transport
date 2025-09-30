@@ -2,9 +2,9 @@
 
 namespace roo_transport {
 
-LinkTransport::LinkTransport(PacketSender& sender, unsigned int sendbuf_log2,
-                             unsigned int recvbuf_log2)
-    : sender_(sender), channel_(sender_, sendbuf_log2, recvbuf_log2) {}
+LinkTransport::LinkTransport(PacketSender& sender, LinkBufferSize sendbuf,
+                             LinkBufferSize recvbuf)
+    : sender_(sender), channel_(sender_, sendbuf, recvbuf) {}
 
 void LinkTransport::processIncomingPacket(const roo::byte* buf, size_t len) {
   channel_.packetReceived(buf, len);

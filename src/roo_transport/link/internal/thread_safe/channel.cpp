@@ -33,12 +33,12 @@ roo_time::Interval Backoff(int retry_count) {
 
 }  // namespace
 
-Channel::Channel(PacketSender& sender,
-                 unsigned int sendbuf_log2, unsigned int recvbuf_log2)
+Channel::Channel(PacketSender& sender, LinkBufferSize sendbuf,
+                 LinkBufferSize recvbuf)
     : packet_sender_(sender),
       outgoing_data_ready_(),
-      transmitter_(sendbuf_log2, outgoing_data_ready_),
-      receiver_(recvbuf_log2, outgoing_data_ready_),
+      transmitter_((unsigned int)sendbuf, outgoing_data_ready_),
+      receiver_((unsigned int)recvbuf, outgoing_data_ready_),
       my_stream_id_(0),
       peer_stream_id_(0),
       needs_handshake_ack_(false),
@@ -46,8 +46,8 @@ Channel::Channel(PacketSender& sender,
       next_scheduled_handshake_update_(roo_time::Uptime::Start()),
       sender_thread_(),
       active_(true) {
-  CHECK_LE(sendbuf_log2, 12);
-  CHECK_LE(sendbuf_log2, recvbuf_log2);
+  CHECK_LE((unsigned int)sendbuf, 12);
+  CHECK_LE((unsigned int)sendbuf, recvbuf);
 }
 
 Channel::~Channel() {

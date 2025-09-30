@@ -16,8 +16,9 @@ namespace roo_transport {
 
 class SerialLinkTransport {
  public:
-  SerialLinkTransport(decltype(Serial1)& serial, unsigned int sendbuf_log2 = 4,
-                      unsigned int recvbuf_log2 = 4, std::string label = "");
+  SerialLinkTransport(decltype(Serial1)& serial,
+                      LinkBufferSize sendbuf = kBufferSize4KB,
+                      LinkBufferSize recvbuf = kBufferSize4KB);
 
   void begin();
 

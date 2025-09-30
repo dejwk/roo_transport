@@ -22,8 +22,8 @@ class LinkLoopback {
         recv1_(input_stream1_),
         send2_(output_stream2_),
         recv2_(input_stream2_),
-        t1_(send1_, 4, 4),
-        t2_(send2_, 4, 4) {}
+        t1_(send1_, kBufferSize4KB, kBufferSize4KB),
+        t2_(send2_, kBufferSize4KB, kBufferSize4KB) {}
 
   roo_transport::LinkTransport& t1() { return t1_; }
   roo_transport::LinkTransport& t2() { return t2_; }

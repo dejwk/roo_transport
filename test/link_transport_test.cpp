@@ -26,7 +26,7 @@ TEST(LinkTransport, DefaultConstructedLinkIsIdle) {
 TEST(LinkTransport, TransportConstructedLinkIsConnecting) {
   NullPacketSender sender;
   NullPacketReceiver receiver;
-  LinkTransport transport(sender, 4, 4);
+  LinkTransport transport(sender);
   Link link = transport.connectAsync();
   EXPECT_EQ(link.status(), LinkStatus::kConnecting);
   EXPECT_EQ(link.in().status(), roo_io::kOk);

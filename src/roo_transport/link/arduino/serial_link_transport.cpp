@@ -7,15 +7,14 @@
 namespace roo_transport {
 
 SerialLinkTransport::SerialLinkTransport(decltype(Serial1)& serial,
-                                         unsigned int sendbuf_log2,
-                                         unsigned int recvbuf_log2,
-                                         std::string label)
+                                         LinkBufferSize sendbuf,
+                                         LinkBufferSize recvbuf)
     : serial_(serial),
       output_(serial),
       input_(serial),
       sender_(output_),
       receiver_(input_),
-      transport_(sender_, sendbuf_log2, recvbuf_log2) {}
+      transport_(sender_, sendbuf, recvbuf) {}
 
 void SerialLinkTransport::begin() {
   transport_.begin();

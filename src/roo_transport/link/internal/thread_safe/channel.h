@@ -23,6 +23,7 @@
 #include "roo_transport/link/internal/thread_safe/thread_safe_receiver.h"
 #include "roo_transport/link/internal/thread_safe/thread_safe_transmitter.h"
 #include "roo_transport/link/internal/transmitter.h"
+#include "roo_transport/link/link_buffer_size.h"
 #include "roo_transport/link/link_status.h"
 #include "roo_transport/packets/packet_receiver.h"
 #include "roo_transport/packets/packet_sender.h"
@@ -33,8 +34,7 @@ namespace roo_transport {
 // packet-based transport. Used as a building block of SingletonSerial.
 class Channel {
  public:
-  Channel(PacketSender& sender, unsigned int sendbuf_log2,
-          unsigned int recvbuf_log2);
+  Channel(PacketSender& sender, LinkBufferSize sendbuf, LinkBufferSize recvbuf);
 
   ~Channel();
 
