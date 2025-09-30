@@ -20,7 +20,7 @@ SerialLinkTransport::SerialLinkTransport(decltype(Serial1)& serial,
 void SerialLinkTransport::begin() {
   transport_.begin();
 #ifdef ESP32
-  serial_.onReceive([this]() { transport_.readData(); });
+  serial_.onReceive([this]() { transport_.tryReceive(); });
 #endif
 }
 

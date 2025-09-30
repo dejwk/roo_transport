@@ -25,8 +25,6 @@ class ChannelInput : public roo_transport::SocketInputStream {
 
   size_t tryRead(roo::byte* buf, size_t count) override;
 
-  void onReceive(roo_transport::SocketInputStream::ReceiveCb recv_cb) override;
-
   size_t available() override;
   int read() override;
   int peek() override;

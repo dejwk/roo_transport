@@ -38,10 +38,6 @@ size_t ChannelInput::tryRead(roo::byte* buf, size_t count) {
   return channel_->tryRead(buf, count, my_stream_id_, status_);
 }
 
-void ChannelInput::onReceive(internal::ThreadSafeReceiver::RecvCb recv_cb) {
-  channel_->onReceive(recv_cb, my_stream_id_, status_);
-}
-
 size_t ChannelInput::available() {
   if (status_ != roo_io::kOk) return 0;
   return channel_->availableForRead(my_stream_id_, status_);

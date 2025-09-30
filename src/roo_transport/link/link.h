@@ -38,6 +38,10 @@ class Link {
   // if the timeout has elapsed.
   bool awaitConnected(roo_time::Interval timeout);
 
+  // Disconnects the link, immediately bringing it to the idle state. If the
+  // link is already idle, does nothing.
+  void disconnect();
+
  private:
   friend class SerialLink;
   friend class LinkTransport;

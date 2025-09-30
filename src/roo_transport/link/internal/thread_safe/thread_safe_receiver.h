@@ -21,7 +21,7 @@ class ThreadSafeReceiver {
   Receiver::State state() const;
 
   void setConnected(SeqNum peer_seq_num);
-  void setBroken(RecvCb& recv_cb);
+  void setBroken();
 
   size_t read(roo::byte* buf, size_t count, uint32_t my_stream_id,
               roo_io::Status& stream_status);
@@ -36,9 +36,6 @@ class ThreadSafeReceiver {
 
   void markInputClosed(uint32_t my_stream_id, roo_io::Status& stream_status);
 
-  void onReceive(RecvCb recv_cb, uint32_t my_stream_id,
-                 roo_io::Status& stream_status);
-
   void reset();
   void init(uint32_t my_stream_id);
 
@@ -46,7 +43,7 @@ class ThreadSafeReceiver {
   size_t updateRecvHimark(roo::byte* buf, long& next_send_micros);
 
   bool handleDataPacket(uint16_t seq_id, const roo::byte* payload, size_t len,
-                        bool is_final, RecvCb& recv_cb);
+                        bool is_final);
 
   bool empty() const {
     roo::lock_guard<roo::mutex> guard(mutex_);
@@ -73,19 +70,14 @@ class ThreadSafeReceiver {
   // when status is kOk; false otherwise.
   //
   // Must be called with mutex_ held.
-  bool checkConnectionStatus(uint32_t my_stream_id, roo_io::Status& status) const;
+  bool checkConnectionStatus(uint32_t my_stream_id,
+                             roo_io::Status& status) const;
 
   internal::Receiver receiver_;
 
   mutable roo::mutex mutex_;
   roo::condition_variable has_data_;
   OutgoingDataReadyNotification& outgoing_data_ready_;
-
-  RecvCb recv_cb_;
-
-  // Captured my_stream_id when registered recv_cb_, so that we can re-confirm
-  // that it is current before invoking the callback.
-  uint32_t recv_cb_stream_id_;
 };
 
 }  // namespace internal

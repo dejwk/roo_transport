@@ -16,7 +16,9 @@ class LinkTransport {
   void begin() { channel_.begin(); }
 
   // Must be called when there is data to read.
-  void readData();
+  void tryReceive();
+
+  bool receive();
 
   Link connect();
   Link connectAsync();

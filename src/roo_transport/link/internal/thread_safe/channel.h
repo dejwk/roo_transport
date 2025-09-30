@@ -1,5 +1,7 @@
-#include <memory>
 #pragma once
+
+#include <atomic>
+#include <memory>
 
 #include "roo_transport/link/internal/thread_safe/compile_guard.h"
 #ifdef ROO_USE_THREADS
@@ -34,6 +36,8 @@ class Channel {
   Channel(PacketSender& sender, PacketReceiver& receiver,
           unsigned int sendbuf_log2, unsigned int recvbuf_log2);
 
+  ~Channel();
+
   void begin();
 
   uint32_t my_stream_id() const;
@@ -62,14 +66,6 @@ class Channel {
 
   void closeInput(uint32_t my_stream_id, roo_io::Status& stream_status);
 
-  // Registers callback to be invoked when new data is available for reading, or
-  // the stream gets closed or broken, due to data received. Executes in the
-  // receiver thread, which stack must be appropriately provisioned to handle
-  // these callbacks. Does NOT get invoked in case of events that were triggered
-  // locally, e.g. an explicit socked input close.
-  void onReceive(internal::ThreadSafeReceiver::RecvCb recv_cb,
-                 uint32_t my_stream_id, roo_io::Status& stream_status);
-
   bool loop();
 
   // Returns the delay, in microseconds, until we're expected to need to
@@ -77,6 +73,10 @@ class Channel {
   long trySend();
 
   bool tryRecv();
+
+  bool recv();
+
+  void disconnect(uint32_t my_stream_id);
 
   // The lower bound of bytes that are guaranteed to be writable without
   // blocking.
@@ -113,10 +113,11 @@ class Channel {
   void packetReceived(const roo::byte* buf, size_t len);
 
   void handleHandshakePacket(uint16_t peer_seq_num, uint32_t peer_stream_id,
-                             uint32_t ack_stream_id, bool want_ack,
-                             internal::ThreadSafeReceiver::RecvCb& recv_cb);
+                             uint32_t ack_stream_id, bool want_ack);
 
   size_t conn(roo::byte* buf, long& next_send_micros);
+
+  void sendLoop();
 
   PacketSender& packet_sender_;
   PacketReceiver& packet_receiver_;
@@ -149,6 +150,7 @@ class Channel {
 
 #ifdef ROO_USE_THREADS
   roo::thread sender_thread_;
+  std::atomic<bool> active_;
 
   mutable roo::mutex handshake_mutex_;
 

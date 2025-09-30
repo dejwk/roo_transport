@@ -25,4 +25,10 @@ bool Link::awaitConnected(roo_time::Interval timeout) {
   return channel_->awaitConnected(my_stream_id_, timeout);
 }
 
+void Link::disconnect() {
+  if (channel_ == nullptr) return;
+  channel_->disconnect(my_stream_id_);
+  channel_ = nullptr;
+}
+
 }  // namespace roo_transport

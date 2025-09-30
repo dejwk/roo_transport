@@ -9,7 +9,8 @@ LinkTransport::LinkTransport(PacketSender& sender, PacketReceiver& receiver,
       receiver_(receiver),
       channel_(sender_, receiver_, sendbuf_log2, recvbuf_log2) {}
 
-void LinkTransport::readData() { channel_.tryRecv(); }
+void LinkTransport::tryReceive() { channel_.tryRecv(); }
+bool LinkTransport::receive() { return channel_.recv(); }
 
 Link LinkTransport::connectAsync() {
   uint32_t my_stream_id = channel_.connect();
