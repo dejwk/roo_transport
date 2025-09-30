@@ -34,3 +34,18 @@ cc_test(
     ],
     size = "small",
 )
+
+cc_test(
+    name = "link_transport_test",
+    srcs = [
+        "test/link_transport_test.cpp",
+    ],
+    copts = ["-Iexternal/gtest/include"],
+    includes = ["src"],
+    linkstatic = 1,
+    deps = [
+        ":roo_transport",
+        "@roo_testing//:arduino_gtest_main",
+    ],
+    size = "small",
+)
