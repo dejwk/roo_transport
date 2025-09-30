@@ -32,7 +32,9 @@ class PacketReceiverOverStream : public PacketReceiver {
   // `setReceiverFn`.
   PacketReceiverOverStream(roo_io::InputStream& in);
 
-  bool tryReceive(const ReceiverFn& receiver_fn) override;
+  size_t tryReceive(const ReceiverFn& receiver_fn) override;
+
+  size_t receive(const ReceiverFn& receiver_fn) override;
 
   // Returns the total amount of bytes received, including bytes rejected due to
   // communication errors.
@@ -42,7 +44,16 @@ class PacketReceiverOverStream : public PacketReceiver {
   size_t bytes_accepted() const { return bytes_accepted_; }
 
  private:
-  void processPacket(roo::byte* buf, size_t size, const ReceiverFn& receiver_fn);
+  // Processes up to `len` bytes of incoming data stored in `tmp_`, calling
+  // `receiver_fn` for each valid packet received. Returns the number of packets
+  // delivered.
+  size_t processIncoming(size_t len, const ReceiverFn& receiver_fn);
+
+  // Processes a complete packet stored in `buf` of size `size`, calling
+  // `receiver_fn` if the packet is valid. Returns true if the packet was
+  // accepted; false if it was rejected due to data corruption or other errors.
+  bool processPacket(roo::byte* buf, size_t size,
+                     const ReceiverFn& receiver_fn);
 
   roo_io::InputStream& in_;
   std::unique_ptr<roo::byte[]> buf_;

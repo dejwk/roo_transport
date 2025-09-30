@@ -140,7 +140,7 @@ TEST(PacketOverStream, SendReceive) {
   };
 
   while (input_stream.status() == roo_io::kOk) {
-    receiver.tryReceive(receive_fn);
+    receiver.receive(receive_fn);
     roo::this_thread::yield();
   }
   EXPECT_EQ(received_count, num_packets);

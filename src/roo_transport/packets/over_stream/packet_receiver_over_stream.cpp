@@ -19,10 +19,24 @@ PacketReceiverOverStream::PacketReceiverOverStream(roo_io::InputStream& in)
       bytes_received_(0),
       bytes_accepted_(0) {}
 
-bool PacketReceiverOverStream::tryReceive(const ReceiverFn& receiver_fn) {
+size_t PacketReceiverOverStream::receive(const ReceiverFn& receiver_fn) {
+  while (true) {
+    size_t len = in_.read(tmp_.get(), 256);
+    if (len == 0) return 0;
+    size_t packets = processIncoming(len, receiver_fn);
+    if (packets > 0) return packets;
+  }
+}
+
+size_t PacketReceiverOverStream::tryReceive(const ReceiverFn& receiver_fn) {
   size_t len = in_.tryRead(tmp_.get(), 256);
+  return processIncoming(len, receiver_fn);
+}
+
+size_t PacketReceiverOverStream::processIncoming(
+    size_t len, const ReceiverFn& receiver_fn) {
   bytes_received_ += len;
-  bool received = false;
+  size_t received = 0;
   roo::byte* data = &tmp_[0];
   while (len > 0) {
     // Find the possible packet delimiter (zero byte).
@@ -33,12 +47,13 @@ bool PacketReceiverOverStream::tryReceive(const ReceiverFn& receiver_fn) {
       ++increment;
       if (pos_ + increment <= 256) {
         if (pos_ == 0) {
-          processPacket(data, increment, receiver_fn);
+          received += (processPacket(data, increment, receiver_fn) ? 1 : 0);
         } else {
           memcpy(&buf_[pos_], data, increment);
-          processPacket(buf_.get(), pos_ + increment, receiver_fn);
+          received +=
+              (processPacket(buf_.get(), pos_ + increment, receiver_fn) ? 1
+                                                                        : 0);
         }
-        received = true;
       }
       pos_ = 0;
     } else {
@@ -80,11 +95,11 @@ bool PacketReceiverOverStream::tryReceive(const ReceiverFn& receiver_fn) {
   return received;
 }
 
-void PacketReceiverOverStream::processPacket(roo::byte* buf, size_t size,
+bool PacketReceiverOverStream::processPacket(roo::byte* buf, size_t size,
                                              const ReceiverFn& receiver_fn) {
   if (cobs_decode_tinyframe(buf, size) != COBS_RET_SUCCESS) {
     // Invalid payload (COBS decoding failed). Dropping packet.
-    return;
+    return false;
   }
   {
     // Verify the checksum.
@@ -92,11 +107,12 @@ void PacketReceiverOverStream::processPacket(roo::byte* buf, size_t size,
     uint32_t received_hash = roo_io::LoadBeU32(&buf[size - 5]);
     if (computed_hash != received_hash) {
       // Invalid checksum. Dropping packet.
-      return;
+      return false;
     }
     bytes_accepted_ += size;
   }
   if (receiver_fn != nullptr) receiver_fn(&buf[1], size - 6);
+  return true;
 }
 
 }  // namespace roo_transport
