@@ -26,7 +26,7 @@ TEST(LinkTransport, DefaultConstructedLinkIsIdle) {
 TEST(LinkTransport, TransportConstructedLinkIsConnecting) {
   NullPacketSender sender;
   NullPacketReceiver receiver;
-  LinkTransport transport(sender, receiver, 4, 4);
+  LinkTransport transport(sender, 4, 4);
   Link link = transport.connectAsync();
   EXPECT_EQ(link.status(), LinkStatus::kConnecting);
   EXPECT_EQ(link.in().status(), roo_io::kOk);
@@ -41,14 +41,12 @@ TEST(LinkTransport, SimpleConnectSendDisconnect) {
 
   // Start receiver threads.
   roo::thread t1([&]() {
-    while (true) {
-      if (!loopback.t1().receive()) break;
+    while (loopback.receive1()) {
     }
   });
 
   roo::thread t2([&]() {
-    while (true) {
-      if (!loopback.t2().receive()) break;
+    while (loopback.receive2()) {
     }
   });
 

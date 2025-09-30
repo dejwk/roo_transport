@@ -10,15 +10,14 @@ namespace roo_transport {
 
 class LinkTransport {
  public:
-  LinkTransport(PacketSender& sender, PacketReceiver& receiver,
-                unsigned int sendbuf_log2, unsigned int recvbuf_log2);
+  LinkTransport(PacketSender& sender, unsigned int sendbuf_log2,
+                unsigned int recvbuf_log2);
 
+  // Starts the send thread.
   void begin() { channel_.begin(); }
 
-  // Must be called when there is data to read.
-  void tryReceive();
-
-  bool receive();
+  // Supply an incoming packet received from the underlying transport.
+  void processIncomingPacket(const roo::byte* buf, size_t len);
 
   Link connect();
   Link connectAsync();
@@ -27,13 +26,8 @@ class LinkTransport {
   uint32_t packets_delivered() const { return channel_.packets_delivered(); }
   uint32_t packets_received() const { return channel_.packets_received(); }
 
-  // For single-threaded systems only.
-  void loop();
-
  private:
   PacketSender& sender_;
-  PacketReceiver& receiver_;
-
   Channel channel_;
 };
 

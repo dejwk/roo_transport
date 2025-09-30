@@ -33,13 +33,9 @@ roo_time::Interval Backoff(int retry_count) {
 
 }  // namespace
 
-Channel::Channel(PacketSender& sender, PacketReceiver& receiver,
+Channel::Channel(PacketSender& sender,
                  unsigned int sendbuf_log2, unsigned int recvbuf_log2)
     : packet_sender_(sender),
-      packet_receiver_(receiver),
-      receiver_fn_([this](const roo::byte* buf, size_t len) {
-        packetReceived(buf, len);
-      }),
       outgoing_data_ready_(),
       transmitter_(sendbuf_log2, outgoing_data_ready_),
       receiver_(recvbuf_log2, outgoing_data_ready_),
@@ -52,7 +48,6 @@ Channel::Channel(PacketSender& sender, PacketReceiver& receiver,
       active_(true) {
   CHECK_LE(sendbuf_log2, 12);
   CHECK_LE(sendbuf_log2, recvbuf_log2);
-  // while (my_stream_id_ == 0) my_stream_id_ = rand();
 }
 
 Channel::~Channel() {
@@ -173,14 +168,6 @@ bool Channel::awaitConnected(uint32_t stream_id, roo_time::Interval timeout) {
   return true;
 }
 
-bool Channel::loop() {
-#ifndef ESP32
-  tryRecv();
-#endif
-  // long delay = trySend();
-  return true;
-}
-
 long Channel::trySend() {
   roo::byte buf[250];
   long next_send_micros = std::numeric_limits<long>::max();
@@ -203,9 +190,6 @@ long Channel::trySend() {
   }
   return next_send_micros;
 }
-
-bool Channel::tryRecv() { return packet_receiver_.tryReceive(receiver_fn_); }
-bool Channel::recv() { return packet_receiver_.receive(receiver_fn_) > 0; }
 
 size_t Channel::conn(roo::byte* buf, long& next_send_micros) {
   roo::lock_guard<roo::mutex> guard(handshake_mutex_);

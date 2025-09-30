@@ -2,15 +2,13 @@
 
 namespace roo_transport {
 
-LinkTransport::LinkTransport(PacketSender& sender, PacketReceiver& receiver,
-                             unsigned int sendbuf_log2,
+LinkTransport::LinkTransport(PacketSender& sender, unsigned int sendbuf_log2,
                              unsigned int recvbuf_log2)
-    : sender_(sender),
-      receiver_(receiver),
-      channel_(sender_, receiver_, sendbuf_log2, recvbuf_log2) {}
+    : sender_(sender), channel_(sender_, sendbuf_log2, recvbuf_log2) {}
 
-void LinkTransport::tryReceive() { channel_.tryRecv(); }
-bool LinkTransport::receive() { return channel_.recv(); }
+void LinkTransport::processIncomingPacket(const roo::byte* buf, size_t len) {
+  channel_.packetReceived(buf, len);
+}
 
 Link LinkTransport::connectAsync() {
   uint32_t my_stream_id = channel_.connect();
@@ -22,7 +20,5 @@ Link LinkTransport::connect() {
   conn.awaitConnected();
   return conn;
 }
-
-void LinkTransport::loop() { channel_.loop(); }
 
 }  // namespace roo_transport

@@ -33,8 +33,8 @@ namespace roo_transport {
 // packet-based transport. Used as a building block of SingletonSerial.
 class Channel {
  public:
-  Channel(PacketSender& sender, PacketReceiver& receiver,
-          unsigned int sendbuf_log2, unsigned int recvbuf_log2);
+  Channel(PacketSender& sender, unsigned int sendbuf_log2,
+          unsigned int recvbuf_log2);
 
   ~Channel();
 
@@ -66,15 +66,11 @@ class Channel {
 
   void closeInput(uint32_t my_stream_id, roo_io::Status& stream_status);
 
-  bool loop();
-
   // Returns the delay, in microseconds, until we're expected to need to
   // (re)send the next packet.
   long trySend();
 
-  bool tryRecv();
-
-  bool recv();
+  void packetReceived(const roo::byte* buf, size_t len);
 
   void disconnect(uint32_t my_stream_id);
 
@@ -110,8 +106,6 @@ class Channel {
 
   LinkStatus getLinkStatusInternal(uint32_t my_stream_id);
 
-  void packetReceived(const roo::byte* buf, size_t len);
-
   void handleHandshakePacket(uint16_t peer_seq_num, uint32_t peer_stream_id,
                              uint32_t ack_stream_id, bool want_ack);
 
@@ -120,8 +114,6 @@ class Channel {
   void sendLoop();
 
   PacketSender& packet_sender_;
-  PacketReceiver& packet_receiver_;
-  PacketReceiver::ReceiverFn receiver_fn_;
 
   // Signals the sender thread that there are packets to send.
   internal::OutgoingDataReadyNotification outgoing_data_ready_;

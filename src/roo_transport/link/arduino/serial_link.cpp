@@ -58,7 +58,7 @@ size_t SerialLink::timedRead(roo::byte* buf, size_t count,
       size_t result = in().tryRead(buf, count);
       if (result == 0) {
         if (in().status() != roo_io::kOk) return -1;
-        link_.channel_->loop();
+        // link_.channel_->loop();
       } else {
         total += result;
         count -= result;

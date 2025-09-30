@@ -15,16 +15,20 @@ SerialLinkTransport::SerialLinkTransport(decltype(Serial1)& serial,
       input_(serial),
       sender_(output_),
       receiver_(input_),
-      transport_(sender_, receiver_, sendbuf_log2, recvbuf_log2) {}
+      transport_(sender_, sendbuf_log2, recvbuf_log2) {}
 
 void SerialLinkTransport::begin() {
   transport_.begin();
 #ifdef ESP32
-  serial_.onReceive([this]() { transport_.tryReceive(); });
+  serial_.onReceive([this]() {
+    receiver_.tryReceive([this](const roo::byte* buf, size_t len) {
+      transport_.processIncomingPacket(buf, len);
+    });
+  });
 #endif
 }
 
-void SerialLinkTransport::loop() { transport_.loop(); }
+// void SerialLinkTransport::loop() { transport_.loop(); }
 
 SerialLink SerialLinkTransport::connectAsync() {
   return SerialLink(transport_.connect());

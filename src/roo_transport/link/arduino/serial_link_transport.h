@@ -31,8 +31,8 @@ class SerialLinkTransport {
   size_t receiver_bytes_received() const { return receiver_.bytes_received(); }
   size_t receiver_bytes_accepted() const { return receiver_.bytes_accepted(); }
 
-  // For single-threaded systems only.
-  void loop();
+  // // For single-threaded systems only.
+  // void loop();
 
   LinkTransport& transport() { return transport_; }
 

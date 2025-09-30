@@ -22,11 +22,33 @@ class LinkLoopback {
         recv1_(input_stream1_),
         send2_(output_stream2_),
         recv2_(input_stream2_),
-        t1_(send1_, recv1_, 4, 4),
-        t2_(send2_, recv2_, 4, 4) {}
+        t1_(send1_, 4, 4),
+        t2_(send2_, 4, 4) {}
 
   roo_transport::LinkTransport& t1() { return t1_; }
   roo_transport::LinkTransport& t2() { return t2_; }
+
+  bool receive1() {
+    if (input_stream1_.status() != roo_io::kOk) return false;
+    recv1_.receive([this](const roo::byte* buf, size_t len) {
+      t1_.processIncomingPacket(buf, len);
+    });
+    return true;
+  }
+
+  bool receive2() {
+    if (input_stream2_.status() != roo_io::kOk) return false;
+    recv2_.receive([this](const roo::byte* buf, size_t len) {
+      t2_.processIncomingPacket(buf, len);
+    });
+    return true;
+  }
+
+  // roo_io::Status in1_status() { return input_stream1_.status(); }
+  // roo_io::Status in2_status() { return input_stream2_.status(); }
+
+  // PacketReceiver& recv1() { return recv1_; }
+  // PacketReceiver& recv2() { return recv2_; }
 
   void begin() {
     t1_.begin();
