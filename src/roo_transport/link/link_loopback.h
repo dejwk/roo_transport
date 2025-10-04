@@ -11,9 +11,12 @@ namespace roo_transport {
 
 class LinkLoopback {
  public:
-  LinkLoopback()
-      : pipe_client_to_server_(128),
-        pipe_server_to_client_(128),
+  LinkLoopback() : LinkLoopback(128, 128) {}
+
+  LinkLoopback(size_t client_to_server_pipe_capacity,
+               size_t server_to_client_pipe_capacity)
+      : pipe_client_to_server_(client_to_server_pipe_capacity),
+        pipe_server_to_client_(server_to_client_pipe_capacity),
         server_input_(pipe_client_to_server_),
         server_output_(pipe_server_to_client_),
         client_input_(pipe_server_to_client_),
