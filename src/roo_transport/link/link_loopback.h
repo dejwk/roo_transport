@@ -12,34 +12,41 @@ namespace roo_transport {
 class LinkLoopback {
  public:
   LinkLoopback()
-      : pipe1_(128),
-        pipe2_(128),
-        input_stream1_(pipe1_),
-        output_stream1_(pipe2_),
-        input_stream2_(pipe2_),
-        output_stream2_(pipe1_),
-        send1_(output_stream1_),
-        recv1_(input_stream1_),
-        send2_(output_stream2_),
-        recv2_(input_stream2_),
-        t1_(send1_, kBufferSize4KB, kBufferSize4KB),
-        t2_(send2_, kBufferSize4KB, kBufferSize4KB) {}
+      : pipe_client_to_server_(128),
+        pipe_server_to_client_(128),
+        server_input_(pipe_client_to_server_),
+        server_output_(pipe_server_to_client_),
+        client_input_(pipe_server_to_client_),
+        client_output_(pipe_client_to_server_),
+        server_packet_sender_(server_output_),
+        server_packet_receiver_(server_input_),
+        client_packet_sender_(client_output_),
+        client_packet_receiver_(client_input_),
+        server_(server_packet_sender_, kBufferSize4KB, kBufferSize4KB),
+        client_(client_packet_sender_, kBufferSize4KB, kBufferSize4KB) {}
 
-  roo_transport::LinkTransport& t1() { return t1_; }
-  roo_transport::LinkTransport& t2() { return t2_; }
+  // Returns the 'server' end of the loopback link.
+  // Note: 'server' and 'client' are just conventional names here; they are in
+  // fact fully symmetric.
+  roo_transport::LinkTransport& server() { return server_; }
 
-  bool receive1() {
-    if (input_stream1_.status() != roo_io::kOk) return false;
-    recv1_.receive([this](const roo::byte* buf, size_t len) {
-      t1_.processIncomingPacket(buf, len);
+  // Returns the 'client' end of the loopback link.
+  // Note: 'server' and 'client' are just conventional names here; they are in
+  // fact fully symmetric.
+  roo_transport::LinkTransport& client() { return client_; }
+
+  bool serverReceive() {
+    if (server_input_.status() != roo_io::kOk) return false;
+    server_packet_receiver_.receive([this](const roo::byte* buf, size_t len) {
+      server_.processIncomingPacket(buf, len);
     });
     return true;
   }
 
-  bool receive2() {
-    if (input_stream2_.status() != roo_io::kOk) return false;
-    recv2_.receive([this](const roo::byte* buf, size_t len) {
-      t2_.processIncomingPacket(buf, len);
+  bool clientReceive() {
+    if (client_input_.status() != roo_io::kOk) return false;
+    client_packet_receiver_.receive([this](const roo::byte* buf, size_t len) {
+      client_.processIncomingPacket(buf, len);
     });
     return true;
   }
@@ -51,29 +58,29 @@ class LinkLoopback {
   // PacketReceiver& recv2() { return recv2_; }
 
   void begin() {
-    t1_.begin();
-    t2_.begin();
+    server_.begin();
+    client_.begin();
   }
 
   void close() {
-    output_stream1_.close();
-    output_stream2_.close();
+    server_output_.close();
+    client_output_.close();
   }
 
  private:
-  roo_io::RingPipe pipe1_;
-  roo_io::RingPipe pipe2_;
-  roo_io::RingPipeInputStream input_stream1_;
-  roo_io::RingPipeOutputStream output_stream1_;
-  roo_io::RingPipeInputStream input_stream2_;
-  roo_io::RingPipeOutputStream output_stream2_;
-  PacketSenderOverStream send1_;
-  PacketReceiverOverStream recv1_;
-  PacketSenderOverStream send2_;
-  PacketReceiverOverStream recv2_;
+  roo_io::RingPipe pipe_client_to_server_;
+  roo_io::RingPipe pipe_server_to_client_;
+  roo_io::RingPipeInputStream server_input_;
+  roo_io::RingPipeOutputStream server_output_;
+  roo_io::RingPipeInputStream client_input_;
+  roo_io::RingPipeOutputStream client_output_;
+  PacketSenderOverStream server_packet_sender_;
+  PacketReceiverOverStream server_packet_receiver_;
+  PacketSenderOverStream client_packet_sender_;
+  PacketReceiverOverStream client_packet_receiver_;
 
-  roo_transport::LinkTransport t1_;
-  roo_transport::LinkTransport t2_;
+  roo_transport::LinkTransport server_;
+  roo_transport::LinkTransport client_;
 };
 
 }  // namespace roo_transport
