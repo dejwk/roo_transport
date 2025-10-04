@@ -36,13 +36,20 @@ TEST(LinkTransport, TransportConstructedLinkIsConnecting) {
 // Loopback with receive threads.
 class AsyncLoopback : public LinkLoopback {
  public:
-  AsyncLoopback() {
+  AsyncLoopback(size_t client_to_server_pipe_capacity = 128,
+                size_t server_to_client_pipe_capacity = 128)
+      : LinkLoopback(client_to_server_pipe_capacity,
+                     server_to_client_pipe_capacity) {
     begin();
-    t1_ = roo::thread([this]() {
+    roo::thread::attributes server_attrs;
+    server_attrs.set_name("server recv");
+    server_receiving_thread_ = roo::thread(server_attrs, [this]() {
       while (serverReceive()) {
       }
     });
-    t2_ = roo::thread([this]() {
+    roo::thread::attributes client_attrs;
+    client_attrs.set_name("client recv");
+    client_receiving_thread_ = roo::thread(client_attrs, [this]() {
       while (clientReceive()) {
       }
     });
@@ -50,13 +57,13 @@ class AsyncLoopback : public LinkLoopback {
 
   ~AsyncLoopback() {
     close();
-    t1_.join();
-    t2_.join();
+    server_receiving_thread_.join();
+    client_receiving_thread_.join();
   }
 
  private:
-  roo::thread t1_;
-  roo::thread t2_;
+  roo::thread server_receiving_thread_;
+  roo::thread client_receiving_thread_;
 };
 
 // Testing the happy path.
@@ -138,38 +145,43 @@ std::unique_ptr<roo::byte[]> make_large_buffer(size_t size) {
 }
 
 TEST(LinkTransport, LargeRequestResponse) {
-  AsyncLoopback loopback;
-  auto request = make_large_buffer(1000000);
-  auto response = make_large_buffer(2000000);
+  const size_t kRequestSize = 1000000;
+  const size_t kResponseSize = 2000000;
+  AsyncLoopback loopback(10000000, 10000000);
+  auto request = make_large_buffer(kRequestSize);
+  auto response = make_large_buffer(kResponseSize);
 
-  roo::thread server([&]() {
+  roo::thread::attributes server_attrs;
+  server_attrs.set_name("server");
+  roo::thread server(server_attrs, [&]() {
     Link server = loopback.client().connect();
     roo_io::InputStream& in = server.in();
     roo_io::OutputStream& out = server.out();
     EXPECT_EQ(server.status(), LinkStatus::kConnected);
     size_t request_byte_idx = 0;
-    while (request_byte_idx < 1000000) {
+    while (request_byte_idx < kRequestSize) {
       EXPECT_EQ(in.status(), roo_io::kOk);
       roo::byte buf[1000];
       size_t count = rand() % 1000 + 1;
       size_t n = in.read(buf, count);
-      EXPECT_GT(n, 0);
+      ASSERT_GT(n, 0);
       for (size_t i = 0; i < n; i++) {
         EXPECT_EQ(buf[i], request[request_byte_idx + i]);
       }
       request_byte_idx += n;
+    LOG(INFO) << "Server received " << request_byte_idx << " bytes";
     }
     EXPECT_EQ(in.status(), roo_io::kOk);
     EXPECT_EQ(out.status(), roo_io::kOk);
     size_t response_byte_idx = 0;
-    while (response_byte_idx < 1000000) {
+    while (response_byte_idx < kResponseSize) {
       EXPECT_EQ(out.status(), roo_io::kOk);
       size_t count = rand() % 1000 + 1;
-      if (count > 1000000 - response_byte_idx) {
-        count = 1000000 - response_byte_idx;
+      if (count > kResponseSize - response_byte_idx) {
+        count = kResponseSize - response_byte_idx;
       }
       size_t n = out.write(&response[response_byte_idx], count);
-      EXPECT_GT(n, 0);
+      ASSERT_GT(n, 0);
       response_byte_idx += n;
     }
     out.close();
@@ -183,13 +195,13 @@ TEST(LinkTransport, LargeRequestResponse) {
   EXPECT_EQ(in.status(), roo_io::kOk);
   EXPECT_EQ(out.status(), roo_io::kOk);
   size_t request_byte_idx = 0;
-  while (request_byte_idx < 1000000) {
+  while (request_byte_idx < kRequestSize) {
     size_t count = rand() % 1000 + 1;
-    if (count > 1000000 - request_byte_idx) {
-      count = 1000000 - request_byte_idx;
+    if (count > kRequestSize - request_byte_idx) {
+      count = kRequestSize - request_byte_idx;
     }
     size_t n = out.write(&request[request_byte_idx], count);
-    EXPECT_GT(n, 0);
+    ASSERT_GT(n, 0);
     request_byte_idx += n;
     LOG(INFO) << "Client sent " << request_byte_idx << " bytes";
   }
@@ -197,11 +209,11 @@ TEST(LinkTransport, LargeRequestResponse) {
   EXPECT_EQ(out.status(), roo_io::kClosed);
   roo::byte buf[1000];
   size_t response_byte_idx = 0;
-  while (response_byte_idx < 1000000) {
+  while (response_byte_idx < kResponseSize) {
     EXPECT_EQ(in.status(), roo_io::kOk);
     size_t count = rand() % 1000 + 1;
     size_t n = in.read(buf, count);
-    EXPECT_GT(n, 0);
+    ASSERT_GT(n, 0);
     for (size_t i = 0; i < n; i++) {
       EXPECT_EQ(buf[i], response[response_byte_idx + i]);
     }
