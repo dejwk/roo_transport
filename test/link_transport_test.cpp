@@ -1,9 +1,16 @@
 #include "roo_transport/link/link_transport.h"
 
 #include "gtest/gtest.h"
+#include "roo_threads/mutex.h"
 #include "roo_transport/link/link_loopback.h"
 #include "roo_transport/link/link_transport.h"
 namespace roo_transport {
+
+int rand(void) {
+  static roo::mutex mutex;
+  roo::lock_guard<roo::mutex> lock(mutex);
+  return ::rand();
+}
 
 class NullPacketSender : public PacketSender {
  public:
@@ -169,7 +176,7 @@ TEST(LinkTransport, LargeRequestResponse) {
         EXPECT_EQ(buf[i], request[request_byte_idx + i]);
       }
       request_byte_idx += n;
-    LOG(INFO) << "Server received " << request_byte_idx << " bytes";
+      // LOG(INFO) << "Server received " << request_byte_idx << " bytes";
     }
     EXPECT_EQ(in.status(), roo_io::kOk);
     EXPECT_EQ(out.status(), roo_io::kOk);
@@ -203,7 +210,7 @@ TEST(LinkTransport, LargeRequestResponse) {
     size_t n = out.write(&request[request_byte_idx], count);
     ASSERT_GT(n, 0);
     request_byte_idx += n;
-    LOG(INFO) << "Client sent " << request_byte_idx << " bytes";
+    // LOG(INFO) << "Client sent " << request_byte_idx << " bytes";
   }
   out.close();
   EXPECT_EQ(out.status(), roo_io::kClosed);
@@ -218,14 +225,14 @@ TEST(LinkTransport, LargeRequestResponse) {
       EXPECT_EQ(buf[i], response[response_byte_idx + i]);
     }
     response_byte_idx += n;
-    LOG(INFO) << "Client received " << response_byte_idx << " bytes";
+    // LOG(INFO) << "Client received " << response_byte_idx << " bytes";
   }
   EXPECT_EQ(in.read(buf, 1), 0);
   EXPECT_EQ(in.status(), roo_io::kEndOfStream);
 
-  LOG(INFO) << "Client done, waiting for server";
+  // LOG(INFO) << "Client done, waiting for server";
   server.join();
-  LOG(INFO) << "Server done";
+  // LOG(INFO) << "Server done";
 }
 
 }  // namespace roo_transport
