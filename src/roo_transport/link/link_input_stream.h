@@ -5,11 +5,10 @@
 
 #include "roo_io/core/input_stream.h"
 #include "roo_transport/link/internal/thread_safe/channel.h"
-#include "roo_transport/socket_input_stream.h"
 
 namespace roo_transport {
 
-class LinkInputStream : public roo_transport::SocketInputStream {
+class LinkInputStream : public roo_io::InputStream {
  public:
   LinkInputStream()
       : channel_(nullptr), my_stream_id_(0), status_(roo_io::kClosed) {}
@@ -25,9 +24,9 @@ class LinkInputStream : public roo_transport::SocketInputStream {
 
   size_t tryRead(roo::byte* buf, size_t count) override;
 
-  size_t available() override;
-  int read() override;
-  int peek() override;
+  size_t available();
+  int read();
+  int peek();
 
   roo_io::Status status() const override { return status_; }
 

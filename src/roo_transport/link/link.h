@@ -19,10 +19,10 @@ class Link {
   Link();
 
   // Obtains the input stream that can be used to read from the link.
-  SocketInputStream& in() { return in_; }
+  LinkInputStream& in() { return in_; }
 
   // Obtains the output stream that can be used to write to the link.
-  SocketOutputStream& out() { return out_; }
+  LinkOutputStream& out() { return out_; }
 
   // Returns the current status of the link.
   LinkStatus status() const;

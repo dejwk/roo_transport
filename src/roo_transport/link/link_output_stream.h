@@ -5,11 +5,10 @@
 
 #include "roo_io/core/input_stream.h"
 #include "roo_transport/link/internal/thread_safe/channel.h"
-#include "roo_transport/socket_output_stream.h"
 
 namespace roo_transport {
 
-class LinkOutputStream : public roo_transport::SocketOutputStream {
+class LinkOutputStream : public roo_io::OutputStream {
  public:
   LinkOutputStream()
       : channel_(nullptr), my_stream_id_(0), status_(roo_io::kClosed) {}
@@ -21,7 +20,7 @@ class LinkOutputStream : public roo_transport::SocketOutputStream {
 
   size_t tryWrite(const roo::byte* buf, size_t count) override;
 
-  size_t availableForWrite() override;
+  size_t availableForWrite();
 
   void flush() override;
 
