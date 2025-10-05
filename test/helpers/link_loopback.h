@@ -1,5 +1,6 @@
 #pragma once
 
+#include "noisy_output_stream.h"
 #include "roo_io/ringpipe/ringpipe.h"
 #include "roo_io/ringpipe/ringpipe_input_stream.h"
 #include "roo_io/ringpipe/ringpipe_output_stream.h"
@@ -27,6 +28,14 @@ class LinkLoopback {
   // fact fully symmetric.
   roo_transport::LinkTransport& client() { return client_; }
 
+  void setServerOutputErrorRate(int error_rate) {
+    noisy_server_output_.setErrorRate(error_rate);
+  }
+
+  void setClientOutputErrorRate(int error_rate) {
+    noisy_client_output_.setErrorRate(error_rate);
+  }
+
   bool serverReceive();
 
   bool clientReceive();
@@ -40,8 +49,10 @@ class LinkLoopback {
   roo_io::RingPipe pipe_server_to_client_;
   roo_io::RingPipeInputStream server_input_;
   roo_io::RingPipeOutputStream server_output_;
+  NoisyOutputStream noisy_server_output_;
   roo_io::RingPipeInputStream client_input_;
   roo_io::RingPipeOutputStream client_output_;
+  NoisyOutputStream noisy_client_output_;
   PacketSenderOverStream server_packet_sender_;
   PacketReceiverOverStream server_packet_receiver_;
   PacketSenderOverStream client_packet_sender_;
