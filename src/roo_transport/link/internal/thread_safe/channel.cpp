@@ -4,7 +4,7 @@
 #include "roo_transport/link/internal/protocol.h"
 #include "roo_transport/link/internal/thread_safe/channel.h"
 
-#ifdef ESP32
+#if (defined ESP32 || defined ROO_TESTING)
 #include "esp_random.h"
 #define RANDOM_INTEGER esp_random
 #else
@@ -53,9 +53,10 @@ Channel::Channel(PacketSender& sender, LinkBufferSize sendbuf,
 Channel::~Channel() {
   active_ = false;
   outgoing_data_ready_.notify();
-  sender_thread_.join();
+  if (sender_thread_.joinable()) {
+    sender_thread_.join();
+  }
 }
-
 size_t Channel::write(const roo::byte* buf, size_t count, uint32_t my_stream_id,
                       roo_io::Status& stream_status) {
   return transmitter_.write(buf, count, my_stream_id, stream_status);
