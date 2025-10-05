@@ -1,18 +1,18 @@
 #include "roo_transport/link/internal/thread_safe/compile_guard.h"
 #ifdef ROO_USE_THREADS
 
-#include "roo_transport/link/internal/thread_safe/channel_input.h"
+#include "roo_transport/link/link_input_stream.h"
 
 namespace roo_transport {
 
-void ChannelInput::close() {
+void LinkInputStream::close() {
   if (status_ != roo_io::kOk && status_ != roo_io::kEndOfStream) return;
   channel_->closeInput(my_stream_id_, status_);
   if (status_ != roo_io::kOk && status_ != roo_io::kEndOfStream) return;
   status_ = roo_io::kClosed;
 }
 
-size_t ChannelInput::read(roo::byte* buf, size_t count) {
+size_t LinkInputStream::read(roo::byte* buf, size_t count) {
   if (count == 0 || status_ != roo_io::kOk) return 0;
   return channel_->read(buf, count, my_stream_id_, status_);
   // // processor_.loop();
@@ -33,17 +33,17 @@ size_t ChannelInput::read(roo::byte* buf, size_t count) {
   // }
 }
 
-size_t ChannelInput::tryRead(roo::byte* buf, size_t count) {
+size_t LinkInputStream::tryRead(roo::byte* buf, size_t count) {
   if (count == 0 || status_ != roo_io::kOk) return 0;
   return channel_->tryRead(buf, count, my_stream_id_, status_);
 }
 
-size_t ChannelInput::available() {
+size_t LinkInputStream::available() {
   if (status_ != roo_io::kOk) return 0;
   return channel_->availableForRead(my_stream_id_, status_);
 }
 
-int ChannelInput::read() {
+int LinkInputStream::read() {
   if (status_ != roo_io::kOk) return 0;
   roo::byte result;
   size_t count = channel_->tryRead(&result, 1, my_stream_id_, status_);
@@ -51,7 +51,7 @@ int ChannelInput::read() {
   return -1;
 }
 
-int ChannelInput::peek() {
+int LinkInputStream::peek() {
   if (status_ != roo_io::kOk) return -1;
   int result = channel_->peek(my_stream_id_, status_);
   if (result >= 0) return result;

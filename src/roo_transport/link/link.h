@@ -4,8 +4,8 @@
 #include "roo_io/core/output_stream.h"
 #include "roo_transport.h"
 #include "roo_transport/link/internal/thread_safe/channel.h"
-#include "roo_transport/link/internal/thread_safe/channel_input.h"
-#include "roo_transport/link/internal/thread_safe/channel_output.h"
+#include "roo_transport/link/link_input_stream.h"
+#include "roo_transport/link/link_output_stream.h"
 #include "roo_transport/link/link_status.h"
 
 namespace roo_transport {
@@ -50,8 +50,8 @@ class Link {
 
   Channel* channel_;
   uint32_t my_stream_id_;
-  ChannelInput in_;
-  ChannelOutput out_;
+  LinkInputStream in_;
+  LinkOutputStream out_;
 };
 
 }  // namespace roo_transport

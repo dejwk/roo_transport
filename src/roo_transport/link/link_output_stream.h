@@ -9,12 +9,12 @@
 
 namespace roo_transport {
 
-class ChannelOutput : public roo_transport::SocketOutputStream {
+class LinkOutputStream : public roo_transport::SocketOutputStream {
  public:
-  ChannelOutput()
+  LinkOutputStream()
       : channel_(nullptr), my_stream_id_(0), status_(roo_io::kClosed) {}
 
-  ChannelOutput(Channel& channel, uint32_t my_stream_id)
+  LinkOutputStream(Channel& channel, uint32_t my_stream_id)
       : channel_(&channel), my_stream_id_(my_stream_id), status_(roo_io::kOk) {}
 
   size_t write(const roo::byte* buf, size_t count) override;

@@ -9,12 +9,12 @@
 
 namespace roo_transport {
 
-class ChannelInput : public roo_transport::SocketInputStream {
+class LinkInputStream : public roo_transport::SocketInputStream {
  public:
-  ChannelInput()
+  LinkInputStream()
       : channel_(nullptr), my_stream_id_(0), status_(roo_io::kClosed) {}
 
-  ChannelInput(Channel& channel, uint32_t my_stream_id)
+  LinkInputStream(Channel& channel, uint32_t my_stream_id)
       : channel_(&channel),
         my_stream_id_(my_stream_id),
         status_(my_stream_id == 0 ? roo_io::kClosed : roo_io::kOk) {}
