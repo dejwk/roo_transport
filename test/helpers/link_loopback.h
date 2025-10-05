@@ -18,6 +18,8 @@ class LinkLoopback {
   LinkLoopback(size_t client_to_server_pipe_capacity,
                size_t server_to_client_pipe_capacity);
 
+  ~LinkLoopback();
+
   // Returns the 'server' end of the loopback link.
   // Note: 'server' and 'client' are just conventional names here; they are in
   // fact fully symmetric.
@@ -60,6 +62,9 @@ class LinkLoopback {
 
   roo_transport::LinkTransport server_;
   roo_transport::LinkTransport client_;
+
+  roo::thread server_receiving_thread_;
+  roo::thread client_receiving_thread_;
 };
 
 }  // namespace roo_transport

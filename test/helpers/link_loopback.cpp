@@ -19,7 +19,19 @@ LinkLoopback::LinkLoopback(size_t client_to_server_pipe_capacity,
       client_packet_sender_(noisy_client_output_),
       client_packet_receiver_(client_input_),
       server_(server_packet_sender_, kBufferSize4KB, kBufferSize4KB),
-      client_(client_packet_sender_, kBufferSize4KB, kBufferSize4KB) {}
+      client_(client_packet_sender_, kBufferSize4KB, kBufferSize4KB) {
+  begin();
+}
+
+LinkLoopback::~LinkLoopback() {
+  close();
+  if (server_receiving_thread_.joinable()) {
+    server_receiving_thread_.join();
+  }
+  if (client_receiving_thread_.joinable()) {
+    client_receiving_thread_.join();
+  }
+}
 
 bool LinkLoopback::serverReceive() {
   if (server_input_.status() != roo_io::kOk) return false;
@@ -40,6 +52,19 @@ bool LinkLoopback::clientReceive() {
 void LinkLoopback::begin() {
   server_.begin();
   client_.begin();
+
+  roo::thread::attributes server_attrs;
+  server_attrs.set_name("server recv");
+  server_receiving_thread_ = roo::thread(server_attrs, [this]() {
+    while (serverReceive()) {
+    }
+  });
+  roo::thread::attributes client_attrs;
+  client_attrs.set_name("client recv");
+  client_receiving_thread_ = roo::thread(client_attrs, [this]() {
+    while (clientReceive()) {
+    }
+  });
 }
 
 void LinkLoopback::close() {

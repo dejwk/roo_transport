@@ -2,15 +2,10 @@
 
 #include "gtest/gtest.h"
 #include "helpers/link_loopback.h"
+#include "helpers/rand.h"
 #include "roo_threads/mutex.h"
 #include "roo_transport/link/link_transport.h"
 namespace roo_transport {
-
-int rand(void) {
-  static roo::mutex mutex;
-  roo::lock_guard<roo::mutex> lock(mutex);
-  return ::rand();
-}
 
 class NullPacketSender : public PacketSender {
  public:
@@ -40,42 +35,9 @@ TEST(LinkTransport, TransportConstructedLinkIsConnecting) {
   EXPECT_EQ(link.out().status(), roo_io::kOk);
 }
 
-// Loopback with receive threads.
-class AsyncLoopback : public LinkLoopback {
- public:
-  AsyncLoopback(size_t client_to_server_pipe_capacity = 128,
-                size_t server_to_client_pipe_capacity = 128)
-      : LinkLoopback(client_to_server_pipe_capacity,
-                     server_to_client_pipe_capacity) {
-    begin();
-    roo::thread::attributes server_attrs;
-    server_attrs.set_name("server recv");
-    server_receiving_thread_ = roo::thread(server_attrs, [this]() {
-      while (serverReceive()) {
-      }
-    });
-    roo::thread::attributes client_attrs;
-    client_attrs.set_name("client recv");
-    client_receiving_thread_ = roo::thread(client_attrs, [this]() {
-      while (clientReceive()) {
-      }
-    });
-  }
-
-  ~AsyncLoopback() {
-    close();
-    server_receiving_thread_.join();
-    client_receiving_thread_.join();
-  }
-
- private:
-  roo::thread server_receiving_thread_;
-  roo::thread client_receiving_thread_;
-};
-
 // Testing the happy path.
 TEST(LinkTransport, SimpleConnectSendDisconnect) {
-  AsyncLoopback loopback;
+  LinkLoopback loopback;
 
   Link server = loopback.client().connectAsync();
   EXPECT_EQ(server.status(), LinkStatus::kConnecting);
@@ -111,7 +73,7 @@ TEST(LinkTransport, SimpleConnectSendDisconnect) {
 }
 
 TEST(LinkTransport, SyncConnect) {
-  AsyncLoopback loopback;
+  LinkLoopback loopback;
 
   roo::thread server([&]() {
     Link server = loopback.client().connect();
@@ -148,6 +110,14 @@ class TransferTest : public ::testing::Test {
   TransferTest() : loopback_() {}
 
   ~TransferTest() { join(); }
+
+  void setServerOutputErrorRate(int error_rate) {
+    loopback_.setServerOutputErrorRate(error_rate);
+  }
+
+  void setClientOutputErrorRate(int error_rate) {
+    loopback_.setClientOutputErrorRate(error_rate);
+  }
 
   void join() {
     if (server_thread_.joinable()) {
@@ -190,7 +160,7 @@ class TransferTest : public ::testing::Test {
     });
   }
 
-  AsyncLoopback loopback_;
+  LinkLoopback loopback_;
   roo::thread server_thread_;
   roo::thread client_thread_;
 };
@@ -204,6 +174,9 @@ std::unique_ptr<roo::byte[]> make_large_buffer(size_t size) {
 }
 
 TEST_F(TransferTest, LargeRequestResponse) {
+  setServerOutputErrorRate(10);
+  setClientOutputErrorRate(10);
+
   const size_t kRequestSize = 1000000;
   const size_t kResponseSize = 2000000;
   auto request = make_large_buffer(kRequestSize);

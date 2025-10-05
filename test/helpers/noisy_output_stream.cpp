@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "rand.h"
+
 namespace roo_transport {
 
 namespace {
