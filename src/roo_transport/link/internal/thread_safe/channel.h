@@ -93,7 +93,7 @@ class Channel {
   LinkStatus getLinkStatus(uint32_t my_stream_id);
 
   void awaitConnected(uint32_t my_stream_id);
-  bool awaitConnected(uint32_t my_stream_id, roo_time::Interval timeout);
+  bool awaitConnected(uint32_t my_stream_id, roo_time::Duration timeout);
 
  private:
   friend class SenderThread;

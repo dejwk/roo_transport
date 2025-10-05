@@ -36,7 +36,7 @@ class Link {
   // until it becomes either kConnected or kBroken, or until the specified
   // timeout elapses, and returns true if the link has changed state, and false
   // if the timeout has elapsed.
-  bool awaitConnected(roo_time::Interval timeout);
+  bool awaitConnected(roo_time::Duration timeout);
 
   // Disconnects the link, immediately bringing it to the idle state. If the
   // link is already idle, does nothing.

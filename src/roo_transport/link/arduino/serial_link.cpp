@@ -44,12 +44,12 @@ LinkStatus SerialLink::status() const { return link_.status(); }
 
 void SerialLink::awaitConnected() { link_.awaitConnected(); }
 
-bool SerialLink::awaitConnected(roo_time::Interval timeout) {
+bool SerialLink::awaitConnected(roo_time::Duration timeout) {
   return link_.awaitConnected(timeout);
 }
 
 size_t SerialLink::timedRead(roo::byte* buf, size_t count,
-                             roo_time::Interval timeout) {
+                             roo_time::Duration timeout) {
   roo_time::Uptime start = roo_time::Uptime::Now();
   size_t total = 0;
   if (in().status() != roo_io::kOk) return -1;

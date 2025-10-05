@@ -50,14 +50,14 @@ class SerialLink : public Stream {
   // until it becomes either kConnected or kBroken, or until the specified
   // timeout elapses, and returns true if the link has changed state, and false
   // if the timeout has elapsed.
-  bool awaitConnected(roo_time::Interval timeout);
+  bool awaitConnected(roo_time::Duration timeout);
 
  private:
   friend class SerialLinkTransport;
 
   SerialLink(Channel& channel, uint32_t my_stream_id);
 
-  size_t timedRead(roo::byte* buf, size_t count, roo_time::Interval timeout);
+  size_t timedRead(roo::byte* buf, size_t count, roo_time::Duration timeout);
 
   Link link_;
 };

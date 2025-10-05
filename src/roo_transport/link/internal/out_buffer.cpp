@@ -27,7 +27,7 @@ void OutBuffer::init(SeqNum seq_id) {
 
 namespace {
 
-roo_time::Interval Backoff(int retry_count) {
+roo_time::Duration Backoff(int retry_count) {
   float min_delay_us = 5000.0f;     // 5ms
   float max_delay_us = 200000.0f;  // 200ms
   float delay = pow(1.33, retry_count) * min_delay_us;

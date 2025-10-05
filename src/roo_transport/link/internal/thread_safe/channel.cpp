@@ -19,7 +19,7 @@ namespace roo_transport {
 
 namespace {
 
-roo_time::Interval Backoff(int retry_count) {
+roo_time::Duration Backoff(int retry_count) {
   float min_delay_us = 1000.0f;     // 1ms
   float max_delay_us = 1000000.0f;  // 1s
   float delay = pow(1.33, retry_count) * min_delay_us;
@@ -158,7 +158,7 @@ void Channel::awaitConnected(uint32_t stream_id) {
   }
 }
 
-bool Channel::awaitConnected(uint32_t stream_id, roo_time::Interval timeout) {
+bool Channel::awaitConnected(uint32_t stream_id, roo_time::Duration timeout) {
   roo::unique_lock<roo::mutex> guard(handshake_mutex_);
   roo_time::Uptime when = roo_time::Uptime::Now() + timeout;
   while (getLinkStatusInternal(stream_id) == LinkStatus::kConnecting) {

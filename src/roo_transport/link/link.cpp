@@ -20,7 +20,7 @@ void Link::awaitConnected() {
   channel_->awaitConnected(my_stream_id_);
 }
 
-bool Link::awaitConnected(roo_time::Interval timeout) {
+bool Link::awaitConnected(roo_time::Duration timeout) {
   if (channel_ == nullptr) return true;
   return channel_->awaitConnected(my_stream_id_, timeout);
 }
