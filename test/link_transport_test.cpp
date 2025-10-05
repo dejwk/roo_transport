@@ -105,7 +105,7 @@ TEST(LinkTransport, SyncConnect) {
   server.join();
 }
 
-class TransferTest : public ::testing::Test {
+class TransferTest : public ::testing::TestWithParam<int> {
  protected:
   TransferTest() : loopback_() {}
 
@@ -173,9 +173,12 @@ std::unique_ptr<roo::byte[]> make_large_buffer(size_t size) {
   return buf;
 }
 
-TEST_F(TransferTest, LargeRequestResponse) {
-  setServerOutputErrorRate(10);
-  setClientOutputErrorRate(10);
+TEST_P(TransferTest, LargeRequestResponse) {
+  int error_rate = GetParam();
+  if (error_rate > 0) {
+    setServerOutputErrorRate(error_rate);
+    setClientOutputErrorRate(error_rate);
+  }
 
   const size_t kRequestSize = 1000000;
   const size_t kResponseSize = 2000000;
@@ -241,5 +244,10 @@ TEST_F(TransferTest, LargeRequestResponse) {
 
   join();
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    LinkTransport, TransferTest,
+    ::testing::Values(0, 1, 2, 10)  // Error rates to test.
+);
 
 }  // namespace roo_transport
