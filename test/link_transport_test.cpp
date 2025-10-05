@@ -105,6 +105,46 @@ TEST(LinkTransport, SyncConnect) {
   server.join();
 }
 
+TEST(LinkTransport, SyncConnectReconnect) {
+  LinkLoopback loopback;
+
+  roo::thread server([&]() {
+    Link server_throwaway = loopback.client().connect();
+    EXPECT_EQ(server_throwaway.status(), LinkStatus::kConnected);
+    // Reconnect.
+    Link server = loopback.client().connect();
+    EXPECT_EQ(server_throwaway.status(), LinkStatus::kBroken);
+    EXPECT_EQ(server.status(), LinkStatus::kConnected);
+    EXPECT_EQ(server.in().status(), roo_io::kOk);
+    EXPECT_EQ(server.out().status(), roo_io::kOk);
+    roo::byte buf[10];
+    size_t n = server.in().readFully(buf, 10);
+    EXPECT_EQ(n, 8);
+    EXPECT_EQ(memcmp(buf, "Request", 8), 0);
+    EXPECT_EQ(server.in().status(), roo_io::kEndOfStream);
+    server.out().writeFully((const roo::byte*)"Response", 9);
+    server.out().close();
+    EXPECT_EQ(server.out().status(), roo_io::kClosed);
+  });
+  Link client_throwaway = loopback.server().connect();
+  // Reconnect.
+  Link client = loopback.server().connect();
+  EXPECT_EQ(client_throwaway.status(), LinkStatus::kBroken);
+  EXPECT_EQ(client.status(), LinkStatus::kConnected);
+  EXPECT_EQ(client.in().status(), roo_io::kOk);
+  EXPECT_EQ(client.out().status(), roo_io::kOk);
+  client.out().writeFully((const roo::byte*)"Request", 8);
+  client.out().close();
+  EXPECT_EQ(client.out().status(), roo_io::kClosed);
+  roo::byte buf[10];
+  size_t n = client.in().readFully(buf, 10);
+  EXPECT_EQ(n, 9);
+  EXPECT_EQ(memcmp(buf, "Response", 9), 0);
+  EXPECT_EQ(client.in().status(), roo_io::kEndOfStream);
+
+  server.join();
+}
+
 class TransferTest : public ::testing::TestWithParam<int> {
  protected:
   TransferTest() : loopback_() {}
@@ -245,10 +285,6 @@ TEST_P(TransferTest, LargeRequestResponse) {
   join();
 }
 
-INSTANTIATE_TEST_SUITE_P(RequestResponse, TransferTest,
-                         ::testing::Values(0, 1, 2, 10)  // Error rates to test.
-);
-
 TEST_P(TransferTest, BidiStreaming) {
   int error_rate = GetParam();
   if (error_rate > 0) {
@@ -332,7 +368,7 @@ TEST_P(TransferTest, BidiStreaming) {
   join();
 }
 
-INSTANTIATE_TEST_SUITE_P(BidiStreaming, TransferTest,
+INSTANTIATE_TEST_SUITE_P(TransferTests, TransferTest,
                          ::testing::Values(0, 1, 2, 10)  // Error rates to test.
 );
 
