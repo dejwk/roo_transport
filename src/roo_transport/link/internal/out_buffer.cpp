@@ -4,6 +4,13 @@
 #include "roo_io/memory/store.h"
 #include "roo_transport/link/internal/protocol.h"
 
+#if (defined ESP32 || defined ROO_TESTING)
+#include "esp_random.h"
+#define RANDOM_INTEGER esp_random
+#else
+#define RANDOM_INTEGER rand
+#endif
+
 namespace roo_transport {
 namespace internal {
 
@@ -28,7 +35,7 @@ roo_time::Interval Backoff(int retry_count) {
     delay = max_delay_us;
   }
   // Randomize by +=20%, to make unrelated retries spread more evenly in time.
-  delay += (float)delay * ((float)rand() / RAND_MAX - 0.5f) * 0.4f;
+  delay += (float)delay * ((float)RANDOM_INTEGER() / RAND_MAX - 0.5f) * 0.4f;
   return roo_time::Micros((uint64_t)delay);
 }
 
