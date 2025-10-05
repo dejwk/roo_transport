@@ -8,6 +8,7 @@
 #include "roo_threads/thread.h"
 #include "roo_transport/packets/over_stream/packet_receiver_over_stream.h"
 #include "roo_transport/packets/over_stream/packet_sender_over_stream.h"
+#include "helpers/noisy_output_stream.h"
 
 namespace roo_transport {
 
@@ -65,48 +66,6 @@ Packet RandomPacket() {
   }
   return packet;
 }
-
-namespace {
-std::unique_ptr<roo::byte[]> PerturbData(const roo::byte* data, size_t size,
-                                         int error_rate) {
-  std::unique_ptr<roo::byte[]> buf(new roo::byte[size]);
-  memcpy(buf.get(), data, size);
-  for (size_t i = 0; i < size; ++i) {
-    if ((rand() % 10000) < error_rate) {
-      buf[i] = static_cast<roo::byte>(rand() & 0xFF);
-    }
-  }
-  return buf;
-}
-
-class ErrorInjectingOutputStream : public roo_io::OutputStream {
- public:
-  ErrorInjectingOutputStream(roo_io::OutputStream& out, int error_rate)
-      : out_(out), error_rate_(error_rate), counter_(0) {}
-
-  void setErrorRate(int error_rate) { error_rate_ = error_rate; }
-
-  size_t write(const roo::byte* data, size_t len) override {
-    std::unique_ptr<roo::byte[]> buf = PerturbData(data, len, error_rate_);
-    return out_.write(buf.get(), len);
-  }
-
-  size_t tryWrite(const roo::byte* data, size_t len) override {
-    std::unique_ptr<roo::byte[]> buf = PerturbData(data, len, error_rate_);
-    return out_.tryWrite(buf.get(), len);
-  }
-
-  roo_io::Status status() const override { return out_.status(); }
-
-  void close() override { out_.close(); }
-
- private:
-  roo_io::OutputStream& out_;
-  int error_rate_;
-  int counter_;
-};
-
-}  // namespace
 
 TEST(PacketOverStream, SendReceive) {
   roo_io::RingPipe pipe(128);
@@ -168,7 +127,7 @@ TEST(PacketOverStream, SendReceiveWithErrors) {
 
   roo::thread writer([&pipe, &packets]() {
     roo_io::RingPipeOutputStream pipe_output_stream(pipe);
-    ErrorInjectingOutputStream output_stream(pipe_output_stream, 10);
+    NoisyOutputStream output_stream(pipe_output_stream, 10);
     PacketSenderOverStream sender(output_stream);
     for (const auto& packet : packets) {
       sender.send(packet.data(), packet.size());

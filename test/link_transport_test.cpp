@@ -1,8 +1,8 @@
 #include "roo_transport/link/link_transport.h"
 
 #include "gtest/gtest.h"
+#include "helpers/link_loopback.h"
 #include "roo_threads/mutex.h"
-#include "roo_transport/link/link_loopback.h"
 #include "roo_transport/link/link_transport.h"
 namespace roo_transport {
 
@@ -143,6 +143,58 @@ TEST(LinkTransport, SyncConnect) {
   server.join();
 }
 
+class TransferTest : public ::testing::Test {
+ protected:
+  TransferTest() : loopback_() {}
+
+  ~TransferTest() { join(); }
+
+  void join() {
+    if (server_thread_.joinable()) {
+      server_thread_.join();
+    }
+    if (client_thread_.joinable()) {
+      client_thread_.join();
+    }
+  }
+
+  void server(
+      std::function<void(roo_io::InputStream& in, roo_io::OutputStream& out)>
+          fn) {
+    roo::thread::attributes server_attrs;
+    server_attrs.set_name("server");
+    server_thread_ = roo::thread(server_attrs, [this, fn]() {
+      Link server = loopback_.server().connect();
+      ASSERT_EQ(server.status(), LinkStatus::kConnected);
+      ASSERT_EQ(server.in().status(), roo_io::kOk);
+      ASSERT_EQ(server.out().status(), roo_io::kOk);
+      fn(server.in(), server.out());
+      server.out().close();
+      ASSERT_EQ(server.out().status(), roo_io::kClosed);
+    });
+  }
+
+  void client(
+      std::function<void(roo_io::InputStream& in, roo_io::OutputStream& out)>
+          fn) {
+    roo::thread::attributes client_attrs;
+    client_attrs.set_name("client");
+    client_thread_ = roo::thread(client_attrs, [this, fn]() {
+      Link client = loopback_.client().connect();
+      ASSERT_EQ(client.status(), LinkStatus::kConnected);
+      ASSERT_EQ(client.in().status(), roo_io::kOk);
+      ASSERT_EQ(client.out().status(), roo_io::kOk);
+      fn(client.in(), client.out());
+      client.out().close();
+      ASSERT_EQ(client.out().status(), roo_io::kClosed);
+    });
+  }
+
+  AsyncLoopback loopback_;
+  roo::thread server_thread_;
+  roo::thread client_thread_;
+};
+
 std::unique_ptr<roo::byte[]> make_large_buffer(size_t size) {
   std::unique_ptr<roo::byte[]> buf(new roo::byte[size]);
   for (size_t i = 0; i < size; i++) {
@@ -151,20 +203,13 @@ std::unique_ptr<roo::byte[]> make_large_buffer(size_t size) {
   return buf;
 }
 
-TEST(LinkTransport, LargeRequestResponse) {
+TEST_F(TransferTest, LargeRequestResponse) {
   const size_t kRequestSize = 1000000;
   const size_t kResponseSize = 2000000;
-  AsyncLoopback loopback(10000000, 10000000);
   auto request = make_large_buffer(kRequestSize);
   auto response = make_large_buffer(kResponseSize);
 
-  roo::thread::attributes server_attrs;
-  server_attrs.set_name("server");
-  roo::thread server(server_attrs, [&]() {
-    Link server = loopback.client().connect();
-    roo_io::InputStream& in = server.in();
-    roo_io::OutputStream& out = server.out();
-    EXPECT_EQ(server.status(), LinkStatus::kConnected);
+  server([&](roo_io::InputStream& in, roo_io::OutputStream& out) {
     size_t request_byte_idx = 0;
     while (request_byte_idx < kRequestSize) {
       EXPECT_EQ(in.status(), roo_io::kOk);
@@ -190,44 +235,38 @@ TEST(LinkTransport, LargeRequestResponse) {
       ASSERT_GT(n, 0);
       response_byte_idx += n;
     }
-    out.close();
-    EXPECT_EQ(out.status(), roo_io::kClosed);
   });
 
-  Link client = loopback.server().connect();
-  EXPECT_EQ(client.status(), LinkStatus::kConnected);
-  roo_io::InputStream& in = client.in();
-  roo_io::OutputStream& out = client.out();
-  EXPECT_EQ(in.status(), roo_io::kOk);
-  EXPECT_EQ(out.status(), roo_io::kOk);
-  size_t request_byte_idx = 0;
-  while (request_byte_idx < kRequestSize) {
-    size_t count = rand() % 1000 + 1;
-    if (count > kRequestSize - request_byte_idx) {
-      count = kRequestSize - request_byte_idx;
+  client([&](roo_io::InputStream& in, roo_io::OutputStream& out) {
+    size_t request_byte_idx = 0;
+    while (request_byte_idx < kRequestSize) {
+      size_t count = rand() % 1000 + 1;
+      if (count > kRequestSize - request_byte_idx) {
+        count = kRequestSize - request_byte_idx;
+      }
+      size_t n = out.write(&request[request_byte_idx], count);
+      ASSERT_GT(n, 0);
+      request_byte_idx += n;
     }
-    size_t n = out.write(&request[request_byte_idx], count);
-    ASSERT_GT(n, 0);
-    request_byte_idx += n;
-  }
-  out.close();
-  EXPECT_EQ(out.status(), roo_io::kClosed);
-  roo::byte buf[1000];
-  size_t response_byte_idx = 0;
-  while (response_byte_idx < kResponseSize) {
-    EXPECT_EQ(in.status(), roo_io::kOk);
-    size_t count = rand() % 1000 + 1;
-    size_t n = in.read(buf, count);
-    ASSERT_GT(n, 0);
-    for (size_t i = 0; i < n; i++) {
-      EXPECT_EQ(buf[i], response[response_byte_idx + i]);
+    out.close();
+    EXPECT_EQ(out.status(), roo_io::kClosed);
+    roo::byte buf[1000];
+    size_t response_byte_idx = 0;
+    while (response_byte_idx < kResponseSize) {
+      EXPECT_EQ(in.status(), roo_io::kOk);
+      size_t count = rand() % 1000 + 1;
+      size_t n = in.read(buf, count);
+      ASSERT_GT(n, 0);
+      for (size_t i = 0; i < n; i++) {
+        EXPECT_EQ(buf[i], response[response_byte_idx + i]);
+      }
+      response_byte_idx += n;
     }
-    response_byte_idx += n;
-  }
-  EXPECT_EQ(in.read(buf, 1), 0);
-  EXPECT_EQ(in.status(), roo_io::kEndOfStream);
+    EXPECT_EQ(in.read(buf, 1), 0);
+    EXPECT_EQ(in.status(), roo_io::kEndOfStream);
+  });
 
-  server.join();
+  join();
 }
 
 }  // namespace roo_transport

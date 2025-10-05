@@ -30,6 +30,7 @@ cc_test(
     linkstatic = 1,
     deps = [
         ":roo_transport",
+        "//test/helpers",
         "@roo_testing//:arduino_gtest_main",
     ],
     size = "small",
@@ -45,6 +46,7 @@ cc_test(
     linkstatic = 1,
     deps = [
         ":roo_transport",
+        "//test/helpers",
         "@roo_testing//:arduino_gtest_main",
     ],
     size = "small",
