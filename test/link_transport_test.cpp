@@ -176,7 +176,6 @@ TEST(LinkTransport, LargeRequestResponse) {
         EXPECT_EQ(buf[i], request[request_byte_idx + i]);
       }
       request_byte_idx += n;
-      // LOG(INFO) << "Server received " << request_byte_idx << " bytes";
     }
     EXPECT_EQ(in.status(), roo_io::kOk);
     EXPECT_EQ(out.status(), roo_io::kOk);
@@ -210,7 +209,6 @@ TEST(LinkTransport, LargeRequestResponse) {
     size_t n = out.write(&request[request_byte_idx], count);
     ASSERT_GT(n, 0);
     request_byte_idx += n;
-    // LOG(INFO) << "Client sent " << request_byte_idx << " bytes";
   }
   out.close();
   EXPECT_EQ(out.status(), roo_io::kClosed);
@@ -225,14 +223,11 @@ TEST(LinkTransport, LargeRequestResponse) {
       EXPECT_EQ(buf[i], response[response_byte_idx + i]);
     }
     response_byte_idx += n;
-    // LOG(INFO) << "Client received " << response_byte_idx << " bytes";
   }
   EXPECT_EQ(in.read(buf, 1), 0);
   EXPECT_EQ(in.status(), roo_io::kEndOfStream);
 
-  // LOG(INFO) << "Client done, waiting for server";
   server.join();
-  // LOG(INFO) << "Server done";
 }
 
 }  // namespace roo_transport
