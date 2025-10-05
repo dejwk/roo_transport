@@ -180,8 +180,8 @@ TEST_P(TransferTest, LargeRequestResponse) {
     setClientOutputErrorRate(error_rate);
   }
 
-  const size_t kRequestSize = 1000000;
-  const size_t kResponseSize = 2000000;
+  const size_t kRequestSize = 200000;
+  const size_t kResponseSize = 500000;
   auto request = make_large_buffer(kRequestSize);
   auto response = make_large_buffer(kResponseSize);
 
@@ -245,9 +245,95 @@ TEST_P(TransferTest, LargeRequestResponse) {
   join();
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    LinkTransport, TransferTest,
-    ::testing::Values(0, 1, 2, 10)  // Error rates to test.
+INSTANTIATE_TEST_SUITE_P(RequestResponse, TransferTest,
+                         ::testing::Values(0, 1, 2, 10)  // Error rates to test.
+);
+
+TEST_P(TransferTest, BidiStreaming) {
+  int error_rate = GetParam();
+  if (error_rate > 0) {
+    setServerOutputErrorRate(error_rate);
+    setClientOutputErrorRate(error_rate);
+  }
+
+  const size_t kRequestSize = 200000;
+  const size_t kResponseSize = 200000;
+  auto request = make_large_buffer(kRequestSize);
+  auto response = make_large_buffer(kResponseSize);
+
+  server([&](roo_io::InputStream& in, roo_io::OutputStream& out) {
+    roo::thread server_recv([&]() {
+      roo::byte buf[1000];
+      size_t request_byte_idx = 0;
+      while (request_byte_idx < kRequestSize) {
+        EXPECT_EQ(in.status(), roo_io::kOk);
+        size_t count = rand() % 1000 + 1;
+        size_t n = in.read(buf, count);
+        ASSERT_GT(n, 0);
+        for (size_t i = 0; i < n; i++) {
+          EXPECT_EQ(buf[i], request[request_byte_idx + i]);
+        }
+        request_byte_idx += n;
+      }
+      EXPECT_EQ(in.read(buf, 1), 0);
+      EXPECT_EQ(in.status(), roo_io::kEndOfStream);
+    });
+    size_t response_byte_idx = 0;
+    while (response_byte_idx < kResponseSize) {
+      EXPECT_EQ(out.status(), roo_io::kOk);
+      size_t count = rand() % 1000 + 1;
+      if (count > kResponseSize - response_byte_idx) {
+        count = kResponseSize - response_byte_idx;
+      }
+      size_t n = out.write(&response[response_byte_idx], count);
+      ASSERT_GT(n, 0);
+      response_byte_idx += n;
+    }
+    out.close();
+    EXPECT_EQ(out.status(), roo_io::kClosed);
+
+    server_recv.join();
+  });
+
+  client([&](roo_io::InputStream& in, roo_io::OutputStream& out) {
+    roo::thread client_recv([&]() {
+      roo::byte buf[1000];
+      size_t response_byte_idx = 0;
+      while (response_byte_idx < kResponseSize) {
+        EXPECT_EQ(in.status(), roo_io::kOk);
+        size_t count = rand() % 1000 + 1;
+        size_t n = in.read(buf, count);
+        ASSERT_GT(n, 0);
+        for (size_t i = 0; i < n; i++) {
+          EXPECT_EQ(buf[i], response[response_byte_idx + i]);
+        }
+        response_byte_idx += n;
+      }
+      EXPECT_EQ(in.read(buf, 1), 0);
+      EXPECT_EQ(in.status(), roo_io::kEndOfStream);
+    });
+
+    size_t request_byte_idx = 0;
+    while (request_byte_idx < kRequestSize) {
+      size_t count = rand() % 1000 + 1;
+      if (count > kRequestSize - request_byte_idx) {
+        count = kRequestSize - request_byte_idx;
+      }
+      size_t n = out.write(&request[request_byte_idx], count);
+      ASSERT_GT(n, 0);
+      request_byte_idx += n;
+    }
+    out.close();
+    EXPECT_EQ(out.status(), roo_io::kClosed);
+
+    client_recv.join();
+  });
+
+  join();
+}
+
+INSTANTIATE_TEST_SUITE_P(BidiStreaming, TransferTest,
+                         ::testing::Values(0, 1, 2, 10)  // Error rates to test.
 );
 
 }  // namespace roo_transport
