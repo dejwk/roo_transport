@@ -45,8 +45,12 @@ size_t PacketReceiverOverStream::processIncoming(
     bool finished = (increment < len);
     if (finished) {
       ++increment;
-      if (pos_ + increment <= 256) {
+      if (pos_ + increment <= 256 && pos_ + increment >= 6) {
+        // Packet is of an acceptable size.
         if (pos_ == 0) {
+          // Fast path: the entire packet fits within the buffer, and we have no
+          // partial packet pending. Process it directly from the temporary
+          // buffer.
           received += (processPacket(data, increment, receiver_fn) ? 1 : 0);
         } else {
           memcpy(&buf_[pos_], data, increment);
@@ -68,8 +72,8 @@ size_t PacketReceiverOverStream::processIncoming(
     len -= increment;
 
     // Alternative implementation:
-    // if (pos_ + increment < 256) {
-    //   // Fits within the 'max packet' size.
+    // if (pos_ + increment <= 256 && pos_ + increment >= 6) {
+    //   // Packet is of an acceptable size.
     //   memcpy(&buf_[pos_], data, increment);
     //   if (finished) {
     //     buf_[pos_ + increment] = 0;
