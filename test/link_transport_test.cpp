@@ -145,6 +145,44 @@ TEST(LinkTransport, SyncConnectReconnect) {
   server.join();
 }
 
+TEST(LinkTransport, SyncConnectCommReconnect) {
+  LinkLoopback loopback;
+
+  roo::thread server([&]() {
+    Link server = loopback.client().connect();
+    EXPECT_EQ(server.status(), LinkStatus::kConnected);
+    EXPECT_EQ(server.in().status(), roo_io::kOk);
+    EXPECT_EQ(server.out().status(), roo_io::kOk);
+    roo::byte buf[10];
+    size_t n = server.in().readFully(buf, 10);
+    EXPECT_EQ(n, 8);
+    EXPECT_EQ(memcmp(buf, "Request", 8), 0);
+    EXPECT_EQ(server.in().status(), roo_io::kEndOfStream);
+    server.out().writeFully((const roo::byte*)"Response", 9);
+    server.out().close();
+    EXPECT_EQ(server.out().status(), roo_io::kClosed);
+    delay(1000);
+    server = loopback.client().connect();
+    EXPECT_EQ(server.status(), LinkStatus::kConnected);
+  });
+  Link client = loopback.server().connect();
+  EXPECT_EQ(client.status(), LinkStatus::kConnected);
+  EXPECT_EQ(client.in().status(), roo_io::kOk);
+  EXPECT_EQ(client.out().status(), roo_io::kOk);
+  client.out().writeFully((const roo::byte*)"Request", 8);
+  client.out().close();
+  EXPECT_EQ(client.out().status(), roo_io::kClosed);
+  roo::byte buf[10];
+  size_t n = client.in().readFully(buf, 10);
+  EXPECT_EQ(n, 9);
+  EXPECT_EQ(memcmp(buf, "Response", 9), 0);
+  EXPECT_EQ(client.in().status(), roo_io::kEndOfStream);
+  client = loopback.server().connect();
+  EXPECT_EQ(client.status(), LinkStatus::kConnected);
+
+  server.join();
+}
+
 class TransferTest : public ::testing::TestWithParam<int> {
  protected:
   TransferTest() : loopback_() {}
