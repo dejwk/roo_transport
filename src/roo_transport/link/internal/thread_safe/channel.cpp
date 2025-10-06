@@ -147,6 +147,8 @@ LinkStatus Channel::getLinkStatus(uint32_t stream_id) {
 LinkStatus Channel::getLinkStatusInternal(uint32_t stream_id) {
   if (my_stream_id_ == 0) return LinkStatus::kIdle;
   if (my_stream_id_ != stream_id) return LinkStatus::kBroken;
+  // Note: we don't require transmitter to be connected - it suffices us that we
+  // have received a handshake request from the peer.
   return peer_stream_id_ == 0 ? LinkStatus::kConnecting
                               : LinkStatus::kConnected;
 }

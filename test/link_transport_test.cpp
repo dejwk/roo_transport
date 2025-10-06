@@ -183,6 +183,34 @@ TEST(LinkTransport, SyncConnectCommReconnect) {
   server.join();
 }
 
+TEST(LinkTransport, ThrashingReconnect) {
+  LinkLoopback loopback;
+  const size_t kIterations = 100;
+
+  roo::thread server_thread([&]() {
+    Link server;
+    for (size_t i = 0; i < kIterations; i++) {
+      server = loopback.server().connect();
+      EXPECT_EQ(server.status(), LinkStatus::kConnected);
+      EXPECT_EQ(server.in().status(), roo_io::kOk);
+      EXPECT_EQ(server.out().status(), roo_io::kOk);
+    }
+    server.out().close();
+    EXPECT_EQ(server.out().status(), roo_io::kClosed);
+  });
+  Link client;
+  for (size_t i = 0; i < kIterations; i++) {
+    client = loopback.client().connect();
+    EXPECT_EQ(client.status(), LinkStatus::kConnected);
+    EXPECT_EQ(client.in().status(), roo_io::kOk);
+    EXPECT_EQ(client.out().status(), roo_io::kOk);
+  }
+  client.out().close();
+  EXPECT_EQ(client.out().status(), roo_io::kClosed);
+
+  server_thread.join();
+}
+
 class TransferTest : public ::testing::TestWithParam<int> {
  protected:
   TransferTest() : loopback_() {}
