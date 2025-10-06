@@ -11,6 +11,7 @@ cc_library(
         "src",
     ],
     visibility = ["//visibility:public"],
+#    defines = ["MLOG_roo_transport_reliable_channel_connection=1"],
     deps = [
         "@roo_collections",
         "@roo_io",
@@ -40,6 +41,22 @@ cc_test(
     name = "link_transport_test",
     srcs = [
         "test/link_transport_test.cpp",
+    ],
+    copts = ["-Iexternal/gtest/include"],
+    includes = ["src"],
+    linkstatic = 1,
+    deps = [
+        ":roo_transport",
+        "//test/helpers",
+        "@roo_testing//:arduino_gtest_main",
+    ],
+    size = "small",
+)
+
+cc_test(
+    name = "link_messaging_test",
+    srcs = [
+        "test/link_messaging_test.cpp",
     ],
     copts = ["-Iexternal/gtest/include"],
     includes = ["src"],

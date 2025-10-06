@@ -50,7 +50,7 @@ void LinkMessaging::send(const void* data, size_t size, SendMode send_mode) {
     }
     reconnected_.wait(guard);
   }
-  roo_io::OutputStream& out = this->out();
+  roo_io::OutputStream& out = link_.out();
   roo::byte header[4];
   roo_io::StoreBeU32(size, header);
   out.writeFully(header, 4);
