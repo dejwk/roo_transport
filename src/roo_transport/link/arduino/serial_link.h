@@ -32,11 +32,11 @@ class SerialLink : public Stream {
 
   // Obtains the input stream that can be used to read from the reliable
   // serial.
-  SocketInputStream& in() { return link_.in(); }
+  LinkInputStream& in() { return link_.in(); }
 
   // Obtains the output stream that can be used to write to the reliable
   // serial.
-  SocketOutputStream& out() { return link_.out(); }
+  LinkOutputStream& out() { return link_.out(); }
 
   // Returns the current status of the link.
   LinkStatus status() const;
