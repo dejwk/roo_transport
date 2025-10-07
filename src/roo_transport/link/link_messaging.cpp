@@ -3,25 +3,22 @@
 namespace roo_transport {
 
 LinkMessaging::LinkMessaging(roo_transport::LinkTransport& link_transport,
-                             size_t max_recv_packet_size,
-                             Messaging::Receiver& receiver)
-    : Messaging(receiver),
-      transport_(link_transport),
+                             size_t max_recv_packet_size)
+    : transport_(link_transport),
       link_(),
       max_recv_packet_size_(max_recv_packet_size),
       sender_disconnected_(true),
       closed_(false) {}
 
-LinkMessaging::~LinkMessaging() { close(); }
-
-void LinkMessaging::begin() {
+void LinkMessaging::begin(Receiver& receiver) {
+  receiver_ = &receiver;
   roo::thread::attributes attrs;
   attrs.set_name("link_msg_recv");
   attrs.set_stack_size(4096);
   reader_thread_ = roo::thread(attrs, [this]() { receiveLoop(); });
 }
 
-void LinkMessaging::close() {
+void LinkMessaging::end() {
   if (closed_) return;
   closed_ = true;
   {
@@ -88,23 +85,23 @@ void LinkMessaging::receiveLoop() {
       size_t count = in.readFully(header, 4);
       if (count < 4) {
         LOG(ERROR) << "Error: " << in.status();
-        reset();
+        receiver_->reset();
         break;
       }
       uint32_t incoming_size = roo_io::LoadBeU32(header);
       if (incoming_size > max_recv_packet_size_) {
         LOG(ERROR) << "Error: incoming size " << incoming_size
                    << " exceeds max " << max_recv_packet_size_;
-        reset();
+        receiver_->reset();
         break;
       }
       size_t read = in.readFully(incoming_payload.get(), incoming_size);
       if (read < incoming_size) {
         LOG(ERROR) << "Error: " << in.status();
-        reset();
+        receiver_->reset();
         break;
       }
-      receive(incoming_payload.get(), incoming_size);
+      receiver_->received(incoming_payload.get(), incoming_size);
     }
   }
 }

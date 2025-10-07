@@ -15,12 +15,10 @@ namespace roo_transport {
 class LinkMessaging : public Messaging {
  public:
   LinkMessaging(roo_transport::LinkTransport& link_transport,
-                size_t max_recv_packet_size, Messaging::Receiver& receiver);
+                size_t max_recv_packet_size);
 
-  ~LinkMessaging() override;
-
-  void begin();
-  void close();
+  void begin(Receiver& receiver) override;
+  void end() override;
 
   void send(const void* data, size_t size, SendMode send_mode) override;
 
@@ -43,6 +41,7 @@ class LinkMessaging : public Messaging {
   roo::condition_variable reconnected_;
   mutable roo::mutex mutex_;
   bool sender_disconnected_ = false;
+  Receiver* receiver_ = nullptr;
   std::atomic<bool> closed_ = false;
 };
 

@@ -49,17 +49,18 @@ class Messaging {
     Fn fn_;
   };
 
-  Messaging(Receiver& receiver) : receiver_(receiver) {}
+  virtual ~Messaging() { end(); }
 
-  virtual ~Messaging() = default;
+  // Can be called only once.
+  virtual void begin(Receiver& receiver) = 0;
+
+  // Should be idempotent (OK to call multiple times).
+  virtual void end() {}
+
   virtual void send(const void* data, size_t size, SendMode send_mode) = 0;
 
  protected:
-  void reset() { receiver_.reset(); }
-  void receive(const void* data, size_t len) { receiver_.received(data, len); }
-
- private:
-  Receiver& receiver_;
+  Messaging() = default;
 };
 
 }  // namespace roo_transport

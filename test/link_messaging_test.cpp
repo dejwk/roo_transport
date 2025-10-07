@@ -42,15 +42,15 @@ class LinkMessagingTest : public ::testing::Test {
         client_receiver_([this](const void* data, size_t len) {
           clientReceived(data, len);
         }),
-        server_(loopback_.server(), 1500, server_receiver_),
-        client_(loopback_.client(), 1500, client_receiver_) {
-    server_.begin();
-    client_.begin();
+        server_(loopback_.server(), 1500),
+        client_(loopback_.client(), 1500) {
+    server_.begin(server_receiver_);
+    client_.begin(client_receiver_);
   }
 
   ~LinkMessagingTest() override {
-    server_.close();
-    client_.close();
+    server_.end();
+    client_.end();
     loopback_.close();
   }
 
