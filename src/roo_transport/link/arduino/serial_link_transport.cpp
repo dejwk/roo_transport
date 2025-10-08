@@ -18,7 +18,7 @@ SerialLinkTransport::SerialLinkTransport(decltype(Serial1)& serial,
 
 void SerialLinkTransport::begin() {
   transport_.begin();
-#ifdef ESP32
+#if (defined ESP32 || defined ROO_TESTING)
   serial_.onReceive([this]() {
     receiver_.tryReceive([this](const roo::byte* buf, size_t len) {
       transport_.processIncomingPacket(buf, len);

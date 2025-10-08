@@ -6,8 +6,6 @@
 
 namespace roo_transport {
 
-SerialLink::SerialLink() : link_() {}
-
 SerialLink::SerialLink(Channel& channel, uint32_t my_stream_id)
     : link_(channel, my_stream_id) {}
 
@@ -15,7 +13,13 @@ SerialLink::SerialLink(Link socket) : link_(std::move(socket)) {}
 
 int SerialLink::available() { return in().available(); }
 
-int SerialLink::read() { return in().read(); }
+int SerialLink::read() {
+  if (available() == 0) {
+    yield();
+    return -1;
+  }
+  return in().read();
+}
 
 int SerialLink::peek() { return in().peek(); }
 
@@ -64,6 +68,7 @@ size_t SerialLink::timedRead(roo::byte* buf, size_t count,
         count -= result;
       }
       if (count == 0) return total;
+      yield();
     }
     if (roo_time::Uptime::Now() - start > timeout) break;
     delay(1);

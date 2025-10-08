@@ -13,7 +13,7 @@ class SerialLink : public Stream {
  public:
   // Creates a dummy serial link in state kIdle.
   // Use SerialLinkTransport::connect() to create a proper connected link.
-  SerialLink();
+  SerialLink() = default;
 
   // Decorate a non-Arduino link into an Arduino-compliant one.
   SerialLink(Link link);
