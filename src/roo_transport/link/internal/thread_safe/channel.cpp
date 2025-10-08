@@ -148,7 +148,7 @@ LinkStatus Channel::getLinkStatus(uint32_t stream_id) {
 }
 
 LinkStatus Channel::getLinkStatusInternal(uint32_t stream_id) {
-  if (my_stream_id_ == 0) return LinkStatus::kIdle;
+  if (stream_id == 0) return LinkStatus::kIdle;
   if (my_stream_id_ != stream_id) return LinkStatus::kBroken;
   return peer_stream_id_ == 0 || !my_stream_id_acked_by_peer_
              ? LinkStatus::kConnecting

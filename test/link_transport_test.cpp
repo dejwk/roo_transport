@@ -194,7 +194,8 @@ TEST(LinkTransport, ThrashingReconnect) {
       // Note: by the time we're checking, might already be broken by the
       // subsequent client reconnect.
       EXPECT_TRUE(server.status() == LinkStatus::kConnected ||
-                  server.status() == LinkStatus::kBroken);
+                  server.status() == LinkStatus::kBroken)
+          << (int)server.status();
       EXPECT_EQ(server.in().status(), roo_io::kOk);
       EXPECT_EQ(server.out().status(), roo_io::kOk);
     }
@@ -207,7 +208,8 @@ TEST(LinkTransport, ThrashingReconnect) {
     // Note: by the time we're checking, might already be broken by the
     // subsequent client reconnect.
     EXPECT_TRUE(client.status() == LinkStatus::kConnected ||
-                client.status() == LinkStatus::kBroken);
+                client.status() == LinkStatus::kBroken)
+        << (int)client.status();
     EXPECT_EQ(client.in().status(), roo_io::kOk);
     EXPECT_EQ(client.out().status(), roo_io::kOk);
   }
