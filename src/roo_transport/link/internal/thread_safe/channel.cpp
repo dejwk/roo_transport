@@ -140,6 +140,8 @@ void Channel::disconnect(uint32_t my_stream_id) {
       << "Transmitter and receiver are now disconnected.";
   transmitter_.reset();
   receiver_.reset();
+  outgoing_data_ready_.notify();
+  connected_cv_.notify_all();
 }
 
 LinkStatus Channel::getLinkStatus(uint32_t stream_id) {
