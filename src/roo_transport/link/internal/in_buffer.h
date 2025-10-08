@@ -25,9 +25,6 @@ class InBuffer {
     size_ = size;
   }
 
-  // Returns true if the buffer's payload has not yet been received.
-  bool unset() const { return type_ == kUnset; }
-
   const roo::byte* data() const { return payload_; }
   Type type() const { return type_; }
   uint8_t size() const { return size_; }

@@ -66,7 +66,7 @@ size_t Receiver::tryRead(roo::byte* buf, size_t count,
       current_in_buffer_ = &getInBuffer(in_ring_.begin());
       current_in_buffer_pos_ = 0;
     }
-    if (current_in_buffer_->unset()) {
+    if (current_in_buffer_->type() == InBuffer::kUnset) {
       // Not received yet.
       break;
     }
@@ -113,8 +113,8 @@ int Receiver::peek() {
     current_in_buffer_ = &getInBuffer(in_ring_.begin());
     current_in_buffer_pos_ = 0;
   }
-  if (current_in_buffer_->unset()) {
-    // Not received yet.
+  if (current_in_buffer_->type() != InBuffer::kData) {
+    // Not received yet, or EOS.
     return -1;
   }
   DCHECK_GT(current_in_buffer_->size(), current_in_buffer_pos_);
@@ -127,12 +127,20 @@ size_t Receiver::availableForRead() const {
     current_in_buffer_ = &getInBuffer(in_ring_.begin());
     current_in_buffer_pos_ = 0;
   }
-  if (current_in_buffer_->unset()) {
-    // Not received yet.
-    return 0;
+  switch (current_in_buffer_->type()) {
+    case InBuffer::kUnset: {
+      return 0;
+    }
+    case InBuffer::kFin: {
+      // Signal to the reader that EOF is here, available to read.
+      return 1;
+    }
+    case InBuffer::kData:
+    default: {
+      DCHECK_GT(current_in_buffer_->size(), current_in_buffer_pos_);
+      return current_in_buffer_->size() - current_in_buffer_pos_;
+    }
   }
-  DCHECK_GT(current_in_buffer_->size(), current_in_buffer_pos_);
-  return current_in_buffer_->size() - current_in_buffer_pos_;
 }
 
 void Receiver::reset() {
@@ -199,7 +207,7 @@ size_t Receiver::ack(roo::byte* buf) {
   SeqNum in_pos = unack_seq_ + 1;
   int idx = 63;
   while (idx >= 0 && in_ring_.contains(in_pos)) {
-    if (!getInBuffer(in_pos).unset()) {
+    if (getInBuffer(in_pos).type() != InBuffer::kUnset) {
       ack_bitmask |= (((uint64_t)1) << idx);
     }
     ++in_pos;
@@ -251,7 +259,7 @@ bool Receiver::handleDataPacket(uint16_t seq_id, const roo::byte* payload,
         << seq << ", " << in_ring_.begin() << "--" << in_ring_.end();
   }
   InBuffer& buffer = getInBuffer(seq);
-  if (buffer.unset()) {
+  if (buffer.type() == InBuffer::kUnset) {
     buffer.set(is_final ? InBuffer::kFin : InBuffer::kData, payload, len);
   } else {
     // Ignore the retransmitted packet; stick to the previously received one.
@@ -269,7 +277,8 @@ bool Receiver::handleDataPacket(uint16_t seq_id, const roo::byte* payload,
     do {
       ++unack_seq_;
       ++packets_received_;
-    } while (in_ring_.contains(unack_seq_) && !getInBuffer(unack_seq_).unset());
+    } while (in_ring_.contains(unack_seq_) &&
+             getInBuffer(unack_seq_).type() != InBuffer::kUnset);
     if (self_closed_) {
       // Remove all the received packets up to the updated unack_seq_, as if
       // they were read.
