@@ -280,9 +280,8 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
     case internal::Receiver::kConnected: {
       // Note: we only consider initial connection requests as 'breaking' -
       // others might be latend acks.
-      if (want_ack && (peer_stream_id_ != peer_stream_id) ||
-          ((ack_stream_id == 0 &&
-            transmitter_.state() == internal::Transmitter::kConnected))) {
+      if (want_ack && (peer_stream_id_ != peer_stream_id) &&
+          ack_stream_id == 0) {
         // The peer opened a new stream.
         if (!receiver_.done()) {
           MLOG(roo_transport_reliable_channel_connection)
@@ -313,7 +312,7 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
         connected_cv_.notify_all();
         break;
       }
-      if (ack_stream_id == my_stream_id_) {
+      if (ack_stream_id == my_stream_id_ && !my_stream_id_acked_by_peer_) {
         CHECK(my_stream_id_ != 0);
         MLOG(roo_transport_reliable_channel_connection)
             << "Transmitter is now connected.";
