@@ -125,6 +125,10 @@ class Channel {
   // GUARDED_BY(handshake_mutex_).
   uint32_t my_stream_id_;
 
+  // Effectively says that the transmitter is connected to the peer.
+  // GUARDED_BY(handshake_mutex_).
+  bool my_stream_id_acked_by_peer_;
+
   // As received from the peer in their connect packets.
   // GUARDED_BY(handshake_mutex_).
   uint32_t peer_stream_id_;

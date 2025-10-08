@@ -191,7 +191,10 @@ TEST(LinkTransport, ThrashingReconnect) {
     Link server;
     for (size_t i = 0; i < kIterations; i++) {
       server = loopback.server().connect();
-      EXPECT_EQ(server.status(), LinkStatus::kConnected);
+      // Note: by the time we're checking, might already be broken by the
+      // subsequent client reconnect.
+      EXPECT_TRUE(server.status() == LinkStatus::kConnected ||
+                  server.status() == LinkStatus::kBroken);
       EXPECT_EQ(server.in().status(), roo_io::kOk);
       EXPECT_EQ(server.out().status(), roo_io::kOk);
     }
@@ -201,7 +204,10 @@ TEST(LinkTransport, ThrashingReconnect) {
   Link client;
   for (size_t i = 0; i < kIterations; i++) {
     client = loopback.client().connect();
-    EXPECT_EQ(client.status(), LinkStatus::kConnected);
+    // Note: by the time we're checking, might already be broken by the
+    // subsequent client reconnect.
+    EXPECT_TRUE(client.status() == LinkStatus::kConnected ||
+                client.status() == LinkStatus::kBroken);
     EXPECT_EQ(client.in().status(), roo_io::kOk);
     EXPECT_EQ(client.out().status(), roo_io::kOk);
   }

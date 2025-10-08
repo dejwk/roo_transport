@@ -40,6 +40,7 @@ Channel::Channel(PacketSender& sender, LinkBufferSize sendbuf,
       transmitter_((unsigned int)sendbuf, outgoing_data_ready_),
       receiver_((unsigned int)recvbuf, outgoing_data_ready_),
       my_stream_id_(0),
+      my_stream_id_acked_by_peer_(false),
       peer_stream_id_(0),
       needs_handshake_ack_(false),
       successive_handshake_retries_(0),
@@ -112,6 +113,7 @@ uint32_t Channel::my_stream_id() const {
 uint32_t Channel::connect() {
   roo::lock_guard<roo::mutex> guard(handshake_mutex_);
   my_stream_id_ = 0;
+  my_stream_id_acked_by_peer_ = false;
   peer_stream_id_ = 0;
   // The stream ID is a random number, but it can't be zero.
   while (my_stream_id_ == 0) my_stream_id_ = RANDOM_INTEGER();
@@ -132,6 +134,7 @@ void Channel::disconnect(uint32_t my_stream_id) {
   roo::lock_guard<roo::mutex> guard(handshake_mutex_);
   if (my_stream_id_ != my_stream_id) return;
   my_stream_id_ = 0;
+  my_stream_id_acked_by_peer_ = false;
   peer_stream_id_ = 0;
   MLOG(roo_transport_reliable_channel_connection)
       << "Transmitter and receiver are now disconnected.";
@@ -147,10 +150,9 @@ LinkStatus Channel::getLinkStatus(uint32_t stream_id) {
 LinkStatus Channel::getLinkStatusInternal(uint32_t stream_id) {
   if (my_stream_id_ == 0) return LinkStatus::kIdle;
   if (my_stream_id_ != stream_id) return LinkStatus::kBroken;
-  // Note: we don't require transmitter to be connected - it suffices us that we
-  // have received a handshake request from the peer.
-  return peer_stream_id_ == 0 ? LinkStatus::kConnecting
-                              : LinkStatus::kConnected;
+  return peer_stream_id_ == 0 || !my_stream_id_acked_by_peer_
+             ? LinkStatus::kConnecting
+             : LinkStatus::kConnected;
 }
 
 void Channel::awaitConnected(uint32_t stream_id) {
@@ -250,6 +252,13 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
       << ", ack_stream_id=" << ack_stream_id << ", want_ack=" << want_ack;
   switch (receiver_.state()) {
     case internal::Receiver::kConnecting: {
+      if (ack_stream_id != 0 && ack_stream_id != my_stream_id_) {
+        // The peer is acknowledging a different stream than the one we're
+        // connecting on. Ignoring.
+        MLOG(roo_transport_reliable_channel_connection)
+            << "Ignoring the handshake, since the ack_stream_id doesn't match.";
+        break;
+      }
       peer_stream_id_ = peer_stream_id;
       CHECK(receiver_.empty());
       MLOG(roo_transport_reliable_channel_connection)
@@ -259,6 +268,7 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
       if (ack_stream_id == my_stream_id_) {
         MLOG(roo_transport_reliable_channel_connection)
             << "Transmitter is now connected.";
+        my_stream_id_acked_by_peer_ = true;
         transmitter_.setConnected();
       }
       needs_handshake_ack_ = want_ack;
@@ -266,8 +276,10 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
       break;
     }
     case internal::Receiver::kConnected: {
-      if ((peer_stream_id_ != peer_stream_id) ||
-          ((ack_stream_id != my_stream_id_ &&
+      // Note: we only consider initial connection requests as 'breaking' -
+      // others might be latend acks.
+      if (want_ack && (peer_stream_id_ != peer_stream_id) ||
+          ((ack_stream_id == 0 &&
             transmitter_.state() == internal::Transmitter::kConnected))) {
         // The peer opened a new stream.
         if (!receiver_.done()) {
@@ -303,7 +315,9 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
         CHECK(my_stream_id_ != 0);
         MLOG(roo_transport_reliable_channel_connection)
             << "Transmitter is now connected.";
+        my_stream_id_acked_by_peer_ = true;
         transmitter_.setConnected();
+        connected_cv_.notify_all();
       }
       needs_handshake_ack_ = want_ack;
       break;
