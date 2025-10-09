@@ -110,7 +110,11 @@ TEST(LinkTransport, SyncConnectReconnect) {
 
   roo::thread server([&]() {
     Link server_throwaway = loopback.server().connect();
-    EXPECT_EQ(server_throwaway.status(), LinkStatus::kConnected);
+    // Note: by the time we're checking, might already be broken by the
+    // subsequent client reconnect.
+    EXPECT_TRUE(server_throwaway.status() == LinkStatus::kConnected ||
+                server_throwaway.status() == LinkStatus::kBroken)
+        << (int)server_throwaway.status();
     // Reconnect.
     Link server = loopback.server().connect();
     EXPECT_EQ(server_throwaway.status(), LinkStatus::kBroken);
@@ -127,6 +131,11 @@ TEST(LinkTransport, SyncConnectReconnect) {
     EXPECT_EQ(server.out().status(), roo_io::kClosed);
   });
   Link client_throwaway = loopback.client().connect();
+  // Note: by the time we're checking, might already be broken by the
+  // subsequent server reconnect.
+  EXPECT_TRUE(client_throwaway.status() == LinkStatus::kConnected ||
+              client_throwaway.status() == LinkStatus::kBroken)
+      << (int)client_throwaway.status();
   // Reconnect.
   Link client = loopback.client().connect();
   EXPECT_EQ(client_throwaway.status(), LinkStatus::kBroken);
