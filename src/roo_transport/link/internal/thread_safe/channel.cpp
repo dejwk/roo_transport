@@ -37,8 +37,8 @@ Channel::Channel(PacketSender& sender, LinkBufferSize sendbuf,
                  LinkBufferSize recvbuf)
     : packet_sender_(sender),
       outgoing_data_ready_(),
-      transmitter_((unsigned int)sendbuf, outgoing_data_ready_),
-      receiver_((unsigned int)recvbuf, outgoing_data_ready_),
+      transmitter_((unsigned int)sendbuf),
+      receiver_((unsigned int)recvbuf),
       my_stream_id_(0),
       my_stream_id_acked_by_peer_(false),
       peer_stream_id_(0),
@@ -60,22 +60,42 @@ Channel::~Channel() {
 }
 size_t Channel::write(const roo::byte* buf, size_t count, uint32_t my_stream_id,
                       roo_io::Status& stream_status) {
-  return transmitter_.write(buf, count, my_stream_id, stream_status);
+  bool outgoing_data_ready = false;
+  return transmitter_.write(buf, count, my_stream_id, stream_status,
+                            outgoing_data_ready);
+  if (outgoing_data_ready) {
+    outgoing_data_ready_.notify();
+  }
 }
 
 size_t Channel::tryWrite(const roo::byte* buf, size_t count,
                          uint32_t my_stream_id, roo_io::Status& stream_status) {
-  return transmitter_.tryWrite(buf, count, my_stream_id, stream_status);
+  bool outgoing_data_ready = false;
+  return transmitter_.tryWrite(buf, count, my_stream_id, stream_status,
+                               outgoing_data_ready);
+  if (outgoing_data_ready) {
+    outgoing_data_ready_.notify();
+  }
 }
 
 size_t Channel::read(roo::byte* buf, size_t count, uint32_t my_stream_id,
                      roo_io::Status& stream_status) {
-  return receiver_.read(buf, count, my_stream_id, stream_status);
+  bool outgoing_data_ready = false;
+  return receiver_.read(buf, count, my_stream_id, stream_status,
+                        outgoing_data_ready);
+  if (outgoing_data_ready) {
+    outgoing_data_ready_.notify();
+  }
 }
 
 size_t Channel::tryRead(roo::byte* buf, size_t count, uint32_t my_stream_id,
                         roo_io::Status& stream_status) {
-  return receiver_.tryRead(buf, count, my_stream_id, stream_status);
+  bool outgoing_data_ready = false;
+  return receiver_.tryRead(buf, count, my_stream_id, stream_status,
+                           outgoing_data_ready);
+  if (outgoing_data_ready) {
+    outgoing_data_ready_.notify();
+  }
 }
 
 int Channel::peek(uint32_t my_stream_id, roo_io::Status& stream_status) {
@@ -88,16 +108,28 @@ size_t Channel::availableForRead(uint32_t my_stream_id,
 }
 
 void Channel::flush(uint32_t my_stream_id, roo_io::Status& stream_status) {
-  transmitter_.flush(my_stream_id, stream_status);
+  bool outgoing_data_ready = false;
+  transmitter_.flush(my_stream_id, stream_status, outgoing_data_ready);
+  if (outgoing_data_ready) {
+    outgoing_data_ready_.notify();
+  }
 }
 
 void Channel::close(uint32_t my_stream_id, roo_io::Status& stream_status) {
-  transmitter_.close(my_stream_id, stream_status);
+  bool outgoing_data_ready = false;
+  transmitter_.close(my_stream_id, stream_status, outgoing_data_ready);
+  if (outgoing_data_ready) {
+    outgoing_data_ready_.notify();
+  }
 }
 
 // Called by ChannelInput::close().
 void Channel::closeInput(uint32_t my_stream_id, roo_io::Status& stream_status) {
-  receiver_.markInputClosed(my_stream_id, stream_status);
+  bool outgoing_data_ready = false;
+  receiver_.markInputClosed(my_stream_id, stream_status, outgoing_data_ready);
+  if (outgoing_data_ready) {
+    outgoing_data_ready_.notify();
+  }
 }
 
 size_t Channel::availableForWrite(uint32_t my_stream_id,
@@ -111,37 +143,43 @@ uint32_t Channel::my_stream_id() const {
 }
 
 uint32_t Channel::connect() {
-  roo::lock_guard<roo::mutex> guard(handshake_mutex_);
-  my_stream_id_ = 0;
-  my_stream_id_acked_by_peer_ = false;
-  peer_stream_id_ = 0;
-  // The stream ID is a random number, but it can't be zero.
-  while (my_stream_id_ == 0) my_stream_id_ = RANDOM_INTEGER();
-  MLOG(roo_transport_reliable_channel_connection)
-      << "Transmitter and receiver are now connecting.";
-  transmitter_.init(my_stream_id_, RANDOM_INTEGER() % 0x0FFF);
-  receiver_.init(my_stream_id_);
-  needs_handshake_ack_ = false;
-  successive_handshake_retries_ = 0;
-  next_scheduled_handshake_update_ = roo_time::Uptime::Start();
+  uint32_t my_stream_id;
+  {
+    roo::lock_guard<roo::mutex> guard(handshake_mutex_);
+    my_stream_id_ = 0;
+    my_stream_id_acked_by_peer_ = false;
+    peer_stream_id_ = 0;
+    // The stream ID is a random number, but it can't be zero.
+    while (my_stream_id_ == 0) my_stream_id_ = RANDOM_INTEGER();
+    MLOG(roo_transport_reliable_channel_connection)
+        << "Transmitter and receiver are now connecting.";
+    transmitter_.init(my_stream_id_, RANDOM_INTEGER() % 0x0FFF);
+    receiver_.init(my_stream_id_);
+    needs_handshake_ack_ = false;
+    successive_handshake_retries_ = 0;
+    next_scheduled_handshake_update_ = roo_time::Uptime::Start();
+    connected_cv_.notify_all();
+    my_stream_id = my_stream_id_;
+  }
   // We need to send that handshake message.
   outgoing_data_ready_.notify();
-  connected_cv_.notify_all();
-  return my_stream_id_;
+  return my_stream_id;
 }
 
 void Channel::disconnect(uint32_t my_stream_id) {
-  roo::lock_guard<roo::mutex> guard(handshake_mutex_);
-  if (my_stream_id_ != my_stream_id) return;
-  my_stream_id_ = 0;
-  my_stream_id_acked_by_peer_ = false;
-  peer_stream_id_ = 0;
-  MLOG(roo_transport_reliable_channel_connection)
-      << "Transmitter and receiver are now disconnected.";
-  transmitter_.reset();
-  receiver_.reset();
+  {
+    roo::lock_guard<roo::mutex> guard(handshake_mutex_);
+    if (my_stream_id_ != my_stream_id) return;
+    my_stream_id_ = 0;
+    my_stream_id_acked_by_peer_ = false;
+    peer_stream_id_ = 0;
+    MLOG(roo_transport_reliable_channel_connection)
+        << "Transmitter and receiver are now disconnected.";
+    transmitter_.reset();
+    receiver_.reset();
+    connected_cv_.notify_all();
+  }
   outgoing_data_ready_.notify();
-  connected_cv_.notify_all();
 }
 
 LinkStatus Channel::getLinkStatus(uint32_t stream_id) {
@@ -246,7 +284,8 @@ size_t Channel::conn(roo::byte* buf, long& next_send_micros) {
 
 void Channel::handleHandshakePacket(uint16_t peer_seq_num,
                                     uint32_t peer_stream_id,
-                                    uint32_t ack_stream_id, bool want_ack) {
+                                    uint32_t ack_stream_id, bool want_ack,
+                                    bool& outgoing_data_ready) {
   roo::lock_guard<roo::mutex> guard(handshake_mutex_);
   MLOG(roo_transport_reliable_channel_connection)
       << "Handshake packet received: peer_seq_num=" << peer_seq_num
@@ -266,6 +305,7 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
       MLOG(roo_transport_reliable_channel_connection)
           << "Receiver is now connected.";
       receiver_.setConnected(peer_seq_num);
+      outgoing_data_ready = true;
 
       if (ack_stream_id == my_stream_id_) {
         MLOG(roo_transport_reliable_channel_connection)
@@ -318,6 +358,7 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
             << "Transmitter is now connected.";
         my_stream_id_acked_by_peer_ = true;
         transmitter_.setConnected();
+        outgoing_data_ready = true;
         connected_cv_.notify_all();
       }
       needs_handshake_ack_ = want_ack;
@@ -337,11 +378,12 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
 }
 
 void Channel::packetReceived(const roo::byte* buf, size_t len) {
+  bool outgoing_data_ready = false;
   uint16_t header = roo_io::LoadBeU16(buf);
   auto type = internal::GetPacketType(header);
   switch (type) {
     case internal::kDataAckPacket: {
-      transmitter_.ack(header & 0x0FFF, buf + 2, len - 2);
+      transmitter_.ack(header & 0x0FFF, buf + 2, len - 2, outgoing_data_ready);
       break;
     }
     case internal::kFlowControlPacket: {
@@ -359,22 +401,23 @@ void Channel::packetReceived(const roo::byte* buf, size_t len) {
       uint32_t ack_stream_id = roo_io::LoadBeU32(buf + 6);
       bool want_ack = roo_io::LoadU8(buf + 10) != 0;
       handleHandshakePacket(peer_seq_num, peer_stream_id, ack_stream_id,
-                            want_ack);
-      if (want_ack) {
-        outgoing_data_ready_.notify();
-      }
+                            want_ack, outgoing_data_ready);
       break;
     }
     case internal::kDataPacket:
     case internal::kFinPacket: {
       if (receiver_.handleDataPacket(header & 0x0FFF, buf + 2, len - 2,
                                      type == internal::kFinPacket)) {
-        outgoing_data_ready_.notify();
+        outgoing_data_ready = true;
       }
+      break;
     }
     default: {
       // Unrecognized packet type; ignoring.
     }
+  }
+  if (outgoing_data_ready) {
+    outgoing_data_ready_.notify();
   }
 }
 

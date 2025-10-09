@@ -4,7 +4,8 @@
 #ifdef ROO_USE_THREADS
 
 #include "roo_io/status.h"
-#include "roo_transport/link/internal/thread_safe/outgoing_data_ready_notification.h"
+#include "roo_threads.h"
+#include "roo_threads/mutex.h"
 #include "roo_transport/link/internal/transmitter.h"
 
 namespace roo_transport {
@@ -12,9 +13,7 @@ namespace internal {
 
 class ThreadSafeTransmitter {
  public:
-  ThreadSafeTransmitter(
-      unsigned int sendbuf_log2,
-      internal::OutgoingDataReadyNotification& outgoing_data_ready);
+  ThreadSafeTransmitter(unsigned int sendbuf_log2);
 
   void reset();
 
@@ -31,27 +30,28 @@ class ThreadSafeTransmitter {
   }
 
   size_t write(const roo::byte* buf, size_t count, uint32_t my_stream_id,
-               roo_io::Status& stream_status);
+               roo_io::Status& stream_status, bool& outgoing_data_ready);
 
   size_t tryWrite(const roo::byte* buf, size_t count, uint32_t my_stream_id,
-                  roo_io::Status& stream_status);
+                  roo_io::Status& stream_status, bool& outgoing_data_ready);
 
   size_t availableForWrite(uint32_t my_stream_id,
                            roo_io::Status& stream_status) const;
 
-  void flush(uint32_t my_stream_id, roo_io::Status& stream_status);
+  void flush(uint32_t my_stream_id, roo_io::Status& stream_status,
+             bool& outgoing_data_ready);
 
   bool hasPendingData(uint32_t my_stream_id,
                       roo_io::Status& stream_status) const;
 
   // Closes the stream and blocks until all the data has been confirmed by the
   // recipient.
-  void close(uint32_t my_stream_id, roo_io::Status& stream_status);
+  void close(uint32_t my_stream_id, roo_io::Status& stream_status,
+             bool& outgoing_data_ready);
 
   void setConnected() {
     roo::lock_guard<roo::mutex> guard(mutex_);
     transmitter_.setConnected();
-    outgoing_data_ready_.notify();
   }
 
   void setBroken() {
@@ -73,7 +73,8 @@ class ThreadSafeTransmitter {
     return transmitter_.front();
   }
 
-  void ack(uint16_t seq_id, const roo::byte* ack_bitmap, size_t ack_bitmap_len);
+  void ack(uint16_t seq_id, const roo::byte* ack_bitmap, size_t ack_bitmap_len,
+           bool& outgoing_data_ready);
 
   void updateRecvHimark(uint16_t recv_himark) {
     roo::lock_guard<roo::mutex> guard(mutex_);
@@ -104,8 +105,6 @@ class ThreadSafeTransmitter {
   // Notifies the application writer thread that the send buffer has been
   // entirely acked (all data has been delivered).
   roo::condition_variable all_acked_;
-
-  internal::OutgoingDataReadyNotification& outgoing_data_ready_;
 };
 
 }  // namespace internal

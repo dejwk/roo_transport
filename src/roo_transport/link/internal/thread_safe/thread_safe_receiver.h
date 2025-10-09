@@ -15,8 +15,7 @@ class ThreadSafeReceiver {
   // Can be supplied to be notified when new data is available for read.
   using RecvCb = std::function<void()>;
 
-  ThreadSafeReceiver(unsigned int recvbuf_log2,
-                     OutgoingDataReadyNotification& notification);
+  ThreadSafeReceiver(unsigned int recvbuf_log2);
 
   Receiver::State state() const;
 
@@ -24,17 +23,18 @@ class ThreadSafeReceiver {
   void setBroken();
 
   size_t read(roo::byte* buf, size_t count, uint32_t my_stream_id,
-              roo_io::Status& stream_status);
+              roo_io::Status& stream_status, bool& outgoing_data_ready);
 
   size_t tryRead(roo::byte* buf, size_t count, uint32_t my_stream_id,
-                 roo_io::Status& stream_status);
+                 roo_io::Status& stream_status, bool& outgoing_data_ready);
 
   int peek(uint32_t my_stream_id, roo_io::Status& stream_status);
 
   size_t availableForRead(uint32_t my_stream_id,
                           roo_io::Status& stream_status) const;
 
-  void markInputClosed(uint32_t my_stream_id, roo_io::Status& stream_status);
+  void markInputClosed(uint32_t my_stream_id, roo_io::Status& stream_status,
+                       bool& outgoing_data_ready);
 
   void reset();
   void init(uint32_t my_stream_id);
@@ -77,7 +77,6 @@ class ThreadSafeReceiver {
 
   mutable roo::mutex mutex_;
   roo::condition_variable has_data_;
-  OutgoingDataReadyNotification& outgoing_data_ready_;
 };
 
 }  // namespace internal

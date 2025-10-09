@@ -107,7 +107,8 @@ class Channel {
   LinkStatus getLinkStatusInternal(uint32_t my_stream_id);
 
   void handleHandshakePacket(uint16_t peer_seq_num, uint32_t peer_stream_id,
-                             uint32_t ack_stream_id, bool want_ack);
+                             uint32_t ack_stream_id, bool want_ack,
+                             bool& outgoing_data_ready);
 
   size_t conn(roo::byte* buf, long& next_send_micros);
 

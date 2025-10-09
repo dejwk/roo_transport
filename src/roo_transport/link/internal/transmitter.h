@@ -40,7 +40,7 @@ class Transmitter {
 
   uint32_t packets_delivered() const { return packets_delivered_; }
 
-  size_t tryWrite(const roo::byte* buf, size_t count, bool* made_space);
+  size_t tryWrite(const roo::byte* buf, size_t count, bool& made_space);
   size_t availableForWrite() const;
   bool flush();
 

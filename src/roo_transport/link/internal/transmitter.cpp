@@ -19,8 +19,8 @@ Transmitter::Transmitter(unsigned int sendbuf_log2)
       packets_delivered_(0) {}
 
 size_t Transmitter::tryWrite(const roo::byte* buf, size_t count,
-                             bool* outgoing_data_ready) {
-  *outgoing_data_ready = false;
+                             bool& outgoing_data_ready) {
+  outgoing_data_ready = false;
   if (count == 0) return 0;
   if (end_of_stream_) return 0;
   if (state_ == kIdle || state_ == kBroken) return 0;
@@ -45,7 +45,7 @@ size_t Transmitter::tryWrite(const roo::byte* buf, size_t count,
     count -= written;
     if (current_out_buffer_->finished()) {
       current_out_buffer_ = nullptr;
-      *outgoing_data_ready = true;
+      outgoing_data_ready = true;
     }
 
   } while (count > 0);
@@ -156,8 +156,21 @@ const internal::OutBuffer* Transmitter::getBufferToSend(
     }
   }
   if (!out_ring_.contains(to_send)) {
-    // No more packets to send at all.
-    return nullptr;
+    // // No more packets to send at all.
+    // // Auto-flush: let's see if we can opportunistically close and send a
+    // // packet?
+    // if (out_ring_.slotsUsed() == 1 && out_ring_.begin() < recv_himark_) {
+    //   OutBuffer& buf = getOutBuffer(out_ring_.begin());
+    //   if (!buf.finished())
+    //   DCHECK(!buf.flushed());
+    //   DCHECK(!buf.acked());
+    //   DCHECK_GT(buf.size(), 0);
+    //   buf.finish();
+    //   to_send = out_ring_.begin();
+    //   min_send_time = roo_time::Uptime::Start();
+    // } else {
+      return nullptr;
+    // }
   }
   if (min_send_time > now) {
     // The next packet to (re)send is not ready yet.

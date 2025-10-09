@@ -6,10 +6,8 @@
 namespace roo_transport {
 namespace internal {
 
-ThreadSafeReceiver::ThreadSafeReceiver(
-    unsigned int recvbuf_log2,
-    internal::OutgoingDataReadyNotification& outgoing_data_ready)
-    : receiver_(recvbuf_log2), outgoing_data_ready_(outgoing_data_ready) {}
+ThreadSafeReceiver::ThreadSafeReceiver(unsigned int recvbuf_log2)
+    : receiver_(recvbuf_log2) {}
 
 Receiver::State ThreadSafeReceiver::state() const {
   roo::lock_guard<roo::mutex> guard(mutex_);
@@ -19,7 +17,6 @@ Receiver::State ThreadSafeReceiver::state() const {
 void ThreadSafeReceiver::setConnected(SeqNum peer_seq_num) {
   roo::lock_guard<roo::mutex> guard(mutex_);
   receiver_.setConnected(peer_seq_num);
-  outgoing_data_ready_.notify();
 }
 
 void ThreadSafeReceiver::setBroken() {
@@ -52,16 +49,13 @@ bool ThreadSafeReceiver::checkConnectionStatus(uint32_t my_stream_id,
 
 size_t ThreadSafeReceiver::read(roo::byte* buf, size_t count,
                                 uint32_t my_stream_id,
-                                roo_io::Status& stream_status) {
+                                roo_io::Status& stream_status,
+                                bool& outgoing_data_ready) {
   if (count == 0) return 0;
   roo::unique_lock<roo::mutex> guard(mutex_);
   if (!checkConnectionStatus(my_stream_id, stream_status)) return 0;
   while (true) {
-    bool outgoing_data_ready = false;
     size_t total_read = receiver_.tryRead(buf, count, outgoing_data_ready);
-    if (outgoing_data_ready) {
-      outgoing_data_ready_.notify();
-    }
     if (total_read > 0) {
       return total_read;
     }
@@ -72,15 +66,12 @@ size_t ThreadSafeReceiver::read(roo::byte* buf, size_t count,
 
 size_t ThreadSafeReceiver::tryRead(roo::byte* buf, size_t count,
                                    uint32_t my_stream_id,
-                                   roo_io::Status& stream_status) {
+                                   roo_io::Status& stream_status,
+                                   bool& outgoing_data_ready) {
   if (count == 0) return 0;
   roo::lock_guard<roo::mutex> guard(mutex_);
   if (!checkConnectionStatus(my_stream_id, stream_status)) return 0;
-  bool outgoing_data_ready = false;
   size_t total_read = receiver_.tryRead(buf, count, outgoing_data_ready);
-  if (outgoing_data_ready) {
-    outgoing_data_ready_.notify();
-  }
   return total_read;
 }
 
@@ -99,14 +90,11 @@ size_t ThreadSafeReceiver::availableForRead(
 }
 
 void ThreadSafeReceiver::markInputClosed(uint32_t my_stream_id,
-                                         roo_io::Status& stream_status) {
+                                         roo_io::Status& stream_status,
+                                         bool& outgoing_data_ready) {
   roo::lock_guard<roo::mutex> guard(mutex_);
   if (!checkConnectionStatus(my_stream_id, stream_status)) return;
-  bool outgoing_data_ready = false;
   receiver_.markInputClosed(outgoing_data_ready);
-  if (outgoing_data_ready) {
-    outgoing_data_ready_.notify();
-  }
 }
 
 void ThreadSafeReceiver::reset() {
@@ -118,8 +106,6 @@ void ThreadSafeReceiver::reset() {
 void ThreadSafeReceiver::init(uint32_t my_stream_id) {
   roo::lock_guard<roo::mutex> guard(mutex_);
   receiver_.init(my_stream_id);
-  // Need to init the handshake.
-  outgoing_data_ready_.notify();
   has_data_.notify_all();
 }
 

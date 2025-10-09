@@ -22,13 +22,10 @@ class OutgoingDataReadyNotification {
 
   bool await(long micros) {
     roo::unique_lock<roo::mutex> guard(mutex_);
-    cv_.wait_for(guard, roo_time::Micros(micros),
-                 [this] { return has_data_to_send_; });
-    if (has_data_to_send_) {
-      has_data_to_send_ = false;
-      return true;
-    }
-    return false;
+    bool result = cv_.wait_for(guard, roo_time::Micros(micros),
+                               [this]() { return has_data_to_send_; });
+    has_data_to_send_ = false;
+    return result;
   }
 
  private:
