@@ -156,21 +156,22 @@ const internal::OutBuffer* Transmitter::getBufferToSend(
     }
   }
   if (!out_ring_.contains(to_send)) {
-    // // No more packets to send at all.
-    // // Auto-flush: let's see if we can opportunistically close and send a
-    // // packet?
-    // if (out_ring_.slotsUsed() == 1 && out_ring_.begin() < recv_himark_) {
-    //   OutBuffer& buf = getOutBuffer(out_ring_.begin());
-    //   if (!buf.finished())
-    //   DCHECK(!buf.flushed());
-    //   DCHECK(!buf.acked());
-    //   DCHECK_GT(buf.size(), 0);
-    //   buf.finish();
-    //   to_send = out_ring_.begin();
-    //   min_send_time = roo_time::Uptime::Start();
-    // } else {
+    // No more packets to send at all.
+    // Auto-flush: let's see if we can opportunistically close and send a
+    // packet?
+    if (out_ring_.slotsUsed() != 1 || out_ring_.begin() >= recv_himark_) {
       return nullptr;
-    // }
+    }
+    OutBuffer& buf = getOutBuffer(out_ring_.begin());
+    if (buf.finished()) {
+      DCHECK_GT(buf.send_counter(), 0);
+      return nullptr;
+    }
+    DCHECK(!buf.acked());
+    DCHECK_GT(buf.size(), 0);
+    buf.finish();
+    to_send = out_ring_.begin();
+    min_send_time = roo_time::Uptime::Start();
   }
   if (min_send_time > now) {
     // The next packet to (re)send is not ready yet.

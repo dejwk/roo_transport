@@ -226,7 +226,8 @@ TEST_F(TransferTest, BlockingTransfer) {
   client([](SerialLink& stream) {
     stream.out().writeFully((const roo::byte*)"Hello, ", 7);
     stream.out().writeFully((const roo::byte*)"world!", 6);
-    stream.out().flush();
+    // Flush is optional; the stream auto-flushes.
+    // stream.out().flush();
     roo::byte buf[64];
     EXPECT_EQ(12, stream.in().readFully(buf, 12));
     buf[12] = roo::byte{0};
