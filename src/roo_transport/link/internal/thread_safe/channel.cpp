@@ -45,19 +45,15 @@ Channel::Channel(PacketSender& sender, LinkBufferSize sendbuf,
       needs_handshake_ack_(false),
       successive_handshake_retries_(0),
       next_scheduled_handshake_update_(roo_time::Uptime::Start()),
+      disconnect_fn_(nullptr),
       sender_thread_(),
       active_(true) {
   CHECK_LE((unsigned int)sendbuf, 12);
   CHECK_LE((unsigned int)sendbuf, recvbuf);
 }
 
-Channel::~Channel() {
-  active_ = false;
-  outgoing_data_ready_.notify();
-  if (sender_thread_.joinable()) {
-    sender_thread_.join();
-  }
-}
+Channel::~Channel() { end(); }
+
 size_t Channel::write(const roo::byte* buf, size_t count, uint32_t my_stream_id,
                       roo_io::Status& stream_status) {
   bool outgoing_data_ready = false;
@@ -142,10 +138,13 @@ uint32_t Channel::my_stream_id() const {
   return my_stream_id_;
 }
 
-uint32_t Channel::connect() {
+uint32_t Channel::connect(std::function<void()> disconnect_fn) {
   uint32_t my_stream_id;
+  std::function<void()> old_disconnect_fn;
   {
     roo::lock_guard<roo::mutex> guard(handshake_mutex_);
+    old_disconnect_fn = std::move(disconnect_fn_);
+    disconnect_fn_ = disconnect_fn;
     my_stream_id_ = 0;
     my_stream_id_acked_by_peer_ = false;
     peer_stream_id_ = 0;
@@ -163,10 +162,14 @@ uint32_t Channel::connect() {
   }
   // We need to send that handshake message.
   outgoing_data_ready_.notify();
+  if (old_disconnect_fn != nullptr) {
+    old_disconnect_fn();
+  }
   return my_stream_id;
 }
 
 void Channel::disconnect(uint32_t my_stream_id) {
+  std::function<void()> disconnect_fn;
   {
     roo::lock_guard<roo::mutex> guard(handshake_mutex_);
     if (my_stream_id_ != my_stream_id) return;
@@ -178,8 +181,13 @@ void Channel::disconnect(uint32_t my_stream_id) {
     transmitter_.reset();
     receiver_.reset();
     connected_cv_.notify_all();
+    disconnect_fn = std::move(disconnect_fn_);
+    disconnect_fn_ = nullptr;
   }
   outgoing_data_ready_.notify();
+  if (disconnect_fn != nullptr) {
+    disconnect_fn();
+  }
 }
 
 LinkStatus Channel::getLinkStatus(uint32_t stream_id) {
@@ -286,6 +294,7 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
                                     uint32_t peer_stream_id,
                                     uint32_t ack_stream_id, bool want_ack,
                                     bool& outgoing_data_ready) {
+  std::function<void()> disconnect_fn;
   roo::lock_guard<roo::mutex> guard(handshake_mutex_);
   MLOG(roo_transport_reliable_channel_connection)
       << "Handshake packet received: peer_seq_num=" << peer_seq_num
@@ -323,6 +332,8 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
       if (want_ack && (peer_stream_id_ != peer_stream_id) &&
           ack_stream_id == 0) {
         // The peer opened a new stream.
+        disconnect_fn = std::move(disconnect_fn_);
+        disconnect_fn_ = nullptr;
         if (!receiver_.done()) {
           MLOG(roo_transport_reliable_channel_connection)
               << "Disconnection detected: " << peer_stream_id_ << ", "
@@ -336,8 +347,8 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
             MLOG(roo_transport_reliable_channel_connection)
                 << "Transmitter is now idle.";
             transmitter_.reset();
-            my_stream_id_ = 0;
           }
+          my_stream_id_ = 0;
           connected_cv_.notify_all();
           MLOG(roo_transport_reliable_channel_connection)
               << "Receiver is now broken.";
@@ -374,6 +385,9 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
     default: {
       break;
     }
+  }
+  if (disconnect_fn != nullptr) {
+    disconnect_fn();
   }
 }
 
@@ -444,6 +458,14 @@ void Channel::begin() {
 #endif
   attrs.set_name("send_loop");
   sender_thread_ = roo::thread(attrs, [this]() { sendLoop(); });
+}
+
+void Channel::end() {
+  active_ = false;
+  outgoing_data_ready_.notify();
+  if (sender_thread_.joinable()) {
+    sender_thread_.join();
+  }
 }
 
 }  // namespace roo_transport

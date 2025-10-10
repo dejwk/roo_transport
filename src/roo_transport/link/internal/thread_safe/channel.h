@@ -39,6 +39,7 @@ class Channel {
   ~Channel();
 
   void begin();
+  void end();
 
   uint32_t my_stream_id() const;
 
@@ -88,7 +89,7 @@ class Channel {
   uint32_t packets_received() const { return receiver_.packets_received(); }
 
   // Returns a newly-generated my_stream_id.
-  uint32_t connect();
+  uint32_t connect(std::function<void()> disconnect_fn = nullptr);
 
   LinkStatus getLinkStatus(uint32_t my_stream_id);
 
@@ -144,6 +145,11 @@ class Channel {
 
   // GUARDED_BY(handshake_mutex_).
   roo_time::Uptime next_scheduled_handshake_update_;
+
+  // If not null, will be called, exactly once (from the receive thread) as soon
+  // as disconnection is detected.
+  // GUARDED_BY(handshake_mutex_).
+  std::function<void()> disconnect_fn_;
 
 #ifdef ROO_USE_THREADS
   roo::thread sender_thread_;

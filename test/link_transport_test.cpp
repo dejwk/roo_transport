@@ -228,6 +228,32 @@ TEST(LinkTransport, ThrashingReconnect) {
   server_thread.join();
 }
 
+TEST(LinkTransport, DisconnectFnCalledWhenDisconnectDetected) {
+  LinkLoopback loopback;
+
+  roo::thread server_thread([&]() {
+    Link server = loopback.server().connect();
+    // Note: by the time we're checking, might already be broken by the
+    // subsequent client reconnect.
+    EXPECT_EQ(server.status(), LinkStatus::kConnected);
+    // Reconnect -> should trigger disconnection fn on the client.
+    server = loopback.server().connect();
+    EXPECT_EQ(server.status(), LinkStatus::kConnected);
+    server.out().close();
+  });
+  int disconnect_counter = 0;
+  Link client = loopback.client().connect([&]() { disconnect_counter++; });
+  client.out().close();
+  EXPECT_EQ(disconnect_counter, 1);
+  EXPECT_EQ(client.status(), LinkStatus::kBroken);
+  client = loopback.client().connect();
+  EXPECT_EQ(disconnect_counter, 1);
+  EXPECT_EQ(client.status(), LinkStatus::kConnected);
+  client.out().close();
+
+  server_thread.join();
+}
+
 class TransferTest : public ::testing::TestWithParam<int> {
  protected:
   TransferTest() : loopback_() {}

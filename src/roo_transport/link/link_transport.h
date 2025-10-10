@@ -17,11 +17,13 @@ class LinkTransport {
   // Starts the send thread.
   void begin() { channel_.begin(); }
 
+  void end() { channel_.end(); }
+
   // Supply an incoming packet received from the underlying transport.
   void processIncomingPacket(const roo::byte* buf, size_t len);
 
-  Link connect();
-  Link connectAsync();
+  Link connect(std::function<void()> disconnect_fn = nullptr);
+  Link connectAsync(std::function<void()> disconnect_fn = nullptr);
 
   uint32_t packets_sent() const { return channel_.packets_sent(); }
   uint32_t packets_delivered() const { return channel_.packets_delivered(); }
