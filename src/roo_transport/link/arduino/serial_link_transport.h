@@ -8,9 +8,11 @@ namespace roo_transport {
 
 #if (defined ESP32 || defined ROO_TESTING)
 
+
+template <typename SerialType>
 class SerialLinkTransport : public LinkStreamTransport {
  public:
-  SerialLinkTransport(HardwareSerial& serial,
+  SerialLinkTransport(SerialType& serial,
                       LinkBufferSize sendbuf = kBufferSize4KB,
                       LinkBufferSize recvbuf = kBufferSize4KB)
       : LinkStreamTransport(serial, sendbuf, recvbuf), serial_(serial) {}
@@ -26,7 +28,7 @@ class SerialLinkTransport : public LinkStreamTransport {
   }
 
  private:
-  HardwareSerial& serial_;
+  SerialType& serial_;
 };
 
 #endif  // ESP32

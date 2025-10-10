@@ -9,9 +9,10 @@ namespace roo_transport {
 
 #if (defined ESP32 || defined ROO_TESTING)
 
+template <typename SerialType>
 class ReliableHardwareSerial : public LinkStream {
  public:
-  ReliableHardwareSerial(HardwareSerial& serial,
+  ReliableHardwareSerial(SerialType& serial,
                          LinkBufferSize sendbuf = kBufferSize4KB,
                          LinkBufferSize recvbuf = kBufferSize4KB)
       : serial_(serial), transport_(serial, sendbuf, recvbuf) {}
@@ -35,11 +36,11 @@ class ReliableHardwareSerial : public LinkStream {
   }
 
  private:
-  HardwareSerial& serial_;
-  SerialLinkTransport transport_;
+  SerialType& serial_;
+  SerialLinkTransport<SerialType> transport_;
 };
 
-class ReliableSerial : public ReliableHardwareSerial {
+class ReliableSerial : public ReliableHardwareSerial<decltype(Serial)> {
  public:
   ReliableSerial(LinkBufferSize sendbuf = kBufferSize4KB,
                  LinkBufferSize recvbuf = kBufferSize4KB)
@@ -47,7 +48,7 @@ class ReliableSerial : public ReliableHardwareSerial {
 };
 
 #if SOC_UART_NUM > 1
-class ReliableSerial1 : public ReliableHardwareSerial {
+class ReliableSerial1 : public ReliableHardwareSerial<decltype(Serial1)> {
  public:
   ReliableSerial1(LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)
@@ -55,7 +56,7 @@ class ReliableSerial1 : public ReliableHardwareSerial {
 };
 #endif  // SOC_UART_NUM > 1
 #if SOC_UART_NUM > 2
-class ReliableSerial2 : public ReliableHardwareSerial {
+class ReliableSerial2 : public ReliableHardwareSerial<decltype(Serial2)> {
  public:
   ReliableSerial2(LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)
