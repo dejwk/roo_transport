@@ -2,50 +2,34 @@
 
 #if (defined ARDUINO)
 
-#include "Arduino.h"
-#include "roo_io_arduino.h"
-#include "roo_io_arduino/stream/arduino_stream_input_stream.h"
-#include "roo_io_arduino/stream/arduino_stream_output_stream.h"
-#include "roo_transport.h"
-#include "roo_transport/link/arduino/link_stream.h"
-#include "roo_transport/link/link_transport.h"
-#include "roo_transport/packets/over_stream/packet_receiver_over_stream.h"
-#include "roo_transport/packets/over_stream/packet_sender_over_stream.h"
+#include "roo_transport/link/arduino/link_stream_transport.h"
 
 namespace roo_transport {
 
-class SerialLinkTransport {
+#if (defined ESP32 || defined ROO_TESTING)
+
+class SerialLinkTransport : public LinkStreamTransport {
  public:
-  SerialLinkTransport(decltype(Serial1)& serial,
+  SerialLinkTransport(HardwareSerial& serial,
                       LinkBufferSize sendbuf = kBufferSize4KB,
-                      LinkBufferSize recvbuf = kBufferSize4KB);
+                      LinkBufferSize recvbuf = kBufferSize4KB)
+      : LinkStreamTransport(serial, sendbuf, recvbuf), serial_(serial) {}
 
-  void begin();
+  void begin() {
+    LinkStreamTransport::begin();
+    serial_.onReceive([this]() { tryReceive(); });
+  }
 
-  LinkStream connect();
-  LinkStream connectAsync();
-
-  uint32_t packets_sent() const { return transport_.packets_sent(); }
-  uint32_t packets_delivered() const { return transport_.packets_delivered(); }
-  uint32_t packets_received() const { return transport_.packets_received(); }
-
-  size_t receiver_bytes_received() const { return receiver_.bytes_received(); }
-  size_t receiver_bytes_accepted() const { return receiver_.bytes_accepted(); }
-
-  // // For single-threaded systems only.
-  // void loop();
-
-  LinkTransport& transport() { return transport_; }
+  void end() {
+    serial_.onReceive(nullptr);
+    serial_.end();
+  }
 
  private:
-  decltype(Serial1)& serial_;
-  roo_io::ArduinoStreamOutputStream output_;
-  roo_io::ArduinoStreamInputStream input_;
-  PacketSenderOverStream sender_;
-  PacketReceiverOverStream receiver_;
-
-  LinkTransport transport_;
+  HardwareSerial& serial_;
 };
+
+#endif  // ESP32
 
 }  // namespace roo_transport
 

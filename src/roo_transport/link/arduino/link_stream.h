@@ -58,6 +58,9 @@ class LinkStream : public Stream {
   // Retrieves the underlying link.
   const Link& link() const { return link_; }
 
+ protected:
+  void set(Link&& link) { link_ = std::move(link); }
+
  private:
   friend class StreamLinkTransport;
 
