@@ -7,16 +7,16 @@
 
 namespace roo_transport {
 
-// Represents a reliable bidirectional stream, e.g. over Serial.
-// Implements Arduino Stream interface.
-class SerialLink : public Stream {
+// Link wrapped in the arduino Stream interface. Represents a reliable
+// bidirectional stream, e.g. over Serial.
+class LinkStream : public Stream {
  public:
-  // Creates a dummy serial link in state kIdle.
+  // Creates a dummy stream link in state kIdle.
   // Use SerialLinkTransport::connect() to create a proper connected link.
-  SerialLink() = default;
+  LinkStream() = default;
 
-  // Decorate a non-Arduino link into an Arduino-compliant one.
-  SerialLink(Link link);
+  // Wrap a link into StreamLink.
+  LinkStream(Link link);
 
   int available() override;
   int read() override;
@@ -31,11 +31,11 @@ class SerialLink : public Stream {
   void flush() override;
 
   // Obtains the input stream that can be used to read from the reliable
-  // serial.
+  // stream.
   LinkInputStream& in() { return link_.in(); }
 
   // Obtains the output stream that can be used to write to the reliable
-  // serial.
+  // stream.
   LinkOutputStream& out() { return link_.out(); }
 
   // Returns the current status of the link.
@@ -52,10 +52,16 @@ class SerialLink : public Stream {
   // if the timeout has elapsed.
   bool awaitConnected(roo_time::Duration timeout);
 
- private:
-  friend class SerialLinkTransport;
+  // Retrieves the underlying link.
+  Link& link() { return link_; }
 
-  SerialLink(Channel& channel, uint32_t my_stream_id);
+  // Retrieves the underlying link.
+  const Link& link() const { return link_; }
+
+ private:
+  friend class StreamLinkTransport;
+
+  LinkStream(Channel& channel, uint32_t my_stream_id);
 
   size_t timedRead(roo::byte* buf, size_t count, roo_time::Duration timeout);
 

@@ -29,14 +29,14 @@ void SerialLinkTransport::begin() {
 
 // void SerialLinkTransport::loop() { transport_.loop(); }
 
-SerialLink SerialLinkTransport::connectAsync() {
-  return SerialLink(transport_.connect());
+LinkStream SerialLinkTransport::connectAsync() {
+  return LinkStream(transport_.connect());
 }
 
-SerialLink SerialLinkTransport::connect() {
-  SerialLink link = connectAsync();
+LinkStream SerialLinkTransport::connect() {
+  LinkStream link = connectAsync();
   link.awaitConnected();
-  return SerialLink(std::move(link));
+  return LinkStream(std::move(link));
 }
 
 }  // namespace roo_transport

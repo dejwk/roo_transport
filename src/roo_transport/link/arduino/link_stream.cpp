@@ -1,19 +1,19 @@
 #ifdef ARDUINO
 
-#include "roo_transport/link/arduino/serial_link.h"
+#include "roo_transport/link/arduino/link_stream.h"
 
 #include <cstddef>
 
 namespace roo_transport {
 
-SerialLink::SerialLink(Channel& channel, uint32_t my_stream_id)
+LinkStream::LinkStream(Channel& channel, uint32_t my_stream_id)
     : link_(channel, my_stream_id) {}
 
-SerialLink::SerialLink(Link socket) : link_(std::move(socket)) {}
+LinkStream::LinkStream(Link socket) : link_(std::move(socket)) {}
 
-int SerialLink::available() { return in().available(); }
+int LinkStream::available() { return in().available(); }
 
-int SerialLink::read() {
+int LinkStream::read() {
   if (available() == 0) {
     yield();
     return -1;
@@ -21,38 +21,38 @@ int SerialLink::read() {
   return in().read();
 }
 
-int SerialLink::peek() { return in().peek(); }
+int LinkStream::peek() { return in().peek(); }
 
-size_t SerialLink::readBytes(char* buffer, size_t length) {
+size_t LinkStream::readBytes(char* buffer, size_t length) {
   return timedRead((roo::byte*)buffer, length, roo_time::Millis(getTimeout()));
 }
 
-size_t SerialLink::readBytes(uint8_t* buffer, size_t length) {
+size_t LinkStream::readBytes(uint8_t* buffer, size_t length) {
   return timedRead((roo::byte*)buffer, length, roo_time::Millis(getTimeout()));
 }
 
-size_t SerialLink::write(uint8_t val) {
+size_t LinkStream::write(uint8_t val) {
   out().write((const roo::byte*)&val, 1);
   return 1;
 }
 
-size_t SerialLink::write(const uint8_t* buffer, size_t size) {
+size_t LinkStream::write(const uint8_t* buffer, size_t size) {
   return out().writeFully((const roo::byte*)buffer, size);
 }
 
-int SerialLink::availableForWrite() { return out().availableForWrite(); }
+int LinkStream::availableForWrite() { return out().availableForWrite(); }
 
-void SerialLink::flush() { out().flush(); }
+void LinkStream::flush() { out().flush(); }
 
-LinkStatus SerialLink::status() const { return link_.status(); }
+LinkStatus LinkStream::status() const { return link_.status(); }
 
-void SerialLink::awaitConnected() { link_.awaitConnected(); }
+void LinkStream::awaitConnected() { link_.awaitConnected(); }
 
-bool SerialLink::awaitConnected(roo_time::Duration timeout) {
+bool LinkStream::awaitConnected(roo_time::Duration timeout) {
   return link_.awaitConnected(timeout);
 }
 
-size_t SerialLink::timedRead(roo::byte* buf, size_t count,
+size_t LinkStream::timedRead(roo::byte* buf, size_t count,
                              roo_time::Duration timeout) {
   roo_time::Uptime start = roo_time::Uptime::Now();
   size_t total = 0;

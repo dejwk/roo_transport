@@ -108,8 +108,8 @@ namespace roo_transport {
 
 TEST(ReliableSerial, ConstructionDestruction) {
   SerialLinkTransport transport(Serial1);
-  SerialLink link;
-  EXPECT_EQ(link.status(), LinkStatus::kIdle);
+  LinkStream stream;
+  EXPECT_EQ(stream.status(), LinkStatus::kIdle);
 }
 
 class TransferTest : public ::testing::Test {
@@ -137,11 +137,11 @@ class TransferTest : public ::testing::Test {
     }
   }
 
-  void server(std::function<void(SerialLink& stream)> fn) {
+  void server(std::function<void(LinkStream& stream)> fn) {
     roo::thread::attributes server_attrs;
     server_attrs.set_name("server");
     server_thread_ = roo::thread(server_attrs, [this, fn]() {
-      SerialLink server = transport1.connect();
+      LinkStream server = transport1.connect();
       ASSERT_EQ(server.status(), LinkStatus::kConnected);
       ASSERT_EQ(server.in().status(), roo_io::kOk);
       ASSERT_EQ(server.out().status(), roo_io::kOk);
@@ -151,11 +151,11 @@ class TransferTest : public ::testing::Test {
     });
   }
 
-  void client(std::function<void(SerialLink& stream)> fn) {
+  void client(std::function<void(LinkStream& stream)> fn) {
     roo::thread::attributes client_attrs;
     client_attrs.set_name("client");
     client_thread_ = roo::thread(client_attrs, [this, fn]() {
-      SerialLink client = transport2.connect();
+      LinkStream client = transport2.connect();
       ASSERT_EQ(client.status(), LinkStatus::kConnected);
       ASSERT_EQ(client.in().status(), roo_io::kOk);
       ASSERT_EQ(client.out().status(), roo_io::kOk);
@@ -215,7 +215,7 @@ TEST_F(TransferTest, TransferByteByByte) {
 
 // Using blocking I/O (the preferred way).
 TEST_F(TransferTest, BlockingTransfer) {
-  server([](SerialLink& stream) {
+  server([](LinkStream& stream) {
     roo::byte buf[64];
     EXPECT_EQ(13, stream.in().readFully(buf, 13));
     buf[13] = roo::byte{0};
@@ -223,7 +223,7 @@ TEST_F(TransferTest, BlockingTransfer) {
     stream.out().writeFully((const roo::byte*)"Hello, ", 7);
     stream.out().writeFully((const roo::byte*)"back!", 5);
   });
-  client([](SerialLink& stream) {
+  client([](LinkStream& stream) {
     stream.out().writeFully((const roo::byte*)"Hello, ", 7);
     stream.out().writeFully((const roo::byte*)"world!", 6);
     // Flush is optional; the stream auto-flushes.

@@ -43,7 +43,7 @@ class Link {
   void disconnect();
 
  private:
-  friend class SerialLink;
+  friend class LinkStream;
   friend class LinkTransport;
 
   Link(Channel& channel, uint32_t my_stream_id);
