@@ -18,6 +18,15 @@ class Link {
   // Use LinkTransport::connect() to create a proper connected link.
   Link();
 
+  Link(const Link&) = delete;
+  Link& operator=(const Link&) = delete;
+
+  // Support for move.
+  Link(Link&& other);
+
+  // Support for move.
+  Link& operator=(Link&& other);
+
   // Obtains the input stream that can be used to read from the link.
   LinkInputStream& in() { return in_; }
 

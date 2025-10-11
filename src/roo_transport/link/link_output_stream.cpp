@@ -5,6 +5,27 @@
 
 namespace roo_transport {
 
+LinkOutputStream::LinkOutputStream(LinkOutputStream&& other) {
+  channel_ = other.channel_;
+  my_stream_id_ = other.my_stream_id_;
+  status_ = other.status_;
+  other.channel_ = nullptr;
+  other.my_stream_id_ = 0;
+  other.status_ = roo_io::kClosed;
+}
+
+LinkOutputStream& LinkOutputStream::operator=(LinkOutputStream&& other) {
+  if (this != &other) {
+    channel_ = other.channel_;
+    my_stream_id_ = other.my_stream_id_;
+    status_ = other.status_;
+    other.channel_ = nullptr;
+    other.my_stream_id_ = 0;
+    other.status_ = roo_io::kClosed;
+  }
+  return *this;
+}
+
 size_t LinkOutputStream::write(const roo::byte* buf, size_t count) {
   if (status_ != roo_io::kOk) return 0;
   if (count == 0) return 0;

@@ -5,6 +5,27 @@
 
 namespace roo_transport {
 
+LinkInputStream::LinkInputStream(LinkInputStream&& other) {
+  channel_ = other.channel_;
+  my_stream_id_ = other.my_stream_id_;
+  status_ = other.status_;
+  other.channel_ = nullptr;
+  other.my_stream_id_ = 0;
+  other.status_ = roo_io::kClosed;
+}
+
+LinkInputStream& LinkInputStream::operator=(LinkInputStream&& other) {
+  if (this != &other) {
+    channel_ = other.channel_;
+    my_stream_id_ = other.my_stream_id_;
+    status_ = other.status_;
+    other.channel_ = nullptr;
+    other.my_stream_id_ = 0;
+    other.status_ = roo_io::kClosed;
+  }
+  return *this;
+}
+
 void LinkInputStream::close() {
   if (status_ != roo_io::kOk && status_ != roo_io::kEndOfStream) return;
   channel_->closeInput(my_stream_id_, status_);

@@ -16,6 +16,12 @@ class LinkOutputStream : public roo_io::OutputStream {
   LinkOutputStream(Channel& channel, uint32_t my_stream_id)
       : channel_(&channel), my_stream_id_(my_stream_id), status_(roo_io::kOk) {}
 
+  LinkOutputStream(const LinkOutputStream&) = delete;
+  LinkOutputStream& operator=(const LinkOutputStream&) = delete;
+
+  LinkOutputStream(LinkOutputStream&& other);
+  LinkOutputStream& operator=(LinkOutputStream&& other);
+
   size_t write(const roo::byte* buf, size_t count) override;
 
   size_t tryWrite(const roo::byte* buf, size_t count) override;

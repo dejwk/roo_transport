@@ -18,6 +18,12 @@ class LinkInputStream : public roo_io::InputStream {
         my_stream_id_(my_stream_id),
         status_(my_stream_id == 0 ? roo_io::kClosed : roo_io::kOk) {}
 
+  LinkInputStream(const LinkInputStream&) = delete;
+  LinkInputStream& operator=(const LinkInputStream&) = delete;
+
+  LinkInputStream(LinkInputStream&& other);
+  LinkInputStream& operator=(LinkInputStream&& other);
+
   void close() override;
 
   size_t read(roo::byte* buf, size_t count) override;
