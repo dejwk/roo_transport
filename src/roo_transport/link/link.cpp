@@ -14,7 +14,9 @@ Link::Link(Link&& other)
     : channel_(other.channel_),
       in_(std::move(other.in_)),
       out_(std::move(other.out_)) {
-  other = Link();
+    other.channel_ = nullptr;
+    other.in_ = LinkInputStream();
+    other.out_ = LinkOutputStream();
 }
 
 Link& Link::operator=(Link&& other) {
@@ -22,7 +24,9 @@ Link& Link::operator=(Link&& other) {
     channel_ = other.channel_;
     in_ = std::move(other.in_);
     out_ = std::move(other.out_);
-    other = Link();
+    other.channel_ = nullptr;
+    other.in_ = LinkInputStream();
+    other.out_ = LinkOutputStream();
   }
   return *this;
 }
