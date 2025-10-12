@@ -311,13 +311,6 @@ size_t Channel::conn(roo::byte* buf, long& next_send_micros) {
              .ack_stream_id = peer_stream_id_,
              .want_ack = we_need_ack,
          };
-  // << (peer_stream_id_ == 0 ? "CONN"
-  //     : we_need_ack        ? "CONN/ACK"
-  //                          : "ACK")
-  // << " packet sent: peer_seq_num=" << (header & 0x0FFF)
-  // << ", my_stream_id=" << my_stream_id_
-  // << ", peer_stream_id=" << peer_stream_id_
-  // << ", want_ack=" << (we_need_ack);
   return 11;
 }
 
