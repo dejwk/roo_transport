@@ -114,7 +114,7 @@ TEST(ReliableSerial, ConstructionDestruction) {
 
 class TransferTest : public ::testing::Test {
  protected:
-  TransferTest() : transport1(Serial1), transport2(Serial2) {
+  TransferTest() {
     Serial1.begin(1000000, SERIAL_8N1, 12, 13);
     Serial2.begin(1000000, SERIAL_8N1, 14, 15);
 
@@ -165,8 +165,8 @@ class TransferTest : public ::testing::Test {
     });
   }
 
-  SerialLinkTransport transport1;
-  SerialLinkTransport transport2;
+  ReliableSerial1Transport transport1;
+  ReliableSerial2Transport transport2;
 
   roo::thread server_thread_;
   roo::thread client_thread_;
