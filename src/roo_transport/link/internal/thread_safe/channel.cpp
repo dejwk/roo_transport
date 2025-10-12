@@ -244,6 +244,28 @@ long Channel::trySend() {
   return next_send_micros;
 }
 
+namespace {
+
+struct HandshakePacket {
+  uint16_t self_seq_num;
+  uint32_t self_stream_id;
+  uint32_t ack_stream_id;
+  bool want_ack;
+
+  friend roo_logging::Stream& operator<<(roo_logging::Stream& s,
+                                         const HandshakePacket& p) {
+    if (p.ack_stream_id == 0) {
+      s << "CONN " << p.self_stream_id << ":" << p.self_seq_num;
+    } else {
+      s << (p.want_ack ? "CONN/ACK " : "ACK ") << p.self_stream_id << ":"
+        << p.self_seq_num << "/" << p.ack_stream_id;
+    }
+    return s;
+  }
+};
+
+}  // namespace
+
 size_t Channel::conn(roo::byte* buf, long& next_send_micros) {
   roo::lock_guard<roo::mutex> guard(handshake_mutex_);
   auto transmitter_state = transmitter_.state();
@@ -273,20 +295,29 @@ size_t Channel::conn(roo::byte* buf, long& next_send_micros) {
   }
   // Clearing the flag, as we're about to send the handshake packet.
   needs_handshake_ack_ = false;
+  bool we_need_ack = (transmitter_state != internal::Transmitter::kConnected);
   uint16_t header =
       FormatPacketHeader(transmitter_.front(), internal::kHandshakePacket);
   roo_io::StoreBeU16(header, buf);
   roo_io::StoreBeU32(my_stream_id_, buf + 2);
   roo_io::StoreBeU32(peer_stream_id_, buf + 6);
-  roo_io::StoreU8(
-      transmitter_state == internal::Transmitter::kConnected ? 0x0 : 0xFF,
-      buf + 10);
+  roo_io::StoreU8(we_need_ack ? 0xFF : 0x00, buf + 10);
   next_send_micros = std::min(next_send_micros, delay);
   MLOG(roo_transport_reliable_channel_connection)
-      << "Handshake packet sent: peer_seq_num=" << (header & 0x0FFF)
-      << ", my_stream_id=" << my_stream_id_
-      << ", peer_stream_id=" << peer_stream_id_ << ", want_ack="
-      << (transmitter_state != internal::Transmitter::kConnected);
+      << "Handshake packet sent: "
+      << HandshakePacket{
+             .self_seq_num = (uint16_t)(header & 0x0FFF),
+             .self_stream_id = my_stream_id_,
+             .ack_stream_id = peer_stream_id_,
+             .want_ack = we_need_ack,
+         };
+  // << (peer_stream_id_ == 0 ? "CONN"
+  //     : we_need_ack        ? "CONN/ACK"
+  //                          : "ACK")
+  // << " packet sent: peer_seq_num=" << (header & 0x0FFF)
+  // << ", my_stream_id=" << my_stream_id_
+  // << ", peer_stream_id=" << peer_stream_id_
+  // << ", want_ack=" << (we_need_ack);
   return 11;
 }
 
@@ -297,9 +328,13 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
   std::function<void()> disconnect_fn;
   roo::lock_guard<roo::mutex> guard(handshake_mutex_);
   MLOG(roo_transport_reliable_channel_connection)
-      << "Handshake packet received: peer_seq_num=" << peer_seq_num
-      << ", peer_stream_id=" << peer_stream_id
-      << ", ack_stream_id=" << ack_stream_id << ", want_ack=" << want_ack;
+      << "Handshake packet received: "
+      << HandshakePacket{
+             .self_seq_num = peer_seq_num,
+             .self_stream_id = peer_stream_id,
+             .ack_stream_id = ack_stream_id,
+             .want_ack = want_ack,
+         };
   switch (receiver_.state()) {
     case internal::Receiver::kConnecting: {
       if (ack_stream_id != 0 && ack_stream_id != my_stream_id_) {
