@@ -49,10 +49,9 @@ class ReliableEsp32Serial : public LinkStream {
 
 class ReliableHardwareSerial : public LinkStream {
  public:
-  class HardwareSerialInputStream : public roo_io::InputStream {
+  class UartInputStream : public roo_io::InputStream {
    public:
-    HardwareSerialInputStream(HardwareSerial& input, int num)
-        : input_(input), num_(num) {}
+    UartInputStream(int num) : num_(num) {}
 
     size_t tryRead(roo::byte* buf, size_t count) override {
       if (!isOpen()) return 0;
@@ -96,7 +95,6 @@ class ReliableHardwareSerial : public LinkStream {
     roo_io::Status status() const override { return status_; }
 
    private:
-    HardwareSerial& input_;
     int num_;
     mutable roo_io::Status status_;
   };
@@ -107,7 +105,7 @@ class ReliableHardwareSerial : public LinkStream {
       : serial_(serial),
         num_(num),
         output_(serial_),
-        input_(serial_, num),
+        input_(num),
         sender_(output_),
         receiver_(input_),
         transport_(sender_, sendbuf, recvbuf),
@@ -165,7 +163,7 @@ class ReliableHardwareSerial : public LinkStream {
   int num_;
   roo_io::ArduinoSerialOutputStream<HardwareSerial> output_;
   // roo_io::ArduinoSerialInputStream<HardwareSerial> input_;
-  HardwareSerialInputStream input_;
+  UartInputStream input_;
   PacketSenderOverStream sender_;
   PacketReceiverOverStream receiver_;
 
