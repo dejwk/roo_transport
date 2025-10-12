@@ -16,8 +16,10 @@ class OutgoingDataReadyNotification {
 
   void notify() {
     roo::unique_lock<roo::mutex> guard(mutex_);
+    if (has_data_to_send_) return;
     has_data_to_send_ = true;
-    cv_.notify_all();
+    // There is only one sender thread.
+    cv_.notify_one();
   }
 
   bool await(long micros) {
