@@ -49,12 +49,12 @@ class ReliableEsp32Serial : public LinkStream {
 
 class ReliableHardwareSerial : public LinkStream {
  public:
-  ReliableHardwareSerial(HardwareSerial& serial, int num,
+  ReliableHardwareSerial(HardwareSerial& serial, uart_port_t num,
                          LinkBufferSize sendbuf = kBufferSize4KB,
                          LinkBufferSize recvbuf = kBufferSize4KB)
       : serial_(serial),
         num_(num),
-        output_(serial_),
+        output_(num),
         input_(num),
         sender_(output_),
         receiver_(input_),
@@ -90,12 +90,9 @@ class ReliableHardwareSerial : public LinkStream {
     serial_.begin(baud, config, rxPin, txPin, invert, timeout_ms,
                   rxfifo_full_thrhd);
     transport_.begin();
-    serial_.onReceive([this]() {
-      receiver_.tryReceive(process_fn_);
-    });
-    serial_.onReceiveError([this](hardwareSerial_error_t) {
-      receiver_.tryReceive(process_fn_);
-    });
+    serial_.onReceive([this]() { receiver_.tryReceive(process_fn_); });
+    serial_.onReceiveError(
+        [this](hardwareSerial_error_t) { receiver_.tryReceive(process_fn_); });
     set(transport_.connect([]() {
       LOG(FATAL) << "Reliable serial: peer reset detected; rebooting";
     }));
@@ -111,8 +108,8 @@ class ReliableHardwareSerial : public LinkStream {
  private:
   HardwareSerial& serial_;
   int num_;
-  roo_io::UartOutputStream output_;
-  roo_io::UartInputStream input_;
+  roo_io::Esp32UartOutputStream output_;
+  roo_io::Esp32UartInputStream input_;
   PacketSenderOverStream sender_;
   PacketReceiverOverStream receiver_;
 
@@ -133,7 +130,7 @@ class ReliableSerial1 : public ReliableHardwareSerial {
  public:
   ReliableSerial1(LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableHardwareSerial(Serial1, 1, sendbuf, recvbuf) {}
+      : ReliableHardwareSerial(Serial1, UART_NUM_1, sendbuf, recvbuf) {}
 };
 #endif  // SOC_UART_NUM > 1
 #if SOC_UART_NUM > 2
@@ -141,7 +138,7 @@ class ReliableSerial2 : public ReliableHardwareSerial {
  public:
   ReliableSerial2(LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableHardwareSerial(Serial2, 2, sendbuf, recvbuf) {}
+      : ReliableHardwareSerial(Serial2, UART_NUM_2, sendbuf, recvbuf) {}
 };
 #endif  // SOC_UART_NUM > 2
 
