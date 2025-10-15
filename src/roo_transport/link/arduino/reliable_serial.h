@@ -7,8 +7,8 @@
 #include "roo_transport/link/arduino/serial_link_transport.h"
 
 #if (defined ESP32 || defined ROO_TESTING)
-#include "HardwareSerial.h"
-#include "driver/uart.h"
+#include "roo_io/uart/esp32/uart_input_stream.h"
+#include "roo_io/uart/esp32/uart_output_stream.h"
 #endif
 
 namespace roo_transport {
@@ -49,56 +49,6 @@ class ReliableEsp32Serial : public LinkStream {
 
 class ReliableHardwareSerial : public LinkStream {
  public:
-  class UartInputStream : public roo_io::InputStream {
-   public:
-    UartInputStream(int num) : num_(num) {}
-
-    size_t tryRead(roo::byte* buf, size_t count) override {
-      if (!isOpen()) return 0;
-      int read = uart_read_bytes((uart_port_t)num_, buf, count, 0);
-      return read > 0 ? read : 0;
-    }
-
-    size_t read(roo::byte* buf, size_t count) override {
-      if (!isOpen() || count == 0) return 0;
-      while (true) {
-        int read = uart_read_bytes((uart_port_t)num_, buf, count, 0);
-        if (read > 0) return read;
-        read = uart_read_bytes((uart_port_t)num_, buf, 1, portMAX_DELAY);
-        if (read > 0) return read;
-        status_ = roo_io::kReadError;
-        return 0;
-      }
-    }
-
-    size_t readFully(roo::byte* buf, size_t count) override {
-      if (!isOpen() || count == 0) return 0;
-      size_t total = 0;
-      while (total < count) {
-        int read =
-            uart_read_bytes((uart_port_t)num_, buf, count, portMAX_DELAY);
-        if (read < 0) {
-          status_ = roo_io::kReadError;
-          break;
-        }
-        total += read;
-        buf += read;
-        count -= read;
-      }
-      return total;
-    }
-
-    bool isOpen() const override { return status() == roo_io::kOk; }
-
-    void close() override { status_ = roo_io::kClosed; }
-
-    roo_io::Status status() const override { return status_; }
-
-   private:
-    int num_;
-    mutable roo_io::Status status_;
-  };
-
   ReliableHardwareSerial(HardwareSerial& serial, int num,
                          LinkBufferSize sendbuf = kBufferSize4KB,
                          LinkBufferSize recvbuf = kBufferSize4KB)
@@ -161,9 +111,8 @@ class ReliableHardwareSerial : public LinkStream {
  private:
   HardwareSerial& serial_;
   int num_;
-  roo_io::ArduinoSerialOutputStream<HardwareSerial> output_;
-  // roo_io::ArduinoSerialInputStream<HardwareSerial> input_;
-  UartInputStream input_;
+  roo_io::UartOutputStream output_;
+  roo_io::UartInputStream input_;
   PacketSenderOverStream sender_;
   PacketReceiverOverStream receiver_;
 

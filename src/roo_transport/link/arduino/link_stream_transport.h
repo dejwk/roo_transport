@@ -3,9 +3,9 @@
 #if (defined ARDUINO)
 
 #include "Arduino.h"
-#include "roo_io_arduino.h"
-#include "roo_io_arduino/stream/arduino_stream_input_stream.h"
-#include "roo_io_arduino/stream/arduino_stream_output_stream.h"
+#include "roo_io.h"
+#include "roo_io/stream/arduino/stream_input_stream.h"
+#include "roo_io/stream/arduino/stream_output_stream.h"
 #include "roo_transport.h"
 #include "roo_transport/link/arduino/link_stream.h"
 #include "roo_transport/link/link_transport.h"

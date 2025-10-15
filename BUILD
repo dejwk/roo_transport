@@ -15,7 +15,6 @@ cc_library(
     deps = [
         "@roo_collections",
         "@roo_io",
-        "@roo_io_arduino",
         "@roo_logging",
         "@roo_threads",
     ],

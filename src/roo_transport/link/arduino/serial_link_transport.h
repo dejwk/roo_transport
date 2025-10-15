@@ -2,8 +2,8 @@
 
 #if (defined ARDUINO)
 
-#include "roo_io_arduino/stream/arduino_serial_input_stream.h"
-#include "roo_io_arduino/stream/arduino_serial_output_stream.h"
+#include "roo_io/uart/arduino/serial_input_stream.h"
+#include "roo_io/uart/arduino/serial_output_stream.h"
 #include "roo_transport/link/arduino/link_stream.h"
 #include "roo_transport/link/link_transport.h"
 #include "roo_transport/packets/over_stream/packet_receiver_over_stream.h"
@@ -61,8 +61,8 @@ class SerialLinkTransport {
 
  private:
   SerialType& serial_;
-  roo_io::ArduinoSerialOutputStream<SerialType> output_;
-  roo_io::ArduinoSerialInputStream<SerialType> input_;
+  roo_io::ArduinoSerialOutputStream output_;
+  roo_io::ArduinoSerialInputStream input_;
   PacketSenderOverStream sender_;
   PacketReceiverOverStream receiver_;
 
