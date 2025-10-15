@@ -24,7 +24,8 @@ class Transmitter {
     // that we can be sending messages to it.
     kConnected = 2,
 
-    // Indicates that peer has abruptly terminated a previously valid connection.
+    // Indicates that peer has abruptly terminated a previously valid
+    // connection.
     kBroken = 3,
   };
 
@@ -69,12 +70,7 @@ class Transmitter {
 
   // Returns true if the recv himark has changed, making room for new data to
   // send.
-  bool updateRecvHimark(uint16_t recv_himark) {
-    if (state_ != kConnected) return false;
-    // Update to available slots received.
-    recv_himark_ = out_ring_.restorePosHighBits(recv_himark, 12);
-    return true;
-  }
+  bool updateRecvHimark(uint16_t recv_himark);
 
  private:
   OutBuffer& getOutBuffer(SeqNum seq) {

@@ -220,6 +220,12 @@ bool Transmitter::ack(uint16_t seq_id, const roo::byte* ack_bitmap,
                       size_t ack_bitmap_len) {
   // Remove all buffers up to the acked position.
   SeqNum seq = out_ring_.restorePosHighBits(seq_id, 12);
+  if (seq > out_ring_.end()) {
+    // Peer is acking a position we have not yet sent. Ignore.
+    LOG(WARNING) << "Bogus ack received, ignoring: " << seq_id << " -> " << seq
+                 << "; current: " << out_ring_.end();
+    return false;
+  }
   while (out_ring_.begin() < seq && !out_ring_.empty()) {
     out_ring_.pop();
     ++packets_delivered_;
@@ -274,6 +280,19 @@ bool Transmitter::ack(uint16_t seq_id, const roo::byte* ack_bitmap,
     }
   }
   return rushed;
+}
+
+bool Transmitter::updateRecvHimark(uint16_t recv_himark) {
+  if (state_ != kConnected) return false;
+  // Update to available slots received.
+  SeqNum new_recv_himark = out_ring_.restorePosHighBits(recv_himark, 12);
+  if (new_recv_himark < recv_himark_) {
+    // Peer has sent a smaller himark than before. This is not expected.
+    LOG(WARNING) << "Bogus recv_himark received, ignoring: " << recv_himark
+                 << " -> " << new_recv_himark << "; current: " << recv_himark_
+                 << "; current outring_.end(): " << out_ring_.end();
+  }
+  return true;
 }
 
 }  // namespace internal

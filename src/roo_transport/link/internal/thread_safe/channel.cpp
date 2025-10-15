@@ -330,6 +330,15 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
              .ack_stream_id = ack_stream_id,
              .want_ack = want_ack,
          };
+  if (peer_stream_id == my_stream_id_ &&
+      peer_seq_num == transmitter_.front().raw()) {
+    // This looks like a cross-talk from our own stream.
+    MLOG(roo_transport_reliable_channel_connection)
+        << getLogPrefix()
+        << "Ignoring the handshake, since it's an echo of the last one we "
+           "sent.";
+    return;
+  }
   switch (receiver_.state()) {
     case internal::Receiver::kConnecting: {
       if (ack_stream_id != 0 && ack_stream_id != my_stream_id_) {
