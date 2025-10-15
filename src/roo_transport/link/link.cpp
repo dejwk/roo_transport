@@ -12,9 +12,11 @@ Link::Link(Channel& channel, uint32_t my_stream_id)
 
 Link::Link(Link&& other)
     : channel_(other.channel_),
+      my_stream_id_(other.my_stream_id_),
       in_(std::move(other.in_)),
       out_(std::move(other.out_)) {
     other.channel_ = nullptr;
+    other.my_stream_id_ = 0;
     other.in_ = LinkInputStream();
     other.out_ = LinkOutputStream();
 }
@@ -22,9 +24,11 @@ Link::Link(Link&& other)
 Link& Link::operator=(Link&& other) {
   if (&other != this) {
     channel_ = other.channel_;
+    my_stream_id_ = other.my_stream_id_;
     in_ = std::move(other.in_);
     out_ = std::move(other.out_);
     other.channel_ = nullptr;
+    other.my_stream_id_ = 0;
     other.in_ = LinkInputStream();
     other.out_ = LinkOutputStream();
   }
