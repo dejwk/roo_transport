@@ -25,8 +25,8 @@ static const int kPinClientRx = 26;
 roo::thread server_thread;
 
 // ReliableSerial1 and ReliableSerial2 are (near) drop-in replacements for
-// Serial1 and Serial2 - except that they implement a reliable transport on top
-// the underlying UART connection.
+// Serial1 and Serial2, that implement a reliable transport on top the
+// underlying UART connection.
 ReliableSerial1 serial1;
 ReliableSerial2 serial2;
 
