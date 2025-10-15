@@ -2,7 +2,7 @@
 
 namespace roo_transport {
 
-enum class LinkStatus {
+enum LinkStatus {
   // The link is idle, no connection being established. This is an initial state
   // of a default-constructed link.
   kIdle,
