@@ -34,7 +34,7 @@ roo_time::Duration Backoff(int retry_count) {
 }  // namespace
 
 Channel::Channel(PacketSender& sender, LinkBufferSize sendbuf,
-                 LinkBufferSize recvbuf)
+                 LinkBufferSize recvbuf, roo::string_view name)
     : packet_sender_(sender),
       outgoing_data_ready_(),
       transmitter_((unsigned int)sendbuf),
@@ -47,7 +47,9 @@ Channel::Channel(PacketSender& sender, LinkBufferSize sendbuf,
       next_scheduled_handshake_update_(roo_time::Uptime::Start()),
       disconnect_fn_(nullptr),
       sender_thread_(),
-      active_(true) {
+      active_(true),
+      name_(name),
+      send_thread_name_(name_.empty() ? "send_loop" : name_ + "-send") {
   CHECK_LE((unsigned int)sendbuf, 12);
   CHECK_LE((unsigned int)sendbuf, recvbuf);
 }
@@ -151,7 +153,7 @@ uint32_t Channel::connect(std::function<void()> disconnect_fn) {
     // The stream ID is a random number, but it can't be zero.
     while (my_stream_id_ == 0) my_stream_id_ = RANDOM_INTEGER();
     MLOG(roo_transport_reliable_channel_connection)
-        << "Transmitter and receiver are now connecting.";
+        << getLogPrefix() << "Transmitter and receiver are now connecting.";
     transmitter_.init(my_stream_id_, RANDOM_INTEGER() % 0x0FFF);
     receiver_.init(my_stream_id_);
     needs_handshake_ack_ = false;
@@ -177,7 +179,7 @@ void Channel::disconnect(uint32_t my_stream_id) {
     my_stream_id_acked_by_peer_ = false;
     peer_stream_id_ = 0;
     MLOG(roo_transport_reliable_channel_connection)
-        << "Transmitter and receiver are now disconnected.";
+        << getLogPrefix() << "Transmitter and receiver are now disconnected.";
     transmitter_.reset();
     receiver_.reset();
     connected_cv_.notify_all();
@@ -304,7 +306,7 @@ size_t Channel::conn(roo::byte* buf, long& next_send_micros) {
   roo_io::StoreU8(we_need_ack ? 0xFF : 0x00, buf + 10);
   next_send_micros = std::min(next_send_micros, delay);
   MLOG(roo_transport_reliable_channel_connection)
-      << "Handshake packet sent: "
+      << getLogPrefix() << "Handshake packet sent: "
       << HandshakePacket{
              .self_seq_num = (uint16_t)(header & 0x0FFF),
              .self_stream_id = my_stream_id_,
@@ -321,7 +323,7 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
   std::function<void()> disconnect_fn;
   roo::lock_guard<roo::mutex> guard(handshake_mutex_);
   MLOG(roo_transport_reliable_channel_connection)
-      << "Handshake packet received: "
+      << getLogPrefix() << "Handshake packet received: "
       << HandshakePacket{
              .self_seq_num = peer_seq_num,
              .self_stream_id = peer_stream_id,
@@ -334,19 +336,20 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
         // The peer is acknowledging a different stream than the one we're
         // connecting on. Ignoring.
         MLOG(roo_transport_reliable_channel_connection)
+            << getLogPrefix()
             << "Ignoring the handshake, since the ack_stream_id doesn't match.";
         break;
       }
       peer_stream_id_ = peer_stream_id;
       CHECK(receiver_.empty());
       MLOG(roo_transport_reliable_channel_connection)
-          << "Receiver is now connected.";
+          << getLogPrefix() << "Receiver is now connected.";
       receiver_.setConnected(peer_seq_num);
       outgoing_data_ready = true;
 
       if (ack_stream_id == my_stream_id_) {
         MLOG(roo_transport_reliable_channel_connection)
-            << "Transmitter is now connected.";
+            << getLogPrefix() << "Transmitter is now connected.";
         my_stream_id_acked_by_peer_ = true;
         transmitter_.setConnected();
       }
@@ -364,27 +367,27 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
         disconnect_fn_ = nullptr;
         if (!receiver_.done()) {
           MLOG(roo_transport_reliable_channel_connection)
-              << "Disconnection detected: " << peer_stream_id_ << ", "
-              << peer_stream_id;
+              << getLogPrefix() << "Disconnection detected: " << peer_stream_id_
+              << ", " << peer_stream_id;
           // Ignore until all in-flight packets have been delivered.
           if (transmitter_.state() == internal::Transmitter::kConnected) {
             MLOG(roo_transport_reliable_channel_connection)
-                << "Transmitter is now broken.";
+                << getLogPrefix() << "Transmitter is now broken.";
             transmitter_.setBroken();
           } else {
             MLOG(roo_transport_reliable_channel_connection)
-                << "Transmitter is now idle.";
+                << getLogPrefix() << "Transmitter is now idle.";
             transmitter_.reset();
           }
           my_stream_id_ = 0;
           connected_cv_.notify_all();
           MLOG(roo_transport_reliable_channel_connection)
-              << "Receiver is now broken.";
+              << getLogPrefix() << "Receiver is now broken.";
           receiver_.setBroken();
           break;
         }
         MLOG(roo_transport_reliable_channel_connection)
-            << "Transmitter and receiver are now idle.";
+            << getLogPrefix() << "Transmitter and receiver are now idle.";
         transmitter_.reset();
         my_stream_id_ = 0;
         receiver_.reset();
@@ -394,7 +397,7 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
       if (ack_stream_id == my_stream_id_ && !my_stream_id_acked_by_peer_) {
         CHECK(my_stream_id_ != 0);
         MLOG(roo_transport_reliable_channel_connection)
-            << "Transmitter is now connected.";
+            << getLogPrefix() << "Transmitter is now connected.";
         my_stream_id_acked_by_peer_ = true;
         transmitter_.setConnected();
         outgoing_data_ready = true;
@@ -407,6 +410,7 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
     case internal::Receiver::kBroken: {
       // We're idle; ignoring handshake;
       MLOG(roo_transport_reliable_channel_connection)
+          << getLogPrefix()
           << "Ignoring the handshake, since the receiver is not connecting.";
       break;
     }
@@ -484,7 +488,7 @@ void Channel::begin() {
   attrs.set_priority(configMAX_PRIORITIES - 2);
 
 #endif
-  attrs.set_name("send_loop");
+  attrs.set_name(send_thread_name_.c_str());
   sender_thread_ = roo::thread(attrs, [this]() { sendLoop(); });
 }
 

@@ -4,7 +4,11 @@ namespace roo_transport {
 
 LinkTransport::LinkTransport(PacketSender& sender, LinkBufferSize sendbuf,
                              LinkBufferSize recvbuf)
-    : sender_(sender), channel_(sender_, sendbuf, recvbuf) {}
+    : LinkTransport(sender, "", sendbuf, recvbuf) {}
+
+LinkTransport::LinkTransport(PacketSender& sender, roo::string_view name,
+                             LinkBufferSize sendbuf, LinkBufferSize recvbuf)
+    : sender_(sender), channel_(sender_, sendbuf, recvbuf, name) {}
 
 void LinkTransport::processIncomingPacket(const roo::byte* buf, size_t len) {
   channel_.packetReceived(buf, len);

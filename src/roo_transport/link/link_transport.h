@@ -14,6 +14,10 @@ class LinkTransport {
   LinkTransport(PacketSender& sender, LinkBufferSize sendbuf = kBufferSize4KB,
                 LinkBufferSize recvbuf = kBufferSize4KB);
 
+  LinkTransport(PacketSender& sender, roo::string_view name,
+                LinkBufferSize sendbuf = kBufferSize4KB,
+                LinkBufferSize recvbuf = kBufferSize4KB);
+
   // Starts the send thread.
   void begin() { channel_.begin(); }
 

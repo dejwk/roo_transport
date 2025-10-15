@@ -21,7 +21,12 @@ class ReliableEsp32Serial : public LinkStream {
   ReliableEsp32Serial(SerialType& serial,
                       LinkBufferSize sendbuf = kBufferSize4KB,
                       LinkBufferSize recvbuf = kBufferSize4KB)
-      : serial_(serial), transport_(serial, sendbuf, recvbuf) {}
+      : ReliableEsp32Serial(serial, "", sendbuf, recvbuf) {}
+
+  ReliableEsp32Serial(SerialType& serial, roo::string_view name,
+                      LinkBufferSize sendbuf = kBufferSize4KB,
+                      LinkBufferSize recvbuf = kBufferSize4KB)
+      : serial_(serial), transport_(serial, name, sendbuf, recvbuf) {}
 
   void begin(unsigned long baud, uint32_t config = SERIAL_8N1,
              int8_t rxPin = -1, int8_t txPin = -1, bool invert = false,
@@ -50,6 +55,7 @@ class ReliableEsp32Serial : public LinkStream {
 class ReliableHardwareSerial : public LinkStream {
  public:
   ReliableHardwareSerial(HardwareSerial& serial, uart_port_t num,
+                         roo::string_view name,
                          LinkBufferSize sendbuf = kBufferSize4KB,
                          LinkBufferSize recvbuf = kBufferSize4KB)
       : serial_(serial),
@@ -58,7 +64,7 @@ class ReliableHardwareSerial : public LinkStream {
         input_(num),
         sender_(output_),
         receiver_(input_),
-        transport_(sender_, sendbuf, recvbuf),
+        transport_(sender_, name, sendbuf, recvbuf),
         process_fn_([this](const roo::byte* buf, size_t len) {
           transport_.processIncomingPacket(buf, len);
         }) {}
@@ -120,25 +126,39 @@ class ReliableHardwareSerial : public LinkStream {
 
 class ReliableSerial : public ReliableEsp32Serial<decltype(Serial)> {
  public:
+  ReliableSerial(roo::string_view name, LinkBufferSize sendbuf = kBufferSize4KB,
+                 LinkBufferSize recvbuf = kBufferSize4KB)
+      : ReliableEsp32Serial(Serial, name, sendbuf, recvbuf) {}
+
   ReliableSerial(LinkBufferSize sendbuf = kBufferSize4KB,
                  LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableEsp32Serial(Serial, sendbuf, recvbuf) {}
+      : ReliableEsp32Serial(Serial, "", sendbuf, recvbuf) {}
 };
 
 #if SOC_UART_NUM > 1
 class ReliableSerial1 : public ReliableHardwareSerial {
  public:
+  ReliableSerial1(roo::string_view name,
+                  LinkBufferSize sendbuf = kBufferSize4KB,
+                  LinkBufferSize recvbuf = kBufferSize4KB)
+      : ReliableHardwareSerial(Serial1, UART_NUM_1, name, sendbuf, recvbuf) {}
+
   ReliableSerial1(LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableHardwareSerial(Serial1, UART_NUM_1, sendbuf, recvbuf) {}
+      : ReliableHardwareSerial(Serial1, UART_NUM_1, "", sendbuf, recvbuf) {}
 };
 #endif  // SOC_UART_NUM > 1
 #if SOC_UART_NUM > 2
 class ReliableSerial2 : public ReliableHardwareSerial {
  public:
+  ReliableSerial2(roo::string_view name,
+                  LinkBufferSize sendbuf = kBufferSize4KB,
+                  LinkBufferSize recvbuf = kBufferSize4KB)
+      : ReliableHardwareSerial(Serial2, UART_NUM_2, name, sendbuf, recvbuf) {}
+
   ReliableSerial2(LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableHardwareSerial(Serial2, UART_NUM_2, sendbuf, recvbuf) {}
+      : ReliableHardwareSerial(Serial2, UART_NUM_2, "", sendbuf, recvbuf) {}
 };
 #endif  // SOC_UART_NUM > 2
 

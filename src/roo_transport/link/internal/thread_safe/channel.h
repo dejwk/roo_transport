@@ -6,6 +6,7 @@
 #include "roo_transport/link/internal/thread_safe/compile_guard.h"
 #ifdef ROO_USE_THREADS
 
+#include "roo_backport/string_view.h"
 #include "roo_io/core/input_stream.h"
 #include "roo_io/core/output_stream.h"
 #include "roo_io/memory/load.h"
@@ -34,7 +35,8 @@ namespace roo_transport {
 // packet-based transport. Used as a building block of SingletonSerial.
 class Channel {
  public:
-  Channel(PacketSender& sender, LinkBufferSize sendbuf, LinkBufferSize recvbuf);
+  Channel(PacketSender& sender, LinkBufferSize sendbuf, LinkBufferSize recvbuf,
+          roo::string_view name = "");
 
   ~Channel();
 
@@ -115,6 +117,10 @@ class Channel {
 
   void sendLoop();
 
+  std::string getLogPrefix() const {
+    return name_.empty() ? "" : ("(" + name_ + ") ");
+  }
+
   PacketSender& packet_sender_;
 
   // Signals the sender thread that there are packets to send.
@@ -159,6 +165,9 @@ class Channel {
 
   roo::condition_variable connected_cv_;
 #endif
+
+  std::string name_;
+  std::string send_thread_name_;
 };
 
 }  // namespace roo_transport

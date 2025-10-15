@@ -16,7 +16,7 @@ namespace roo_transport {
 template <typename SerialType>
 class SerialLinkTransport {
  public:
-  SerialLinkTransport(SerialType& serial,
+  SerialLinkTransport(SerialType& serial, roo::string_view name,
                       LinkBufferSize sendbuf = kBufferSize4KB,
                       LinkBufferSize recvbuf = kBufferSize4KB)
       : serial_(serial),
@@ -24,11 +24,21 @@ class SerialLinkTransport {
         input_(serial_),
         sender_(output_),
         receiver_(input_),
-        transport_(sender_, sendbuf, recvbuf) {}
+        transport_(sender_, name, sendbuf, recvbuf) {}
+
+  SerialLinkTransport(SerialType& serial,
+                      LinkBufferSize sendbuf = kBufferSize4KB,
+                      LinkBufferSize recvbuf = kBufferSize4KB)
+      : SerialLinkTransport(serial, "", sendbuf, recvbuf) {}
 
   void begin() {
     transport_.begin();
     serial_.onReceive([this]() {
+      receiver_.tryReceive([this](const roo::byte* buf, size_t len) {
+        transport_.processIncomingPacket(buf, len);
+      });
+    });
+    serial_.onReceiveError([this](hardwareSerial_error_t) {
       receiver_.tryReceive([this](const roo::byte* buf, size_t len) {
         transport_.processIncomingPacket(buf, len);
       });
