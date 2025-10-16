@@ -303,7 +303,9 @@ size_t Channel::conn(roo::byte* buf, long& next_send_micros) {
   roo_io::StoreBeU16(header, buf);
   roo_io::StoreBeU32(my_stream_id_, buf + 2);
   roo_io::StoreBeU32(peer_stream_id_, buf + 6);
-  roo_io::StoreU8(we_need_ack ? 0xFF : 0x00, buf + 10);
+  uint8_t last_byte = we_need_ack ? 0x80 : 0x00;
+  last_byte |= receiver_.buffer_size_log2();
+  roo_io::StoreU8(last_byte, buf + 10);
   next_send_micros = std::min(next_send_micros, delay);
   MLOG(roo_transport_reliable_channel_connection)
       << getLogPrefix() << "Handshake packet sent: "
@@ -319,6 +321,7 @@ size_t Channel::conn(roo::byte* buf, long& next_send_micros) {
 void Channel::handleHandshakePacket(uint16_t peer_seq_num,
                                     uint32_t peer_stream_id,
                                     uint32_t ack_stream_id, bool want_ack,
+                                    uint16_t peer_receive_buffer_size,
                                     bool& outgoing_data_ready) {
   std::function<void()> disconnect_fn;
   roo::lock_guard<roo::mutex> guard(handshake_mutex_);
@@ -360,7 +363,7 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
         MLOG(roo_transport_reliable_channel_connection)
             << getLogPrefix() << "Transmitter is now connected.";
         my_stream_id_acked_by_peer_ = true;
-        transmitter_.setConnected();
+        transmitter_.setConnected(peer_receive_buffer_size);
       }
       needs_handshake_ack_ = want_ack;
       connected_cv_.notify_all();
@@ -408,7 +411,7 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
         MLOG(roo_transport_reliable_channel_connection)
             << getLogPrefix() << "Transmitter is now connected.";
         my_stream_id_acked_by_peer_ = true;
-        transmitter_.setConnected();
+        transmitter_.setConnected(peer_receive_buffer_size);
         outgoing_data_ready = true;
         connected_cv_.notify_all();
       }
@@ -454,9 +457,15 @@ void Channel::packetReceived(const roo::byte* buf, size_t len) {
       uint16_t peer_seq_num = header & 0x0FFF;
       uint32_t peer_stream_id = roo_io::LoadBeU32(buf + 2);
       uint32_t ack_stream_id = roo_io::LoadBeU32(buf + 6);
-      bool want_ack = roo_io::LoadU8(buf + 10) != 0;
+      uint8_t last_byte = roo_io::LoadU8(buf + 10);
+      bool want_ack = ((last_byte & 0x80) != 0);
+      uint8_t peer_receive_buffer_size_log2 = last_byte & 0x0F;
+      if (peer_receive_buffer_size_log2 > 12) {
+        peer_receive_buffer_size_log2 = 12;
+      }
       handleHandshakePacket(peer_seq_num, peer_stream_id, ack_stream_id,
-                            want_ack, outgoing_data_ready);
+                            want_ack, (1 << peer_receive_buffer_size_log2),
+                            outgoing_data_ready);
       break;
     }
     case internal::kDataPacket:

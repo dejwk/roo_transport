@@ -61,6 +61,7 @@ class RingBuffer {
     return left + (((uint16_t)(truncated_pos - left)) % (1 << pos_bits));
   }
 
+  int capacity_log2() const { return capacity_log2_; }
   uint16_t capacity() const { return 1 << capacity_log2_; }
 
  private:

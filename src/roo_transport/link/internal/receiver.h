@@ -60,6 +60,9 @@ class Receiver {
 
   uint32_t my_stream_id() const { return my_stream_id_; }
 
+  // Used to communicate maximum offset of the recv himark to the sender.
+  unsigned int buffer_size_log2() const { return in_ring_.capacity_log2(); }
+
  private:
   InBuffer& getInBuffer(SeqNum seq) const {
     return in_buffers_[in_ring_.offset_for(seq)];

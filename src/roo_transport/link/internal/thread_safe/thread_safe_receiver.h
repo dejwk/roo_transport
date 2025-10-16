@@ -60,6 +60,8 @@ class ThreadSafeReceiver {
     return receiver_.packets_received();
   }
 
+  unsigned int buffer_size_log2() const;
+
  private:
   // Checks the state of the underlying receiver, and whether its stream ID
   // matches my_stream_id. If there is no match, it means that the connection

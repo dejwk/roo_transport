@@ -111,6 +111,7 @@ class Channel {
 
   void handleHandshakePacket(uint16_t peer_seq_num, uint32_t peer_stream_id,
                              uint32_t ack_stream_id, bool want_ack,
+                             uint16_t peer_receive_buffer_size,
                              bool& outgoing_data_ready);
 
   size_t conn(roo::byte* buf, long& next_send_micros);

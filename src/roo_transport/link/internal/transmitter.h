@@ -51,7 +51,13 @@ class Transmitter {
   // If connected, sets state to kClosed.
   void close();
 
-  void setConnected() { state_ = kConnected; }
+  void setConnected(uint16_t peer_receive_buffer_size) {
+    state_ = kConnected;
+    peer_receive_buffer_size_ = peer_receive_buffer_size;
+    // Update the recv himark to reflect the peer's receive buffer size.
+    recv_himark_ = out_ring_.begin() + peer_receive_buffer_size;
+  }
+
   void setBroken();
 
   State state() const { return state_; }
@@ -110,6 +116,9 @@ class Transmitter {
 
   uint32_t packets_sent_;
   uint32_t packets_delivered_;
+
+  // Used to check validity of incoming flow control updates.
+  uint16_t peer_receive_buffer_size_;
 };
 
 }  // namespace internal

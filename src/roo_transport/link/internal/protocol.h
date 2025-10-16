@@ -38,9 +38,13 @@ namespace internal {
 //   Used in the handshake protocol. The payload consists of 9 bytes. The bytes
 //   1-4 contain the sender's 32-bit stream ID (in the network order). The bytes
 //   5-8 contain the acknowledgement of the previously received peer's 32-bit
-//   stream ID (in the network order), or zero if we don't know it yet. The last
-//   byte indicates whether the sender expects an acknowledgement of the
-//   handshake (a non-zero value indicates that the ack is requested).
+//   stream ID (in the network order), or zero if we don't know it yet. In the
+//   last byte, the most significant bit indicates whether the sender expects an
+//   acknowledgement of the handshake (1 indicates that the ack is requested),
+//   and the 4 least significant bits communicate the peer's receive buffer
+//   size, as a power of 2 (valid values are 0-12, indicating buffer sizes of
+//   1-4096 packets).
+//
 //   The handshake protocol is somewhat similar to TCP-IP connection protocol
 //   (SYN/SYN-ACK/ACK): the initiating party sends a handshake message including
 //   its randomly generated stream ID; the recipient responds with a similar

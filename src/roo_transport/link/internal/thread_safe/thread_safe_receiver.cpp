@@ -134,6 +134,11 @@ bool ThreadSafeReceiver::handleDataPacket(uint16_t seq_id,
   return has_ack_to_send;
 }
 
+unsigned int ThreadSafeReceiver::buffer_size_log2() const {
+  roo::lock_guard<roo::mutex> guard(mutex_);
+  return receiver_.buffer_size_log2();
+}
+
 }  // namespace internal
 }  // namespace roo_transport
 

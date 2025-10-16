@@ -16,7 +16,8 @@ Transmitter::Transmitter(unsigned int sendbuf_log2)
       recv_himark_(out_ring_.begin() + (1 << sendbuf_log2)),
       has_pending_eof_(false),
       packets_sent_(0),
-      packets_delivered_(0) {}
+      packets_delivered_(0),
+      peer_receive_buffer_size_(0) {}
 
 size_t Transmitter::tryWrite(const roo::byte* buf, size_t count,
                              bool& outgoing_data_ready) {
@@ -210,7 +211,8 @@ void Transmitter::init(uint32_t my_stream_id, SeqNum new_start) {
     out_ring_.pop();
   }
   out_ring_.reset(new_start);
-  recv_himark_ = out_ring_.begin() + out_ring_.capacity();
+  // To be updated by setConnected().
+  recv_himark_ = out_ring_.begin();
   next_to_send_ = out_ring_.begin();
   current_out_buffer_ = nullptr;
   has_pending_eof_ = false;
@@ -286,12 +288,16 @@ bool Transmitter::updateRecvHimark(uint16_t recv_himark) {
   if (state_ != kConnected) return false;
   // Update to available slots received.
   SeqNum new_recv_himark = out_ring_.restorePosHighBits(recv_himark, 12);
-  if (new_recv_himark < recv_himark_) {
-    // Peer has sent a smaller himark than before. This is not expected.
+  if (new_recv_himark < recv_himark_ ||
+      new_recv_himark > out_ring_.end() + peer_receive_buffer_size_) {
+    // Peer has sent a smaller himark than before, or too large to be able to
+    // consume. This is not expected.
     LOG(WARNING) << "Bogus recv_himark received, ignoring: " << recv_himark
                  << " -> " << new_recv_himark << "; current: " << recv_himark_
                  << "; current outring_.end(): " << out_ring_.end();
+    return false;
   }
+  recv_himark_ = out_ring_.restorePosHighBits(recv_himark, 12);
   return true;
 }
 
