@@ -8,6 +8,7 @@
 #include "roo_io/memory/load.h"
 #include "roo_io/third_party/nanocobs/cobs.h"
 #include "roo_logging.h"
+#include "roo_transport/packets/over_stream/seed.h"
 
 namespace roo_transport {
 
@@ -107,7 +108,8 @@ bool PacketReceiverOverStream::processPacket(roo::byte* buf, size_t size,
   }
   {
     // Verify the checksum.
-    uint32_t computed_hash = roo_collections::murmur3_32(&buf[1], size - 6, 0);
+    uint32_t computed_hash =
+        roo_collections::murmur3_32(&buf[1], size - 6, kPacketOverStreamSeed);
     uint32_t received_hash = roo_io::LoadBeU32(&buf[size - 5]);
     if (computed_hash != received_hash) {
       // Invalid checksum. Dropping packet.

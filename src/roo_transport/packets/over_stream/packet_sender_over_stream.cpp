@@ -4,6 +4,7 @@
 #include "roo_io/memory/store.h"
 #include "roo_io/third_party/nanocobs/cobs.h"
 #include "roo_logging.h"
+#include "roo_transport/packets/over_stream/seed.h"
 
 namespace roo_transport {
 
@@ -15,7 +16,8 @@ void PacketSenderOverStream::send(const roo::byte* buf, size_t len) {
   CHECK_LE(len, kMaxPacketSize);
   buf_[0] = (roo::byte)COBS_TINYFRAME_SENTINEL_VALUE;
   memcpy(&buf_[1], buf, len);
-  uint32_t hash = roo_collections::murmur3_32(&buf_[1], len, 0);
+  uint32_t hash =
+      roo_collections::murmur3_32(&buf_[1], len, kPacketOverStreamSeed);
   roo_io::StoreBeU32(hash, &buf_[len + 1]);
   buf_[len + 5] = (roo::byte)COBS_TINYFRAME_SENTINEL_VALUE;
   CHECK_EQ(COBS_RET_SUCCESS, cobs_encode_tinyframe(buf_.get(), len + 6));
