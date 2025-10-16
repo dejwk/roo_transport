@@ -17,7 +17,8 @@ Transmitter::Transmitter(unsigned int sendbuf_log2)
       has_pending_eof_(false),
       packets_sent_(0),
       packets_delivered_(0),
-      peer_receive_buffer_size_(0) {}
+      peer_receive_buffer_size_(0),
+      control_bit_(false) {}
 
 size_t Transmitter::tryWrite(const roo::byte* buf, size_t count,
                              bool& outgoing_data_ready) {
@@ -38,7 +39,7 @@ size_t Transmitter::tryWrite(const roo::byte* buf, size_t count,
       }
       SeqNum pos = out_ring_.push();
       current_out_buffer_ = &getOutBuffer(pos);
-      current_out_buffer_->init(pos);
+      current_out_buffer_->init(pos, control_bit_);
     }
     size_t written = current_out_buffer_->write(buf, count);
     total_written += written;
@@ -66,7 +67,7 @@ bool Transmitter::hasPendingData() const { return !out_ring_.empty(); }
 void Transmitter::addEosPacket() {
   SeqNum pos = out_ring_.push();
   auto* buf = &getOutBuffer(pos);
-  buf->init(pos);
+  buf->init(pos, control_bit_);
   buf->markFinal();
   buf->finish();
 }

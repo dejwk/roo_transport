@@ -34,7 +34,7 @@ class Receiver {
 
   bool done() const;
 
-  void setConnected(SeqNum peer_seq_num);
+  void setConnected(SeqNum peer_seq_num, bool control_bit);
   void setIdle();
   void setBroken();
 
@@ -108,6 +108,8 @@ class Receiver {
   roo_time::Uptime recv_himark_update_expiration_;
 
   uint32_t packets_received_;
+
+  bool control_bit_;
 };
 
 }  // namespace internal

@@ -19,7 +19,7 @@ class ThreadSafeReceiver {
 
   Receiver::State state() const;
 
-  void setConnected(SeqNum peer_seq_num);
+  void setConnected(SeqNum peer_seq_num, bool control_bit);
   void setBroken();
 
   size_t read(roo::byte* buf, size_t count, uint32_t my_stream_id,

@@ -22,11 +22,12 @@ Receiver::Receiver(unsigned int recvbuf_log2)
       recv_himark_update_expiration_(roo_time::Uptime::Start()),
       packets_received_(0) {}
 
-void Receiver::setConnected(SeqNum peer_seq_num) {
+void Receiver::setConnected(SeqNum peer_seq_num, bool control_bit) {
   CHECK(in_ring_.empty());
   in_ring_.reset(peer_seq_num);
   unack_seq_ = peer_seq_num.raw();
   state_ = kConnected;
+  control_bit_ = control_bit;
 }
 
 void Receiver::setIdle() {
@@ -182,7 +183,8 @@ size_t Receiver::updateRecvHimark(roo::byte* buf, long& next_send_micros) {
     return 0;
   }
   recv_himark_ = in_ring_.begin() + in_ring_.capacity();
-  uint16_t payload = FormatPacketHeader(recv_himark_, kFlowControlPacket);
+  uint16_t payload =
+      FormatPacketHeader(recv_himark_, kFlowControlPacket, control_bit_);
   roo_io::StoreBeU16(payload, buf);
   recv_himark_update_expiration_ =
       now + roo_time::Micros(kRecvHimarkExpirationTimeoutUs);
@@ -194,7 +196,8 @@ size_t Receiver::ack(roo::byte* buf) {
   if ((state_ != kConnected && state_ != kIdle) || !needs_ack_) {
     return 0;
   }
-  uint16_t payload = FormatPacketHeader(unack_seq_, kDataAckPacket);
+  uint16_t payload =
+      FormatPacketHeader(unack_seq_, kDataAckPacket, control_bit_);
   roo_io::StoreBeU16(payload, buf);
 
   // For now, we only send ack about up to 64 packets. This should be more

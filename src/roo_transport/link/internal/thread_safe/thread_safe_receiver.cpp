@@ -14,9 +14,9 @@ Receiver::State ThreadSafeReceiver::state() const {
   return receiver_.state();
 }
 
-void ThreadSafeReceiver::setConnected(SeqNum peer_seq_num) {
+void ThreadSafeReceiver::setConnected(SeqNum peer_seq_num, bool control_bit) {
   roo::lock_guard<roo::mutex> guard(mutex_);
-  receiver_.setConnected(peer_seq_num);
+  receiver_.setConnected(peer_seq_num, control_bit);
 }
 
 void ThreadSafeReceiver::setBroken() {

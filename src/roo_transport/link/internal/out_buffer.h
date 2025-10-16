@@ -19,7 +19,7 @@ class OutBuffer {
         expiration_(roo_time::Uptime::Start()),
         send_counter_(0) {}
 
-  void init(SeqNum seq_id);
+  void init(SeqNum seq_id, bool control_bit);
 
   bool flushed() const { return flushed_; }
   bool finished() const { return finished_; }

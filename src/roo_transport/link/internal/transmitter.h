@@ -51,9 +51,10 @@ class Transmitter {
   // If connected, sets state to kClosed.
   void close();
 
-  void setConnected(uint16_t peer_receive_buffer_size) {
+  void setConnected(uint16_t peer_receive_buffer_size, bool control_bit) {
     state_ = kConnected;
     peer_receive_buffer_size_ = peer_receive_buffer_size;
+    control_bit_ = control_bit;
     // Update the recv himark to reflect the peer's receive buffer size.
     recv_himark_ = out_ring_.begin() + peer_receive_buffer_size;
   }
@@ -119,6 +120,12 @@ class Transmitter {
 
   // Used to check validity of incoming flow control updates.
   uint16_t peer_receive_buffer_size_;
+
+  // Indicates whether we are the 'control' side of the connection, which is
+  // determined by whoever has the larger stream ID.
+  // This bit is sent in the packet header to differentiate between the two
+  // sides, and to detect cross-talk (e.g. due to wiring mistakes).
+  bool control_bit_;
 };
 
 }  // namespace internal

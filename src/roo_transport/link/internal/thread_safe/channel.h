@@ -122,6 +122,8 @@ class Channel {
     return name_.empty() ? "" : ("(" + name_ + ") ");
   }
 
+  bool my_control_bit() const { return my_stream_id_ > peer_stream_id_; }
+
   PacketSender& packet_sender_;
 
   // Signals the sender thread that there are packets to send.

@@ -49,9 +49,9 @@ class ThreadSafeTransmitter {
   void close(uint32_t my_stream_id, roo_io::Status& stream_status,
              bool& outgoing_data_ready);
 
-  void setConnected(uint16_t peer_receive_buffer_size) {
+  void setConnected(uint16_t peer_receive_buffer_size, bool control_bit) {
     roo::lock_guard<roo::mutex> guard(mutex_);
-    transmitter_.setConnected(peer_receive_buffer_size);
+    transmitter_.setConnected(peer_receive_buffer_size, control_bit);
   }
 
   void setBroken() {

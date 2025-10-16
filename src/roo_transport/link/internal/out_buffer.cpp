@@ -14,8 +14,8 @@
 namespace roo_transport {
 namespace internal {
 
-void OutBuffer::init(SeqNum seq_id) {
-  uint16_t header = FormatPacketHeader(seq_id, kDataPacket);
+void OutBuffer::init(SeqNum seq_id, bool control_bit) {
+  uint16_t header = FormatPacketHeader(seq_id, kDataPacket, control_bit);
   roo_io::StoreBeU16(header, payload_);
   size_ = 0;
   acked_ = false;
@@ -28,7 +28,7 @@ void OutBuffer::init(SeqNum seq_id) {
 namespace {
 
 roo_time::Duration Backoff(int retry_count) {
-  float min_delay_us = 5000.0f;     // 5ms
+  float min_delay_us = 5000.0f;    // 5ms
   float max_delay_us = 200000.0f;  // 200ms
   float delay = pow(1.33, retry_count) * min_delay_us;
   if (delay > max_delay_us) {
@@ -47,9 +47,9 @@ void OutBuffer::markSent(roo_time::Uptime now) {
 }
 
 void OutBuffer::markFinal() {
-  SeqNum seq_id(roo_io::LoadBeU16(payload_) & 0x0FFF);
-  uint16_t header = FormatPacketHeader(seq_id, kFinPacket);
-  roo_io::StoreBeU16(header, payload_);
+  uint16_t raw = roo_io::LoadBeU16(payload_);
+  SetPacketHeaderTypeFin(raw);
+  roo_io::StoreBeU16(raw, payload_);
 }
 
 }  // namespace internal

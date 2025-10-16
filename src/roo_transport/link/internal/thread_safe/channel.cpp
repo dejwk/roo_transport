@@ -298,8 +298,8 @@ size_t Channel::conn(roo::byte* buf, long& next_send_micros) {
   // Clearing the flag, as we're about to send the handshake packet.
   needs_handshake_ack_ = false;
   bool we_need_ack = (transmitter_state != internal::Transmitter::kConnected);
-  uint16_t header =
-      FormatPacketHeader(transmitter_.front(), internal::kHandshakePacket);
+  uint16_t header = FormatPacketHeader(transmitter_.front(),
+                                       internal::kHandshakePacket, false);
   roo_io::StoreBeU16(header, buf);
   roo_io::StoreBeU32(my_stream_id_, buf + 2);
   roo_io::StoreBeU32(peer_stream_id_, buf + 6);
@@ -333,14 +333,17 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
              .ack_stream_id = ack_stream_id,
              .want_ack = want_ack,
          };
-  if (peer_stream_id == my_stream_id_ &&
-      peer_seq_num == transmitter_.front().raw()) {
-    // This looks like a cross-talk from our own stream.
-    MLOG(roo_transport_reliable_channel_connection)
-        << getLogPrefix()
-        << "Ignoring the handshake, since it's an echo of the last one we "
-           "sent.";
-    return;
+  if (peer_stream_id == my_stream_id_) {
+    // The peer is echoing our own stream ID. This is probably a cross-talk from
+    // our own packets.
+    if (peer_seq_num == transmitter_.front().raw()) {
+      MLOG(roo_transport_reliable_channel_connection)
+          << getLogPrefix()
+          << "Ignoring the handshake, since it's an echo of the last one we "
+             "sent.";
+      LOG(WARNING) << "Cross-talk detected. Please check the wiring.";
+      return;
+    }
   }
   switch (receiver_.state()) {
     case internal::Receiver::kConnecting: {
@@ -352,18 +355,34 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
             << "Ignoring the handshake, since the ack_stream_id doesn't match.";
         break;
       }
+      if (peer_stream_id == my_stream_id_) {
+        // Since we ruled out the echo case above, we're going to assume that
+        // this is a freakish accident of two endpoints accidentally choosing
+        // the same stream ID. Bailing out, as if the peer has disconnected.
+        MLOG(roo_transport_reliable_channel_connection)
+            << getLogPrefix()
+            << "Aborting: peer is using the same stream ID as ours: "
+            << peer_stream_id;
+        disconnect_fn = std::move(disconnect_fn_);
+        disconnect_fn_ = nullptr;
+        receiver_.setBroken();
+        transmitter_.setBroken();
+        my_stream_id_ = 0;
+        connected_cv_.notify_all();
+        break;
+      }
       peer_stream_id_ = peer_stream_id;
       CHECK(receiver_.empty());
       MLOG(roo_transport_reliable_channel_connection)
           << getLogPrefix() << "Receiver is now connected.";
-      receiver_.setConnected(peer_seq_num);
+      receiver_.setConnected(peer_seq_num, my_control_bit());
       outgoing_data_ready = true;
 
       if (ack_stream_id == my_stream_id_) {
         MLOG(roo_transport_reliable_channel_connection)
             << getLogPrefix() << "Transmitter is now connected.";
         my_stream_id_acked_by_peer_ = true;
-        transmitter_.setConnected(peer_receive_buffer_size);
+        transmitter_.setConnected(peer_receive_buffer_size, my_control_bit());
       }
       needs_handshake_ack_ = want_ack;
       connected_cv_.notify_all();
@@ -411,7 +430,7 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
         MLOG(roo_transport_reliable_channel_connection)
             << getLogPrefix() << "Transmitter is now connected.";
         my_stream_id_acked_by_peer_ = true;
-        transmitter_.setConnected(peer_receive_buffer_size);
+        transmitter_.setConnected(peer_receive_buffer_size, my_control_bit());
         outgoing_data_ready = true;
         connected_cv_.notify_all();
       }
@@ -438,7 +457,13 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
 void Channel::packetReceived(const roo::byte* buf, size_t len) {
   bool outgoing_data_ready = false;
   uint16_t header = roo_io::LoadBeU16(buf);
+  bool control_bit = internal::GetPacketControlBit(header);
   auto type = internal::GetPacketType(header);
+  if (type != internal::kHandshakePacket &&
+      control_bit == my_control_bit()) {
+    LOG(WARNING) << "Cross-talk detected. Check the wiring.";
+    return;
+  }
   switch (type) {
     case internal::kDataAckPacket: {
       transmitter_.ack(header & 0x0FFF, buf + 2, len - 2, outgoing_data_ready);
