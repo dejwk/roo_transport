@@ -20,11 +20,15 @@ class LinkMessaging : public Messaging {
   void begin(Receiver& receiver) override;
   void end() override;
 
-  void send(const void* data, size_t size, SendMode send_mode) override;
+  void send(const roo::byte* data, size_t size) override;
+
+  void sendContinuation(const roo::byte* data, size_t size) override;
 
  private:
   void connect();
   void receiveLoop();
+
+  void sendInternal(const roo::byte* data, size_t size, bool continuation);
 
   roo_transport::LinkInputStream& in();
 
@@ -34,7 +38,7 @@ class LinkMessaging : public Messaging {
   roo_transport::Link link_;
   uint32_t my_channel_id_;
 
-  std::function<void(const void* data, size_t len)> recv_cb_;
+  std::function<void(const roo::byte* data, size_t len)> recv_cb_;
   size_t max_recv_packet_size_;
 
   roo::thread reader_thread_;

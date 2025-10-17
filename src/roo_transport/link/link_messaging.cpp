@@ -31,13 +31,22 @@ void LinkMessaging::end() {
   }
 }
 
-void LinkMessaging::send(const void* data, size_t size, SendMode send_mode) {
+void LinkMessaging::send(const roo::byte* data, size_t size) {
+  sendInternal(data, size, false);
+}
+
+void LinkMessaging::sendContinuation(const roo::byte* data, size_t size) {
+  sendInternal(data, size, true);
+}
+
+void LinkMessaging::sendInternal(const roo::byte* data, size_t size,
+                                 bool continuation) {
   // Receiver may reconnect and thus reset the link object at any time, so we
   // need to hold the lock while sending to not let that happen until we're done
   // sending.
   roo::unique_lock<roo::mutex> guard(mutex_);
   while (sender_disconnected_) {
-    if (send_mode == kContinuation) {
+    if (continuation) {
       return;
     }
     LinkStatus status = link_.status();
@@ -56,12 +65,10 @@ void LinkMessaging::send(const void* data, size_t size, SendMode send_mode) {
 }
 
 void LinkMessaging::connect() {
-  LOG(INFO) << "Connecting...";
   roo::lock_guard<roo::mutex> guard(mutex_);
   sender_disconnected_ = true;
   link_ = transport_.connectAsync();
   reconnected_.notify_all();
-  LOG(INFO) << "Notifying...";
 }
 
 roo_transport::LinkInputStream& LinkMessaging::in() {
