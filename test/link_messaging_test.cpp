@@ -113,10 +113,10 @@ TEST_F(LinkMessagingTest, ConstructionDestruction) {
 }
 
 TEST_F(LinkMessagingTest, SendReceiveOneEach) {
-  server_.send("Hello, World!", 14, Messaging::kRegular);
-  client_.send("Hello back!", 12, Messaging::kRegular);
-  server_.send(nullptr, 0, Messaging::kRegular);
-  client_.send(nullptr, 0, Messaging::kRegular);
+  server_.send((const roo::byte*)"Hello, World!", 14);
+  client_.send((const roo::byte*)"Hello back!", 12);
+  server_.send(nullptr, 0);
+  client_.send(nullptr, 0);
   join();
   EXPECT_EQ(serverReceived(), std::vector<Message>{"Hello back!"});
   EXPECT_EQ(clientReceived(), std::vector<Message>{"Hello, World!"});
