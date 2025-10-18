@@ -124,7 +124,7 @@ inline uint16_t FormatPacketHeader(SeqNum seq, PacketType type,
 }
 
 inline void SetPacketHeaderTypeFin(uint16_t& header) {
-  DCHECK_LE(1, header & 0x7000) << "Must be 'data' or 'final data' packet";
+  DCHECK_LE(header & 0x7000, 1) << "Must be 'data' or 'final data' packet";
   header |= 0x1000;  // Set the 'final' type.
 }
 
