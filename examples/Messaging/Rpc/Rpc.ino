@@ -1,3 +1,87 @@
+#ifdef ROO_TESTING
+
+#include "roo_testing/buses/uart/fake_uart.h"
+#include "roo_testing/microcontrollers/esp32/fake_esp32.h"
+#include "roo_io/ringpipe/ringpipe.h"
+
+class FakeUartEndpoint : public FakeUartDevice {
+ public:
+  FakeUartEndpoint() : tx_(256), rx_(256) {}
+
+  size_t write(const uint8_t* buf, uint16_t size) override {
+    return tx_.writeFully((const roo::byte*)buf, size);
+  }
+
+  size_t read(uint8_t* buf, uint16_t size) override {
+    return rx_.tryRead((roo::byte*)buf, size);
+  }
+
+  size_t availableForRead() override { return rx_.availableForRead(); }
+
+  size_t availableForWrite() override { return tx_.availableForWrite(); }
+
+  roo_io::RingPipe& tx() { return tx_; }
+  roo_io::RingPipe& rx() { return rx_; }
+
+ private:
+  roo_io::RingPipe tx_;
+  roo_io::RingPipe rx_;
+};
+
+class UartForwarder {
+ public:
+  UartForwarder(roo_io::RingPipe& from, roo_io::RingPipe& to,
+                FakeUartDevice& recv)
+      : from_(from), to_(to), recv_(recv) {}
+
+  void begin() {
+    roo::thread::attributes attrs;
+    attrs.set_name("uart forwarder");
+    forwarder_thread_ = roo::thread(attrs, [this]() {
+      roo::byte buffer[256];
+      while (true) {
+        size_t count = from_.read(buffer, sizeof(buffer));
+        if (count == 0) {
+          break;
+        }
+        do {
+          size_t written = to_.write(buffer, count);
+          recv_.notifyDataAvailable();
+          if (written == 0) {
+            break;
+          }
+          count -= written;
+        } while (count > 0);
+      }
+    });
+  }
+
+ private:
+  roo_io::RingPipe& from_;
+  roo_io::RingPipe& to_;
+  FakeUartDevice& recv_;
+  roo::thread forwarder_thread_;
+};
+
+struct Emulator {
+  FakeUartEndpoint serial1_;
+  FakeUartEndpoint serial2_;
+  UartForwarder forwarder_1_to_2_;
+  UartForwarder forwarder_2_to_1_;
+  Emulator()
+      : forwarder_1_to_2_(serial1_.tx(), serial2_.rx(), serial2_),
+        forwarder_2_to_1_(serial2_.tx(), serial1_.rx(), serial1_) {
+    forwarder_1_to_2_.begin();
+    forwarder_2_to_1_.begin();
+
+    auto& board = FakeEsp32();
+    board.attachUartDevice(serial1_, 27, 14);
+    board.attachUartDevice(serial2_, 25, 26);
+  }
+} emulator;
+
+#endif
+
 // This example demonstrates how to use the messaging transport to implement a
 // simple single-threaded RPC system (server and client).
 //
@@ -170,7 +254,8 @@ RpcHandlerFn rpc_function_table[] = {
 // function ID, and the rest is the serialized request message. Similarly, the
 // first byte of the response payload contains the RPC status, and the rest is
 // the serialized response message.
-void handleRequest(const roo::byte* data, size_t len, Messaging& messaging) {
+void handleRequest(const roo::byte* data, size_t len,
+                   Messaging::Channel& messaging) {
   uint8_t function_id = (uint8_t)data[0];
   if (function_id >=
       sizeof(rpc_function_table) / sizeof(rpc_function_table[0])) {
@@ -199,13 +284,15 @@ void handleRequest(const roo::byte* data, size_t len, Messaging& messaging) {
 
 SerialLinkTransport<decltype(Serial1)> server_serial(Serial1);
 LinkMessaging server_messaging(server_serial.transport(), kMaxPayloadSize);
+std::unique_ptr<Messaging::Channel> server_channel(
+    server_messaging.newChannel(0));
 
 // Here we are registering the function that handles incoming messages. Since we
 // don't care about clients resetting, we can inherit from SimpleReceiver (which
 // provides a no-op reset() handler).
 Messaging::SimpleReceiver server_receiver([](const roo::byte* data,
                                              size_t len) {
-  handleRequest(data, len, server_messaging);
+  handleRequest(data, len, *server_channel);
 });
 
 // This is our server's entry point.
@@ -216,10 +303,13 @@ void server() {
   // Initialize the reliable serial transport.
   server_serial.begin();
 
+  // Initialize the RPC server channel to use our request handler.
+  server_channel->setReceiver(server_receiver);
+
   // Start the 'RPC' server. Our receiver gets registered to trigger (and call
   // handleRequest) every time a new message is received. This happens in a
   // newly created singleton thread.
-  server_messaging.begin(server_receiver);
+  server_messaging.begin();
 
   // Just idle - we don't need the loop thread anymore.
   while (true) {
@@ -233,6 +323,8 @@ void server() {
 
 SerialLinkTransport<decltype(Serial2)> client_serial(Serial2);
 LinkMessaging client_messaging(client_serial.transport(), 128);
+std::unique_ptr<Messaging::Channel> client_channel(
+    client_messaging.newChannel(0));
 
 // The RPC client is an interface for making RPC calls. It implements the
 // Messaging::Receiver interface to receive responses from the server.
@@ -265,7 +357,7 @@ class RpcClient : public Messaging::Receiver {
     }
 
     // Everything looks good - send the request.
-    client_messaging.send(send_buffer.get(), request_size + 1);
+    client_channel->send(send_buffer.get(), request_size + 1);
 
     // Wait for the response to be received in the received() callback.
     do {
@@ -331,9 +423,12 @@ void client() {
   // Initialize the reliable serial transport.
   client_serial.begin();
 
+  // Initialize the RPC client channel to be ready to receive response messages.
+  client_channel->setReceiver(rpc_client);
+
   // Start the 'RPC' client. It creates a singleton thread to handle incoming
   // response messages.
-  client_messaging.begin(rpc_client);
+  client_messaging.begin();
 
   // Make requests in a loop.
   while (true) {

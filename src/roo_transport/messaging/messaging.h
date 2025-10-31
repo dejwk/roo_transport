@@ -3,9 +3,12 @@
 #include <stdint.h>
 
 #include <functional>
+#include <memory>
 
 #include "roo_backport.h"
 #include "roo_backport/byte.h"
+#include "roo_collections.h"
+#include "roo_collections/flat_small_hash_map.h"
 namespace roo_transport {
 
 // Abstract interface for messaging over a reliable channel. The messages are
@@ -17,14 +20,16 @@ namespace roo_transport {
 // the receiver with means to handle message loss.
 class Messaging {
  public:
+  using ChannelId = uint8_t;
+
   class Receiver {
    public:
     virtual ~Receiver() = default;
 
-    // Called when a new message is received.
+    // Called when a new message is received on the channel.
     virtual void received(const roo::byte* data, size_t len) = 0;
 
-    // Notifies the recipient that the underlying channel has been reset, and
+    // Notifies the recipient that the underlying transport has been reset, and
     // that any state associated with previously received messages should be
     // cleared.
     virtual void reset() {}
@@ -42,16 +47,28 @@ class Messaging {
     Fn fn_;
   };
 
+  class Channel;
+
   virtual ~Messaging() { end(); }
 
   // Can be called only once.
-  virtual void begin(Receiver& receiver) = 0;
+  virtual void begin() = 0;
 
   // Should be idempotent (OK to call multiple times).
   virtual void end() {}
 
+  std::unique_ptr<Channel> newChannel(ChannelId channel_id);
+
+ protected:
+  Messaging() = default;
+
+  void received(ChannelId channel_id, const roo::byte* data, size_t len);
+  void reset();
+
+ private:
   // Sends the specified message (unconditionally).
-  virtual void send(const roo::byte* data, size_t size) = 0;
+  virtual void send(ChannelId channel_id, const roo::byte* data,
+                    size_t size) = 0;
 
   // Sends the specified message, conditioned on successful delivery of the
   // preceding message. That is, if the recipient gets reset in between, the
@@ -59,10 +76,49 @@ class Messaging {
   // allows the sender to send atomic sequences of messages that get delivered
   // wholly or not at all. This can be useful e.g. for breaking up large
   // messages into smaller chunks.
-  virtual void sendContinuation(const roo::byte* data, size_t size) = 0;
+  virtual void sendContinuation(ChannelId channel_id, const roo::byte* data,
+                                size_t size) = 0;
 
- protected:
-  Messaging() = default;
+  void unregisterChannel(ChannelId channel_id) { receivers_.erase(channel_id); }
+
+  roo_collections::FlatSmallHashMap<ChannelId, Channel*> receivers_;
+};
+
+class Messaging::Channel {
+ public:
+  Channel(Messaging& messaging, ChannelId id)
+      : messaging_(messaging), id_(id), receiver_(nullptr) {}
+
+  void setReceiver(Receiver& receiver) { receiver_ = &receiver; }
+
+  // Sends the specified message (unconditionally).
+  void send(const roo::byte* data, size_t size) {
+    messaging_.send(id_, data, size);
+  }
+
+  // Sends the specified message (unconditionally).
+  void sendContinuation(const roo::byte* data, size_t size) {
+    messaging_.sendContinuation(id_, data, size);
+  }
+
+ private:
+  friend class Messaging;
+
+  void received(const roo::byte* data, size_t len) {
+    if (receiver_ != nullptr) {
+      receiver_->received(data, len);
+    }
+  }
+
+  void reset() {
+    if (receiver_ != nullptr) {
+      receiver_->reset();
+    }
+  }
+
+  Messaging& messaging_;
+  ChannelId id_;
+  Receiver* receiver_;
 };
 
 }  // namespace roo_transport

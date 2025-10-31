@@ -17,18 +17,18 @@ class LinkMessaging : public Messaging {
   LinkMessaging(roo_transport::LinkTransport& link_transport,
                 size_t max_recv_packet_size);
 
-  void begin(Receiver& receiver) override;
+  void begin() override;
   void end() override;
 
-  void send(const roo::byte* data, size_t size) override;
+  void send(ChannelId channel_id, const roo::byte* data, size_t size) override;
 
-  void sendContinuation(const roo::byte* data, size_t size) override;
+  void sendContinuation(ChannelId channel_id, const roo::byte* data, size_t size) override;
 
  private:
   void connect();
   void receiveLoop();
 
-  void sendInternal(const roo::byte* data, size_t size, bool continuation);
+  void sendInternal(ChannelId channel_id, const roo::byte* data, size_t size, bool continuation);
 
   roo_transport::LinkInputStream& in();
 
@@ -45,7 +45,6 @@ class LinkMessaging : public Messaging {
   roo::condition_variable reconnected_;
   mutable roo::mutex mutex_;
   bool sender_disconnected_ = false;
-  Receiver* receiver_ = nullptr;
   std::atomic<bool> closed_ = false;
 };
 
