@@ -32,9 +32,9 @@ class Message {
   size_t size_;
 };
 
-class LinkMessagingTest : public ::testing::Test {
+class SimpleLinkMessagingTest : public ::testing::Test {
  public:
-  LinkMessagingTest()
+  SimpleLinkMessagingTest()
       : loopback_(),
         server_receiver_([this](const void* data, size_t len) {
           serverReceived(data, len);
@@ -43,12 +43,16 @@ class LinkMessagingTest : public ::testing::Test {
           clientReceived(data, len);
         }),
         server_(loopback_.server(), 1500),
-        client_(loopback_.client(), 1500) {
-    server_.begin(server_receiver_);
-    client_.begin(client_receiver_);
+        client_(loopback_.client(), 1500),
+        server_channel_(server_.newChannel(23)),
+        client_channel_(client_.newChannel(23)) {
+    server_channel_->setReceiver(server_receiver_);
+    client_channel_->setReceiver(client_receiver_);
+    server_.begin();
+    client_.begin();
   }
 
-  ~LinkMessagingTest() override {
+  ~SimpleLinkMessagingTest() override {
     server_.end();
     client_.end();
     loopback_.close();
@@ -93,12 +97,19 @@ class LinkMessagingTest : public ::testing::Test {
     }
   }
 
+  Messaging::Channel& serverChannel() { return *server_channel_; }
+
+  Messaging::Channel& clientChannel() { return *client_channel_; }
+
  protected:
   LinkLoopback loopback_;
   Messaging::SimpleReceiver server_receiver_;
   Messaging::SimpleReceiver client_receiver_;
   LinkMessaging server_;
   LinkMessaging client_;
+  std::unique_ptr<Messaging::Channel> server_channel_;
+  std::unique_ptr<Messaging::Channel> client_channel_;
+
   mutable roo::mutex mutex_;
   roo::condition_variable done_;
   bool server_fin_received_ = false;
@@ -108,15 +119,15 @@ class LinkMessagingTest : public ::testing::Test {
   std::vector<Message> client_received_;
 };
 
-TEST_F(LinkMessagingTest, ConstructionDestruction) {
+TEST_F(SimpleLinkMessagingTest, ConstructionDestruction) {
   // Nothing to do, just testing that construction and destruction works.
 }
 
-TEST_F(LinkMessagingTest, SendReceiveOneEach) {
-  server_.send((const roo::byte*)"Hello, World!", 14);
-  client_.send((const roo::byte*)"Hello back!", 12);
-  server_.send(nullptr, 0);
-  client_.send(nullptr, 0);
+TEST_F(SimpleLinkMessagingTest, SendReceiveOneEach) {
+  serverChannel().send((const roo::byte*)"Hello, World!", 14);
+  clientChannel().send((const roo::byte*)"Hello back!", 12);
+  serverChannel().send(nullptr, 0);
+  clientChannel().send(nullptr, 0);
   join();
   EXPECT_EQ(serverReceived(), std::vector<Message>{"Hello back!"});
   EXPECT_EQ(clientReceived(), std::vector<Message>{"Hello, World!"});
