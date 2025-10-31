@@ -64,7 +64,7 @@ cc_test(
         ":roo_transport",
         "//test/helpers",
         "@roo_testing//:arduino_gtest_main",
-        "@roo_testing//roo_testing/devices/microcontroller/esp32"
+        "@roo_testing//roo_testing/microcontrollers/esp32"
     ],
     size = "small",
 )
