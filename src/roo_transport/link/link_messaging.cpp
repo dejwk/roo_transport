@@ -3,17 +3,21 @@
 namespace roo_transport {
 
 LinkMessaging::LinkMessaging(roo_transport::LinkTransport& link_transport,
-                             size_t max_recv_packet_size)
+                             size_t max_recv_packet_size,
+                             uint16_t recv_thread_stack_size,
+                             const char* recv_thread_name)
     : transport_(link_transport),
       link_(),
       max_recv_packet_size_(max_recv_packet_size),
       sender_disconnected_(true),
-      closed_(false) {}
+      closed_(false),
+      recv_thread_stack_size_(recv_thread_stack_size),
+      recv_thread_name_(recv_thread_name) {}
 
 void LinkMessaging::begin() {
   roo::thread::attributes attrs;
-  attrs.set_name("link_msg_recv");
-  attrs.set_stack_size(4096);
+  attrs.set_name(recv_thread_name_);
+  attrs.set_stack_size(recv_thread_stack_size_);
   reader_thread_ = roo::thread(attrs, [this]() { receiveLoop(); });
 }
 

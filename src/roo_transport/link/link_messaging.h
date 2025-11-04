@@ -15,20 +15,25 @@ namespace roo_transport {
 class LinkMessaging : public Messaging {
  public:
   LinkMessaging(roo_transport::LinkTransport& link_transport,
-                size_t max_recv_packet_size);
+                size_t max_recv_packet_size,
+                uint16_t recv_thread_stack_size = 4096,
+                const char* recv_thread_name = "link_msg_recv");
 
   void begin() override;
+
   void end() override;
 
   void send(ChannelId channel_id, const roo::byte* data, size_t size) override;
 
-  void sendContinuation(ChannelId channel_id, const roo::byte* data, size_t size) override;
+  void sendContinuation(ChannelId channel_id, const roo::byte* data,
+                        size_t size) override;
 
  private:
   void connect();
   void receiveLoop();
 
-  void sendInternal(ChannelId channel_id, const roo::byte* data, size_t size, bool continuation);
+  void sendInternal(ChannelId channel_id, const roo::byte* data, size_t size,
+                    bool continuation);
 
   roo_transport::LinkInputStream& in();
 
@@ -40,7 +45,8 @@ class LinkMessaging : public Messaging {
 
   std::function<void(const roo::byte* data, size_t len)> recv_cb_;
   size_t max_recv_packet_size_;
-
+  uint16_t recv_thread_stack_size_;
+  const char* recv_thread_name_;
   roo::thread reader_thread_;
   roo::condition_variable reconnected_;
   mutable roo::mutex mutex_;
