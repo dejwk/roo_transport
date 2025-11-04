@@ -22,11 +22,14 @@ void Messaging::reset() {
   }
 }
 
-std::unique_ptr<Messaging::Channel> Messaging::newChannel(
-    Messaging::ChannelId channel_id) {
-  auto channel = std::make_unique<Messaging::Channel>(*this, channel_id);
-  receivers_.insert({channel_id, channel.get()});
-  return channel;
+void Messaging::registerChannel(Channel& channel) {
+  CHECK(receivers_.insert({channel.id_, &channel}).second)
+      << "Channel ID " << (int)channel.id_ << " is already registered.";
+}
+
+void Messaging::unregisterChannel(Channel& channel) {
+  CHECK(receivers_.erase(channel.id_))
+      << "Channel ID " << (int)channel.id_ << " is not registered.";
 }
 
 }  // namespace roo_transport

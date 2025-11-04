@@ -44,10 +44,10 @@ class SimpleLinkMessagingTest : public ::testing::Test {
         }),
         server_(loopback_.server(), 1500),
         client_(loopback_.client(), 1500),
-        server_channel_(server_.newChannel(23)),
-        client_channel_(client_.newChannel(23)) {
-    server_channel_->setReceiver(server_receiver_);
-    client_channel_->setReceiver(client_receiver_);
+        server_channel_(server_, 23),
+        client_channel_(client_, 23) {
+    server_channel_.setReceiver(server_receiver_);
+    client_channel_.setReceiver(client_receiver_);
     server_.begin();
     client_.begin();
   }
@@ -97,9 +97,9 @@ class SimpleLinkMessagingTest : public ::testing::Test {
     }
   }
 
-  Messaging::Channel& serverChannel() { return *server_channel_; }
+  Messaging::Channel& serverChannel() { return server_channel_; }
 
-  Messaging::Channel& clientChannel() { return *client_channel_; }
+  Messaging::Channel& clientChannel() { return client_channel_; }
 
  protected:
   LinkLoopback loopback_;
@@ -107,8 +107,8 @@ class SimpleLinkMessagingTest : public ::testing::Test {
   Messaging::SimpleReceiver client_receiver_;
   LinkMessaging server_;
   LinkMessaging client_;
-  std::unique_ptr<Messaging::Channel> server_channel_;
-  std::unique_ptr<Messaging::Channel> client_channel_;
+  Messaging::Channel server_channel_;
+  Messaging::Channel client_channel_;
 
   mutable roo::mutex mutex_;
   roo::condition_variable done_;

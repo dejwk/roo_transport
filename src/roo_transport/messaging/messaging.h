@@ -57,8 +57,6 @@ class Messaging {
   // Should be idempotent (OK to call multiple times).
   virtual void end() {}
 
-  std::unique_ptr<Channel> newChannel(ChannelId channel_id);
-
  protected:
   Messaging() = default;
 
@@ -66,6 +64,8 @@ class Messaging {
   void reset();
 
  private:
+  friend class Channel;
+
   // Sends the specified message (unconditionally).
   virtual void send(ChannelId channel_id, const roo::byte* data,
                     size_t size) = 0;
@@ -79,7 +79,11 @@ class Messaging {
   virtual void sendContinuation(ChannelId channel_id, const roo::byte* data,
                                 size_t size) = 0;
 
-  void unregisterChannel(ChannelId channel_id) { receivers_.erase(channel_id); }
+  // Called by Messaging::Channel constructor.
+  void registerChannel(Channel& channel);
+
+  // Called by Messaging::Channel destructor.
+  void unregisterChannel(Channel& channel);
 
   roo_collections::FlatSmallHashMap<ChannelId, Channel*> receivers_;
 };
@@ -87,9 +91,15 @@ class Messaging {
 class Messaging::Channel {
  public:
   Channel(Messaging& messaging, ChannelId id)
-      : messaging_(messaging), id_(id), receiver_(nullptr) {}
+      : messaging_(messaging), id_(id), receiver_(nullptr) {
+    messaging_.registerChannel(*this);
+  }
+  ~Channel() {
+    messaging_.unregisterChannel(*this);
+  }
 
   void setReceiver(Receiver& receiver) { receiver_ = &receiver; }
+  void unsetReceiver() { receiver_ = nullptr; }
 
   // Sends the specified message (unconditionally).
   void send(const roo::byte* data, size_t size) {

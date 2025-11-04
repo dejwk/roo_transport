@@ -284,15 +284,14 @@ void handleRequest(const roo::byte* data, size_t len,
 
 SerialLinkTransport<decltype(Serial1)> server_serial(Serial1);
 LinkMessaging server_messaging(server_serial.transport(), kMaxPayloadSize);
-std::unique_ptr<Messaging::Channel> server_channel(
-    server_messaging.newChannel(0));
+Messaging::Channel server_channel(server_messaging, 0);
 
 // Here we are registering the function that handles incoming messages. Since we
 // don't care about clients resetting, we can inherit from SimpleReceiver (which
 // provides a no-op reset() handler).
 Messaging::SimpleReceiver server_receiver([](const roo::byte* data,
                                              size_t len) {
-  handleRequest(data, len, *server_channel);
+  handleRequest(data, len, server_channel);
 });
 
 // This is our server's entry point.
@@ -304,7 +303,7 @@ void server() {
   server_serial.begin();
 
   // Initialize the RPC server channel to use our request handler.
-  server_channel->setReceiver(server_receiver);
+  server_channel.setReceiver(server_receiver);
 
   // Start the 'RPC' server. Our receiver gets registered to trigger (and call
   // handleRequest) every time a new message is received. This happens in a
@@ -323,8 +322,7 @@ void server() {
 
 SerialLinkTransport<decltype(Serial2)> client_serial(Serial2);
 LinkMessaging client_messaging(client_serial.transport(), 128);
-std::unique_ptr<Messaging::Channel> client_channel(
-    client_messaging.newChannel(0));
+Messaging::Channel client_channel(client_messaging, 0);
 
 // The RPC client is an interface for making RPC calls. It implements the
 // Messaging::Receiver interface to receive responses from the server.
@@ -357,7 +355,7 @@ class RpcClient : public Messaging::Receiver {
     }
 
     // Everything looks good - send the request.
-    client_channel->send(send_buffer.get(), request_size + 1);
+    client_channel.send(send_buffer.get(), request_size + 1);
 
     // Wait for the response to be received in the received() callback.
     do {
@@ -424,7 +422,7 @@ void client() {
   client_serial.begin();
 
   // Initialize the RPC client channel to be ready to receive response messages.
-  client_channel->setReceiver(rpc_client);
+  client_channel.setReceiver(rpc_client);
 
   // Start the 'RPC' client. It creates a singleton thread to handle incoming
   // response messages.
