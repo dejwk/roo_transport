@@ -524,7 +524,7 @@ void Channel::sendLoop() {
 
 void Channel::begin() {
   roo::thread::attributes attrs;
-  attrs.set_stack_size(8192);
+  attrs.set_stack_size(4096);
 #if (defined ESP32 || defined ROO_TESTING)
   // Set the priority just the notch below the receiver thread, so that it
   // doesn't starve the receiver thread (which receives acks) but is still high.
