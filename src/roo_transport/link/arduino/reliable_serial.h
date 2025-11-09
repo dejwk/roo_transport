@@ -99,8 +99,6 @@ class ReliableEsp32Serial<HardwareSerial> : public LinkStream {
   size_t receiver_bytes_received() const { return receiver_.bytes_received(); }
   size_t receiver_bytes_accepted() const { return receiver_.bytes_accepted(); }
 
-  LinkTransport& transport() { return transport_; }
-
   void begin() { begin(5000000, SERIAL_8N1); }
 
   void begin(unsigned long baud, uint32_t config = SERIAL_8N1,
