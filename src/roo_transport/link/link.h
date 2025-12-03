@@ -51,6 +51,10 @@ class Link {
   // link is already idle, does nothing.
   void disconnect();
 
+  // Returns the ID that identifies this link. The link objects created by
+  // LinkTransport::connect() will have unique stream IDs.
+  uint32_t streamId() const { return my_stream_id_; }
+
  private:
   friend class LinkStream;
   friend class LinkTransport;
