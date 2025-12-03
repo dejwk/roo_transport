@@ -4,21 +4,21 @@
 
 namespace roo_transport {
 
-void Messaging::received(ChannelId channel_id, const roo::byte* data,
-                         size_t len) {
+void Messaging::received(ConnectionId connection_id, ChannelId channel_id,
+                         const roo::byte* data, size_t len) {
   auto it = receivers_.find(channel_id);
   if (it == receivers_.end()) {
     LOG(WARNING) << "Messaging: received message for unknown channel "
                  << (int)channel_id;
   } else {
     // Dispatch the message to the appropriate channel receiver.
-    it->second->received(data, len);
+    it->second->received(connection_id, data, len);
   }
 }
 
-void Messaging::reset() {
+void Messaging::reset(ConnectionId connection_id) {
   for (auto& entry : receivers_) {
-    entry.second->reset();
+    entry.second->reset(connection_id);
   }
 }
 

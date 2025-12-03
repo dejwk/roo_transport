@@ -36,12 +36,12 @@ class SimpleLinkMessagingTest : public ::testing::Test {
  public:
   SimpleLinkMessagingTest()
       : loopback_(),
-        server_receiver_([this](const void* data, size_t len) {
-          serverReceived(data, len);
-        }),
-        client_receiver_([this](const void* data, size_t len) {
-          clientReceived(data, len);
-        }),
+        server_receiver_([this](roo_transport::Messaging::ConnectionId ignored,
+                                const void* data,
+                                size_t len) { serverReceived(data, len); }),
+        client_receiver_([this](roo_transport::Messaging::ConnectionId ignored,
+                                const void* data,
+                                size_t len) { clientReceived(data, len); }),
         server_(loopback_.server(), 1500),
         client_(loopback_.client(), 1500),
         server_channel_(server_, 23),

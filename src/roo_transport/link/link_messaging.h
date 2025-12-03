@@ -23,17 +23,18 @@ class LinkMessaging : public Messaging {
 
   void end() override;
 
-  void send(ChannelId channel_id, const roo::byte* data, size_t size) override;
+  ConnectionId send(ChannelId channel_id, const roo::byte* data,
+                    size_t size) override;
 
-  void sendContinuation(ChannelId channel_id, const roo::byte* data,
-                        size_t size) override;
+  bool sendContinuation(ConnectionId connection_id, ChannelId channel_id,
+                        const roo::byte* data, size_t size) override;
 
  private:
-  void connect();
+  uint32_t connect();
   void receiveLoop();
 
-  void sendInternal(ChannelId channel_id, const roo::byte* data, size_t size,
-                    bool continuation);
+  // Must hold mutex_.
+  void sendInternal(ChannelId channel_id, const roo::byte* data, size_t size);
 
   roo_transport::LinkInputStream& in();
 
@@ -41,17 +42,17 @@ class LinkMessaging : public Messaging {
 
   roo_transport::LinkTransport& transport_;
   roo_transport::Link link_;
-  uint32_t my_channel_id_;
+  std::atomic<bool> closed_ = false;
 
-  std::function<void(const roo::byte* data, size_t len)> recv_cb_;
+  std::function<void(ConnectionId connection_id, const roo::byte* data,
+                     size_t len)>
+      recv_cb_;
   size_t max_recv_packet_size_;
   uint16_t recv_thread_stack_size_;
   const char* recv_thread_name_;
   roo::thread reader_thread_;
   roo::condition_variable reconnected_;
   mutable roo::mutex mutex_;
-  bool sender_disconnected_ = false;
-  std::atomic<bool> closed_ = false;
 };
 
 }  // namespace roo_transport
