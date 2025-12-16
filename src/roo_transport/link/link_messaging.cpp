@@ -33,9 +33,10 @@ void LinkMessaging::end() {
   }
 }
 
-Messaging::ConnectionId LinkMessaging::send(ChannelId channel_id,
-                                            const roo::byte* data,
-                                            size_t size) {
+Messaging::ConnectionId LinkMessaging::send(const roo::byte* header,
+                                            size_t header_size,
+                                            const roo::byte* payload,
+                                            size_t payload_size) {
   roo::unique_lock<roo::mutex> guard(mutex_);
   Messaging::ConnectionId connection_id;
   while (true) {
@@ -46,31 +47,34 @@ Messaging::ConnectionId LinkMessaging::send(ChannelId channel_id,
     }
     reconnected_.wait(guard);
   }
-  sendInternal(channel_id, data, size);
+  sendInternal(header, header_size, payload, payload_size);
   return connection_id;
 }
 
 bool LinkMessaging::sendContinuation(ConnectionId connection_id,
-                                     ChannelId channel_id,
-                                     const roo::byte* data, size_t size) {
+                                     const roo::byte* header,
+                                     size_t header_size,
+                                     const roo::byte* payload,
+                                     size_t payload_size) {
   roo::unique_lock<roo::mutex> guard(mutex_);
   if ((ConnectionId)link_.streamId() != connection_id) {
     // Connection ID does not match the current link stream ID; the connection
     // must have been reset.
     return false;
   }
-  sendInternal(channel_id, data, size);
+  sendInternal(header, header_size, payload, payload_size);
   return true;
 }
 
-void LinkMessaging::sendInternal(ChannelId channel_id, const roo::byte* data,
-                                 size_t size) {
+void LinkMessaging::sendInternal(const roo::byte* header, size_t header_size,
+                                 const roo::byte* payload,
+                                 size_t payload_size) {
   roo_io::OutputStream& out = link_.out();
-  roo::byte header[4];
-  roo_io::StoreBeU32(size, header);
-  out.writeFully(header, 4);
-  out.write((const roo::byte*)&channel_id, 1);
-  out.writeFully((const roo::byte*)data, size);
+  roo::byte serialized_size[4];
+  roo_io::StoreBeU32(header_size + payload_size, serialized_size);
+  out.writeFully(serialized_size, 4);
+  out.writeFully(header, header_size);
+  out.writeFully(payload, payload_size);
   out.flush();
 }
 
@@ -98,28 +102,27 @@ void LinkMessaging::receiveLoop() {
     ConnectionId connection_id = (ConnectionId)connect();
     roo_io::InputStream& in = this->in();
     while (true) {
-      roo::byte header[4];
-      size_t count = in.readFully(header, 4);
+      roo::byte serialized_size[4];
+      size_t count = in.readFully(serialized_size, 4);
       if (count < 4) {
         LOG(ERROR) << "Error: " << in.status();
         reset(connection_id);
         break;
       }
-      uint32_t incoming_size = roo_io::LoadBeU32(header);
+      uint32_t incoming_size = roo_io::LoadBeU32(serialized_size);
       if (incoming_size > max_recv_packet_size_) {
         LOG(ERROR) << "Error: incoming size " << incoming_size
                    << " exceeds max " << max_recv_packet_size_;
         reset(connection_id);
         break;
       }
-      size_t read = in.readFully(incoming_payload.get(), incoming_size + 1);
-      if (read < incoming_size + 1) {
+      size_t read = in.readFully(incoming_payload.get(), incoming_size);
+      if (read < incoming_size) {
         LOG(ERROR) << "Error: " << in.status();
         reset(connection_id);
         break;
       }
-      ChannelId channel_id = (ChannelId)incoming_payload[0];
-      received(connection_id, channel_id, &incoming_payload[1], incoming_size);
+      received(connection_id, incoming_payload.get(), incoming_size);
     }
   }
 }

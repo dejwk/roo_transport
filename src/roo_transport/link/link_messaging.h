@@ -19,22 +19,24 @@ class LinkMessaging : public Messaging {
                 uint16_t recv_thread_stack_size = 4096,
                 const char* recv_thread_name = "link_msg_recv");
 
-  void begin() override;
+  void begin();
 
-  void end() override;
+  void end();
 
-  ConnectionId send(ChannelId channel_id, const roo::byte* data,
-                    size_t size) override;
+  ConnectionId send(const roo::byte* header, size_t header_size,
+                    const roo::byte* payload, size_t payload_size) override;
 
-  bool sendContinuation(ConnectionId connection_id, ChannelId channel_id,
-                        const roo::byte* data, size_t size) override;
+  bool sendContinuation(ConnectionId connection_id, const roo::byte* header,
+                        size_t header_size, const roo::byte* payload,
+                        size_t payload_size) override;
 
  private:
   uint32_t connect();
   void receiveLoop();
 
   // Must hold mutex_.
-  void sendInternal(ChannelId channel_id, const roo::byte* data, size_t size);
+  void sendInternal(const roo::byte* header, size_t header_size,
+                    const roo::byte* payload, size_t payload_size);
 
   roo_transport::LinkInputStream& in();
 

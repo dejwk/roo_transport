@@ -3,6 +3,7 @@
 #include "gtest/gtest.h"
 #include "helpers/link_loopback.h"
 #include "helpers/rand.h"
+#include "roo_transport/messaging/mux_messaging.h"
 
 namespace roo_transport {
 
@@ -32,31 +33,24 @@ class Message {
   size_t size_;
 };
 
-class SimpleLinkMessagingTest : public ::testing::Test {
+class MessagingTester {
  public:
-  SimpleLinkMessagingTest()
-      : loopback_(),
-        server_receiver_([this](roo_transport::Messaging::ConnectionId ignored,
-                                const void* data,
-                                size_t len) { serverReceived(data, len); }),
-        client_receiver_([this](roo_transport::Messaging::ConnectionId ignored,
-                                const void* data,
-                                size_t len) { clientReceived(data, len); }),
-        server_(loopback_.server(), 1500),
-        client_(loopback_.client(), 1500),
-        server_channel_(server_, 23),
-        client_channel_(client_, 23) {
-    server_channel_.setReceiver(server_receiver_);
-    client_channel_.setReceiver(client_receiver_);
-    server_.begin();
-    client_.begin();
+  MessagingTester(Messaging& server, Messaging& client)
+      : server_receiver_(
+            [this](roo_transport::Messaging::ConnectionId ignored_connection_id,
+                   const void* data,
+                   size_t len) { serverReceived(data, len); }),
+        client_receiver_(
+            [this](roo_transport::Messaging::ConnectionId ignored_connection_id,
+                   const void* data,
+                   size_t len) { clientReceived(data, len); }),
+        server_(server),
+        client_(client) {
+    server_.setReceiver(server_receiver_);
+    client_.setReceiver(client_receiver_);
   }
 
-  ~SimpleLinkMessagingTest() override {
-    server_.end();
-    client_.end();
-    loopback_.close();
-  }
+  ~MessagingTester() = default;
 
   void serverReceived(const void* data, size_t len) {
     roo::lock_guard<roo::mutex> guard(mutex_);
@@ -97,18 +91,15 @@ class SimpleLinkMessagingTest : public ::testing::Test {
     }
   }
 
-  Messaging::Channel& serverChannel() { return server_channel_; }
+  Messaging& server() { return server_; }
 
-  Messaging::Channel& clientChannel() { return client_channel_; }
+  Messaging& client() { return client_; }
 
  protected:
-  LinkLoopback loopback_;
   Messaging::SimpleReceiver server_receiver_;
   Messaging::SimpleReceiver client_receiver_;
-  LinkMessaging server_;
-  LinkMessaging client_;
-  Messaging::Channel server_channel_;
-  Messaging::Channel client_channel_;
+  Messaging& server_;
+  Messaging& client_;
 
   mutable roo::mutex mutex_;
   roo::condition_variable done_;
@@ -119,15 +110,93 @@ class SimpleLinkMessagingTest : public ::testing::Test {
   std::vector<Message> client_received_;
 };
 
+class LoopbackTestBase : public testing::Test {
+ public:
+  LoopbackTestBase()
+      : loopback_(),
+        server_(loopback_.server(), 1500),
+        client_(loopback_.client(), 1500) {}
+
+  void begin() {
+    server_.begin();
+    client_.begin();
+  }
+
+  void end() {
+    server_.end();
+    client_.end();
+  }
+
+  ~LoopbackTestBase() override { loopback_.close(); }
+
+ protected:
+  LinkLoopback loopback_;
+  LinkMessaging server_;
+  LinkMessaging client_;
+};
+
+class SimpleLinkMessagingTest : public LoopbackTestBase,
+                                public MessagingTester {
+ public:
+  SimpleLinkMessagingTest()
+      : LoopbackTestBase(),
+        MessagingTester(LoopbackTestBase::server_, LoopbackTestBase::client_) {
+    begin();
+  }
+
+  ~SimpleLinkMessagingTest() override { end(); }
+};
+
+class MuxMessagingTester {
+ public:
+  MuxMessagingTester(Messaging& server, Messaging& client,
+                     MuxMessaging::ChannelId channel_id)
+      : server_(server),
+        client_(client),
+        channel_server_(server_, channel_id),
+        channel_client_(client_, channel_id) {}
+
+ protected:
+  roo_transport::MuxMessaging server_;
+  roo_transport::MuxMessaging client_;
+  roo_transport::MuxMessaging::Channel channel_server_;
+  roo_transport::MuxMessaging::Channel channel_client_;
+};
+
+class MuxMessagingTest : public LoopbackTestBase,
+                         public MuxMessagingTester,
+                         public MessagingTester {
+ public:
+  MuxMessagingTest()
+      : LoopbackTestBase(),
+        MuxMessagingTester(LoopbackTestBase::server_, LoopbackTestBase::client_,
+                           23),
+        MessagingTester(channel_server_, channel_client_) {
+    begin();
+  }
+
+  ~MuxMessagingTest() override { end(); }
+};
+
 TEST_F(SimpleLinkMessagingTest, ConstructionDestruction) {
   // Nothing to do, just testing that construction and destruction works.
 }
 
 TEST_F(SimpleLinkMessagingTest, SendReceiveOneEach) {
-  serverChannel().send((const roo::byte*)"Hello, World!", 14);
-  clientChannel().send((const roo::byte*)"Hello back!", 12);
-  serverChannel().send(nullptr, 0);
-  clientChannel().send(nullptr, 0);
+  server().send((const roo::byte*)"Hello, World!", 14);
+  client().send((const roo::byte*)"Hello back!", 12);
+  server().send(nullptr, 0);
+  client().send(nullptr, 0);
+  join();
+  EXPECT_EQ(serverReceived(), std::vector<Message>{"Hello back!"});
+  EXPECT_EQ(clientReceived(), std::vector<Message>{"Hello, World!"});
+}
+
+TEST_F(MuxMessagingTest, SendReceiveOneEach) {
+  server().send((const roo::byte*)"Hello, World!", 14);
+  client().send((const roo::byte*)"Hello back!", 12);
+  server().send(nullptr, 0);
+  client().send(nullptr, 0);
   join();
   EXPECT_EQ(serverReceived(), std::vector<Message>{"Hello back!"});
   EXPECT_EQ(clientReceived(), std::vector<Message>{"Hello, World!"});

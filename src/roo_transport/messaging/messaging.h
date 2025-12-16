@@ -7,8 +7,7 @@
 
 #include "roo_backport.h"
 #include "roo_backport/byte.h"
-#include "roo_collections.h"
-#include "roo_collections/flat_small_hash_map.h"
+
 namespace roo_transport {
 
 // Abstract interface for messaging over a reliable channel. The messages are
@@ -20,97 +19,23 @@ namespace roo_transport {
 // the receiver with means to handle message loss.
 class Messaging {
  public:
-  using ChannelId = uint8_t;
   using ConnectionId = uint32_t;
 
-  class Receiver {
-   public:
-    virtual ~Receiver() = default;
+  class Receiver;
+  class SimpleReceiver;
 
-    // Called when a new message is received on the channel. The (receiver-side)
-    // connection ID can be used to ensure that response messages (e.g. RPC
-    // responses) are sent on the same connection, using
-    // channel.sendContinuation().
-    virtual void received(ConnectionId connection_id, const roo::byte* data,
-                          size_t len) = 0;
+  virtual ~Messaging() = default;
 
-    // Notifies the recipient that the underlying connection has been closed,
-    // and that any state associated with previously received messages using
-    // that connection ID should be cleared.
-    virtual void reset(ConnectionId connection_id) {}
-  };
-
-  class SimpleReceiver : public Receiver {
-   public:
-    using Fn = std::function<void(ConnectionId connection_id,
-                                  const roo::byte* data, size_t len)>;
-    explicit SimpleReceiver(Fn fn) : fn_(std::move(fn)) {}
-    void received(ConnectionId connection_id, const roo::byte* data,
-                  size_t len) override {
-      fn_(connection_id, data, len);
-    }
-
-   private:
-    Fn fn_;
-  };
-
-  class Channel;
-
-  virtual ~Messaging() { end(); }
-
-  // Can be called only once.
-  virtual void begin() = 0;
-
-  // Should be idempotent (OK to call multiple times).
-  virtual void end() {}
-
- protected:
-  Messaging() = default;
-
-  void received(ConnectionId connection_id, ChannelId channel_id,
-                const roo::byte* data, size_t len);
-
-  void reset(ConnectionId connection_id);
-
- private:
-  friend class Channel;
-
-  // Sends the specified message (unconditionally). See Channel::send().
-  virtual ConnectionId send(ChannelId channel_id, const roo::byte* data,
-                            size_t size) = 0;
-
-  // Sends the specified message, using the specified sender-side connection ID.
-  // See See Channel::sendContinuation().
-  virtual bool sendContinuation(ConnectionId connection_id,
-                                ChannelId channel_id, const roo::byte* data,
-                                size_t size) = 0;
-
-  // Called by Messaging::Channel constructor.
-  void registerChannel(Channel& channel);
-
-  // Called by Messaging::Channel destructor.
-  void unregisterChannel(Channel& channel);
-
-  roo_collections::FlatSmallHashMap<ChannelId, Channel*> receivers_;
-};
-
-class Messaging::Channel {
- public:
-  Channel(Messaging& messaging, ChannelId id)
-      : messaging_(messaging), id_(id), receiver_(nullptr) {
-    messaging_.registerChannel(*this);
-  }
-  ~Channel() { messaging_.unregisterChannel(*this); }
-
+  // Should be called before initialization (e.g. begin() etc.)
   void setReceiver(Receiver& receiver) { receiver_ = &receiver; }
+
   void unsetReceiver() { receiver_ = nullptr; }
 
   // Sends the specified message (unconditionally). Returns the (sender-side)
   // connection ID that was used to send the message. (That connection ID may be
   // later used for sendContinuation; see below).
-  ConnectionId send(const roo::byte* data, size_t size) {
-    return messaging_.send(id_, data, size);
-  }
+  virtual ConnectionId send(const roo::byte* header, size_t header_size,
+                            const roo::byte* payload, size_t payload_size) = 0;
 
   // Sends the specified message, using the specified sender-side connection ID.
   // Fails if that connection has been closed. Returns false if send cannot be
@@ -122,29 +47,64 @@ class Messaging::Channel {
   //     request (or not at all),
   // (2) for message strams that should be 'atomic' (sent entirely on the same
   //     connection).
-  void sendContinuation(ConnectionId connection_id, const roo::byte* data,
-                        size_t size) {
-    messaging_.sendContinuation(connection_id, id_, data, size);
+  virtual bool sendContinuation(ConnectionId connection_id,
+                                const roo::byte* header, size_t header_size,
+                                const roo::byte* payload,
+                                size_t payload_size) = 0;
+
+  // Convenience for header-less messages.
+  virtual ConnectionId send(const roo::byte* payload, size_t payload_size) {
+    return send(nullptr, 0, payload, payload_size);
+  }
+
+  // Convenience for header-less continuation messages.
+  virtual bool sendContinuation(ConnectionId connection_id,
+                                const roo::byte* payload, size_t payload_size) {
+    return sendContinuation(connection_id, nullptr, 0, payload, payload_size);
+  }
+
+ protected:
+  Messaging() = default;
+
+  // Dispatches a received message to the registered receiver.
+  void received(ConnectionId connection_id, const roo::byte* data, size_t len);
+
+  // Dispatches a reset notification to the registered receiver.
+  void reset(ConnectionId connection_id);
+
+ private:
+  Receiver* receiver_ = nullptr;
+};
+
+class Messaging::Receiver {
+ public:
+  virtual ~Receiver() = default;
+
+  // Called when a new message is received on the channel. The (receiver-side)
+  // connection ID can be used to ensure that response messages (e.g. RPC
+  // responses) are sent on the same connection, using
+  // channel.sendContinuation().
+  virtual void received(ConnectionId connection_id, const roo::byte* data,
+                        size_t len) = 0;
+
+  // Notifies the recipient that the underlying connection has been closed,
+  // and that any state associated with previously received messages using
+  // that connection ID should be cleared.
+  virtual void reset(ConnectionId connection_id) {}
+};
+
+class Messaging::SimpleReceiver : public Messaging::Receiver {
+ public:
+  using Fn = std::function<void(ConnectionId connection_id,
+                                const roo::byte* data, size_t len)>;
+  explicit SimpleReceiver(Fn fn) : fn_(std::move(fn)) {}
+  void received(ConnectionId connection_id, const roo::byte* data,
+                size_t len) override {
+    fn_(connection_id, data, len);
   }
 
  private:
-  friend class Messaging;
-
-  void received(ConnectionId connection_id, const roo::byte* data, size_t len) {
-    if (receiver_ != nullptr) {
-      receiver_->received(connection_id, data, len);
-    }
-  }
-
-  void reset(ConnectionId connection_id) {
-    if (receiver_ != nullptr) {
-      receiver_->reset(connection_id);
-    }
-  }
-
-  Messaging& messaging_;
-  ChannelId id_;
-  Receiver* receiver_;
+  Fn fn_;
 };
 
 }  // namespace roo_transport
