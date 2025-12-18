@@ -54,15 +54,14 @@ void MuxMessaging::unregisterChannel(Channel& channel) {
       << "Channel ID " << (int)channel.id_ << " is not registered.";
 }
 
-Messaging::ConnectionId MuxMessaging::Channel::send(const roo::byte* header,
-                                                    size_t header_size,
-                                                    const roo::byte* payload,
-                                                    size_t payload_size) {
+bool MuxMessaging::Channel::send(const roo::byte* header, size_t header_size,
+                                 const roo::byte* payload, size_t payload_size,
+                                 ConnectionId* connection_id) {
   roo::byte new_header[header_size + 1];
   roo_io::StoreU8((uint8_t)id_, &new_header[0]);
   memcpy(&new_header[1], header, header_size);
   return messaging_.messaging_.send(new_header, header_size + 1, payload,
-                                    payload_size);
+                                    payload_size, connection_id);
 }
 
 bool MuxMessaging::Channel::sendContinuation(

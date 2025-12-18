@@ -60,8 +60,9 @@ class MuxMessaging::Channel : public Messaging {
 
   ~Channel() { messaging_.unregisterChannel(*this); }
 
-  ConnectionId send(const roo::byte* header, size_t header_size,
-                    const roo::byte* payload, size_t payload_size) override;
+  bool send(const roo::byte* header, size_t header_size,
+            const roo::byte* payload, size_t payload_size,
+            ConnectionId* connection_id) override;
 
   bool sendContinuation(ConnectionId connection_id, const roo::byte* header,
                         size_t header_size, const roo::byte* payload,

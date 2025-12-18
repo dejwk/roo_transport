@@ -31,11 +31,14 @@ class Messaging {
 
   void unsetReceiver() { receiver_ = nullptr; }
 
-  // Sends the specified message (unconditionally). Returns the (sender-side)
+  // Sends the specified message (unconditionally). Returns true on success,
+  // false otherwise. True does not guarantee that the message gets delivered.
+  // If connection_id is not nullptr, it is set to the (sender-side)
   // connection ID that was used to send the message. (That connection ID may be
   // later used for sendContinuation; see below).
-  virtual ConnectionId send(const roo::byte* header, size_t header_size,
-                            const roo::byte* payload, size_t payload_size) = 0;
+  virtual bool send(const roo::byte* header, size_t header_size,
+                    const roo::byte* payload, size_t payload_size,
+                    ConnectionId* connection_id) = 0;
 
   // Sends the specified message, using the specified sender-side connection ID.
   // Fails if that connection has been closed. Returns false if send cannot be
@@ -53,8 +56,14 @@ class Messaging {
                                 size_t payload_size) = 0;
 
   // Convenience for header-less messages.
-  virtual ConnectionId send(const roo::byte* payload, size_t payload_size) {
-    return send(nullptr, 0, payload, payload_size);
+  virtual bool send(const roo::byte* payload, size_t payload_size,
+                    ConnectionId* connection_id) {
+    return send(nullptr, 0, payload, payload_size, connection_id);
+  }
+
+  // Convenience for header-less stateless messages.
+  bool send(const roo::byte* payload, size_t payload_size) {
+    return send(payload, payload_size, nullptr);
   }
 
   // Convenience for header-less continuation messages.

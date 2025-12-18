@@ -23,8 +23,9 @@ class LinkMessaging : public Messaging {
 
   void end();
 
-  ConnectionId send(const roo::byte* header, size_t header_size,
-                    const roo::byte* payload, size_t payload_size) override;
+  bool send(const roo::byte* header, size_t header_size,
+            const roo::byte* payload, size_t payload_size,
+            ConnectionId* connection_id) override;
 
   bool sendContinuation(ConnectionId connection_id, const roo::byte* header,
                         size_t header_size, const roo::byte* payload,
@@ -35,7 +36,7 @@ class LinkMessaging : public Messaging {
   void receiveLoop();
 
   // Must hold mutex_.
-  void sendInternal(const roo::byte* header, size_t header_size,
+  bool sendInternal(const roo::byte* header, size_t header_size,
                     const roo::byte* payload, size_t payload_size);
 
   roo_transport::LinkInputStream& in();

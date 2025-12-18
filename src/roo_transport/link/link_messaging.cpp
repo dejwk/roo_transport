@@ -33,22 +33,21 @@ void LinkMessaging::end() {
   }
 }
 
-Messaging::ConnectionId LinkMessaging::send(const roo::byte* header,
-                                            size_t header_size,
-                                            const roo::byte* payload,
-                                            size_t payload_size) {
+bool LinkMessaging::send(const roo::byte* header, size_t header_size,
+                         const roo::byte* payload, size_t payload_size,
+                         Messaging::ConnectionId* connection_id) {
   roo::unique_lock<roo::mutex> guard(mutex_);
-  Messaging::ConnectionId connection_id;
   while (true) {
     LinkStatus status = link_.status();
     if (status == LinkStatus::kConnected || status == LinkStatus::kConnecting) {
-      connection_id = (Messaging::ConnectionId)link_.streamId();
+      if (connection_id != nullptr) {
+        *connection_id = (Messaging::ConnectionId)link_.streamId();
+      }
       break;
     }
     reconnected_.wait(guard);
   }
-  sendInternal(header, header_size, payload, payload_size);
-  return connection_id;
+  return sendInternal(header, header_size, payload, payload_size);
 }
 
 bool LinkMessaging::sendContinuation(ConnectionId connection_id,
@@ -62,11 +61,10 @@ bool LinkMessaging::sendContinuation(ConnectionId connection_id,
     // must have been reset.
     return false;
   }
-  sendInternal(header, header_size, payload, payload_size);
-  return true;
+  return sendInternal(header, header_size, payload, payload_size);
 }
 
-void LinkMessaging::sendInternal(const roo::byte* header, size_t header_size,
+bool LinkMessaging::sendInternal(const roo::byte* header, size_t header_size,
                                  const roo::byte* payload,
                                  size_t payload_size) {
   roo_io::OutputStream& out = link_.out();
@@ -76,6 +74,7 @@ void LinkMessaging::sendInternal(const roo::byte* header, size_t header_size,
   out.writeFully(header, header_size);
   out.writeFully(payload, payload_size);
   out.flush();
+  return out.isOpen();
 }
 
 uint32_t LinkMessaging::connect() {
