@@ -9,12 +9,47 @@
 #include "roo_time.h"
 #include "roo_transport/messaging/messaging.h"
 #include "roo_transport/rpc/internal/server/handler.h"
+#include "roo_transport/rpc/serialization.h"
 #include "roo_transport/rpc/status.h"
 
 namespace roo_transport {
 
 using FunctionTable =
     roo_collections::FlatSmallHashMap<RpcFunctionId, RpcHandlerFn>;
+
+// Convenience wrapper for implementing unary RPC handlers.
+template <typename Request, typename Response,
+          typename RequestDeserializer = Deserializer<Request>,
+          typename ResponseSerializer = Serializer<Response>>
+class UnaryHandler {
+ public:
+  using Fn = std::function<Status(const Request&, Response&)>;
+
+  UnaryHandler(Fn fn) : fn_(std::move(fn)) {}
+
+  void operator()(RpcRequest& request, const roo::byte* payload,
+                  size_t payload_size, bool fin) const {
+    RequestDeserializer deserialize;
+    Request req;
+    roo_transport::Status status = deserialize(payload, payload_size, req);
+    if (status != roo_transport::kOk) {
+      request.sendFailureResponse(status, "request deserialization failed");
+      return;
+    }
+    Response resp;
+    status = fn_(req, resp);
+    if (status != roo_transport::kOk) {
+      request.sendFailureResponse(status, "application error");
+      return;
+    }
+    ResponseSerializer serialize;
+    auto serialized = serialize(resp);
+    request.sendSuccessResponse(serialized.data(), serialized.size(), true);
+  }
+
+ private:
+  Fn fn_;
+};
 
 class RpcServer {
  public:

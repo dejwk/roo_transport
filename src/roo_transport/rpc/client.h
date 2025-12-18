@@ -5,12 +5,81 @@
 #include "roo_collections.h"
 #include "roo_collections/flat_small_hash_map.h"
 #include "roo_threads.h"
+#include "roo_threads/latch.h"
 #include "roo_threads/mutex.h"
 #include "roo_transport/messaging/messaging.h"
 #include "roo_transport/rpc/rpc.h"
+#include "roo_transport/rpc/serialization.h"
 #include "roo_transport/rpc/status.h"
 
 namespace roo_transport {
+
+class RpcClient;
+
+// Convenience wrapper for implementing unary RPC stubs.
+template <typename Request, typename Response,
+          typename RequestSerializer = Serializer<Request>,
+          typename ResponseDeserializer = Deserializer<Response>>
+class UnaryStub {
+ public:
+  UnaryStub(RpcClient& client, RpcFunctionId function_id)
+      : client_(client), function_id_(function_id) {}
+
+  roo_transport::Status call(const Request& request, Response& response) {
+    roo::latch completed(1);
+    RequestSerializer serialize;
+    // Serialize the request message.
+    auto serialized = serialize(request);
+    // Bail in case the argument serialization failed.
+    if (serialized.status() != kOk) {
+      return serialized.status();
+    }
+    roo_transport::Status status;
+    roo_transport::Status req_status = client_.sendUnaryRpc(
+        function_id_, serialized.data(), serialized.size(),
+        [&completed, &response, &status](const roo::byte* data, size_t len,
+                                         roo_transport::Status resp_status) {
+          ResponseDeserializer deserialize;
+          if (resp_status == kOk) {
+            resp_status = deserialize((const roo_io::byte*)data, len, response);
+          }
+          status = resp_status;
+          completed.count_down();
+        });
+    if (req_status != kOk) {
+      return req_status;
+    }
+    completed.wait();
+    return status;
+  }
+
+  roo_transport::Status callAsync(
+      const Request& request,
+      std::function<void(roo_transport::Status, Response)> completion_cb) {
+    RequestSerializer serialize;
+    // Serialize the request message.
+    auto serialized = serialize(request);
+    // Bail in case the argument serialization failed.
+    if (serialized.status() != kOk) {
+      return serialized.status();
+    }
+    return client_.sendUnaryRpc(
+        function_id_, serialized.data(), serialized.size(),
+        [completion_cb](const roo::byte* data, size_t len,
+                        roo_transport::Status resp_status) {
+          ResponseDeserializer deserialize;
+          Response resp;
+          if (resp_status == kOk) {
+            resp_status = deserialize((const roo_io::byte*)data, len, resp);
+          }
+          completion_cb(resp_status, std::move(resp));
+        });
+  }
+
+ private:
+  RpcClient& client_;
+  RpcFunctionId function_id_;
+};
 
 class RpcClient {
  public:
@@ -49,7 +118,7 @@ class RpcClient {
     RpcClient& rpc_client_;
   };
 
-  using OutgoingCalls = 
+  using OutgoingCalls =
       roo_collections::FlatSmallHashMap<RpcStreamId, UnaryCompletionCb>;
 
   // Called when we receive a response from the server. This method dispatches
