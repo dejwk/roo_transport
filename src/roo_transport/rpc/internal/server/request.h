@@ -12,17 +12,16 @@ namespace roo_transport {
 
 class RpcServer;
 
+// Source of truth about the pending request, maintained by the server.
 class RpcRequest {
  public:
   RpcRequest() = default;
   RpcRequest(const RpcRequest&) = default;
   RpcRequest& operator=(const RpcRequest&) = default;
 
-  RpcRequest(RpcServer& server, Messaging::ConnectionId connection_id,
-             RpcFunctionId function_id, RpcStreamId stream_id,
-             roo_time::Uptime deadline, bool fin)
-      : server_(&server),
-        connection_id_(connection_id),
+  RpcRequest(Messaging::ConnectionId connection_id, RpcFunctionId function_id,
+             RpcStreamId stream_id, roo_time::Uptime deadline, bool fin)
+      : connection_id_(connection_id),
         function_id_(function_id),
         stream_id_(stream_id),
         deadline_(deadline),
@@ -36,22 +35,36 @@ class RpcRequest {
 
   roo_time::Uptime deadline() const { return deadline_; }
 
-  void sendSuccessResponse(const roo::byte* payload, size_t payload_size,
-                           bool last);
-
-  void sendFailureResponse(Status status, roo::string_view msg);
-
   bool clientFin() const { return client_closed_; }
   bool serverFin() const { return server_closed_; }
 
  private:
-  RpcServer* server_;
   Messaging::ConnectionId connection_id_;
   RpcFunctionId function_id_;
   RpcStreamId stream_id_;
   roo_time::Uptime deadline_;
   bool client_closed_;
   bool server_closed_;
+};
+
+// Pass-by-value handle, used by handlers for sending responses.
+class RequestHandle {
+ public:
+  RequestHandle(RpcServer& server, Messaging::ConnectionId connection_id,
+                RpcStreamId stream_id)
+      : server_(&server),
+        connection_id_(connection_id),
+        stream_id_(stream_id) {}
+
+  void sendSuccessResponse(const roo::byte* payload, size_t payload_size,
+                           bool last) const;
+
+  void sendFailureResponse(Status status, roo::string_view msg) const;
+
+ private:
+  mutable RpcServer* server_;
+  Messaging::ConnectionId connection_id_;
+  RpcStreamId stream_id_;
 };
 
 }  // namespace roo_transport

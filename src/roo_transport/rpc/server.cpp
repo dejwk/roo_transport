@@ -50,7 +50,6 @@ void RpcServer::handleRequest(Messaging::ConnectionId connection_id,
       deadline = roo_time::Uptime::Now() + roo_time::Millis(header.timeoutMs());
     }
 
-    RpcRequest* request = nullptr;
     {
       roo::lock_guard<roo::mutex> guard(mutex_);
       if (pending_calls_.find(header.streamId()) != pending_calls_.end()) {
@@ -58,16 +57,15 @@ void RpcServer::handleRequest(Messaging::ConnectionId connection_id,
                      << header.streamId();
         return;
       }
-      request = &pending_calls_
-                     .insert({header.streamId(),
-                              RpcRequest(*this, connection_id, function_id,
-                                         header.streamId(), deadline,
-                                         header.isLastMessage())})
-                     .first->second;
+      pending_calls_.insert(
+          {header.streamId(),
+           RpcRequest(connection_id, function_id, header.streamId(), deadline,
+                      header.isLastMessage())});
     }
 
     // Invoke the handler.
-    handler(*request, data, len, header.isLastMessage());
+    handler(RequestHandle(*this, connection_id, header.streamId()), data, len,
+            header.isLastMessage());
   } else {
     LOG(FATAL) << "Streaming RPC not yet supported";
   }

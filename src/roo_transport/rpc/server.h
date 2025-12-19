@@ -17,7 +17,7 @@ namespace roo_transport {
 using FunctionTable =
     roo_collections::FlatSmallHashMap<RpcFunctionId, RpcHandlerFn>;
 
-// Convenience wrapper for implementing unary RPC handlers.
+// Convenience wrapper for implementing synchronous unary RPC handlers.
 template <typename Request, typename Response,
           typename RequestDeserializer = Deserializer<Request>,
           typename ResponseSerializer = Serializer<Response>>
@@ -27,24 +27,60 @@ class UnaryHandler {
 
   UnaryHandler(Fn fn) : fn_(std::move(fn)) {}
 
-  void operator()(RpcRequest& request, const roo::byte* payload,
+  void operator()(RequestHandle handle, const roo::byte* payload,
                   size_t payload_size, bool fin) const {
     RequestDeserializer deserialize;
     Request req;
     roo_transport::Status status = deserialize(payload, payload_size, req);
     if (status != roo_transport::kOk) {
-      request.sendFailureResponse(status, "request deserialization failed");
+      handle.sendFailureResponse(status, "request deserialization failed");
       return;
     }
     Response resp;
     status = fn_(req, resp);
     if (status != roo_transport::kOk) {
-      request.sendFailureResponse(status, "application error");
+      handle.sendFailureResponse(status, "application error");
       return;
     }
     ResponseSerializer serialize;
     auto serialized = serialize(resp);
-    request.sendSuccessResponse(serialized.data(), serialized.size(), true);
+    handle.sendSuccessResponse(serialized.data(), serialized.size(), true);
+  }
+
+ private:
+  Fn fn_;
+};
+
+// Convenience wrapper for implementing asynchronous unary RPC handlers.
+template <typename Request, typename Response,
+          typename RequestDeserializer = Deserializer<Request>,
+          typename ResponseSerializer = Serializer<Response>>
+class AsyncUnaryHandler {
+ public:
+  using Fn = std::function<void(const Request&,
+                                std::function<void(Status, Response)>)>;
+
+  AsyncUnaryHandler(Fn fn) : fn_(std::move(fn)) {}
+
+  void operator()(RequestHandle handle, const roo::byte* payload,
+                  size_t payload_size, bool fin) const {
+    RequestDeserializer deserializer;
+    Request req;
+    roo_transport::Status status =
+        deserializer.deserialize(payload, payload_size, req);
+    if (status != roo_transport::kOk) {
+      handle.sendFailureResponse(status, "request deserialization failed");
+      return;
+    }
+    fn_(req, [handle](Status resp_status, Response resp_val) {
+      if (resp_status != roo_transport::kOk) {
+        handle.sendFailureResponse(resp_status, "application error");
+        return;
+      }
+      ResponseSerializer serializer;
+      auto serialized = serializer.serialize(resp_val);
+      handle.sendSuccessResponse(serialized.data(), serialized.size(), true);
+    });
   }
 
  private:
@@ -61,7 +97,7 @@ class RpcServer {
   ~RpcServer() { messaging_.unsetReceiver(); }
 
  private:
-  friend class RpcRequest;
+  friend class RequestHandle;
 
   class Dispatcher : public Messaging::Receiver {
    public:
@@ -104,7 +140,7 @@ class RpcServer {
   roo::mutex mutex_;
 
   // Guarded by mutex_.
-  roo_collections::FlatSmallHashMap<RpcFunctionId, RpcRequest> pending_calls_;
+  roo_collections::FlatSmallHashMap<RpcStreamId, RpcRequest> pending_calls_;
 };
 
 }  // namespace roo_transport

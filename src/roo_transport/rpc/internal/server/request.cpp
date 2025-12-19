@@ -4,13 +4,13 @@
 
 namespace roo_transport {
 
-void RpcRequest::sendSuccessResponse(const roo::byte* payload,
-                                     size_t payload_size, bool last) {
+void RequestHandle::sendSuccessResponse(const roo::byte* payload,
+                                        size_t payload_size, bool last) const {
   server_->sendSuccessResponse(connection_id_, stream_id_, payload,
                                payload_size);
 }
 
-void RpcRequest::sendFailureResponse(Status status, roo::string_view msg) {
+void RequestHandle::sendFailureResponse(Status status, roo::string_view msg) const {
   server_->sendFailureResponse(connection_id_, stream_id_, status, msg);
 }
 
