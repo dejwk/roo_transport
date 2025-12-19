@@ -95,6 +95,9 @@ class DynamicSerialized {
   // Implementation of the iterator contract.
   void write(roo::byte b) {
     if (eos()) {
+      if (pos_ > data_.size()) {
+        data_.insert(data_.end(), pos_ - data_.size(), roo::byte{0});
+      }
       data_.push_back(b);
     } else {
       data_[pos_] = b;
@@ -130,20 +133,32 @@ class DynamicSerialized {
   size_t pos_;
 };
 
-template <typename T, typename S = Serializer<T>>
-struct SerializerTraits {
-  template <typename Itr>
-  void serializeTo(const T& val, Itr& output) {
-    S serializer;
+// Default implementation that implements SerializeInto in terms of serialize().
+template <typename T, typename Itr, typename S = Serializer<T>, typename = void>
+struct IntoSerializer {
+  void operator()(const T& val, Itr& output) const {
+    Serializer<T> serializer;
     auto serialized = serializer.serialize(val);
     output.write(serialized.data(), serialized.size());
   }
 };
 
-template <typename T, typename Itr, typename S = Serializer<T>>
+// Override for serializers that provide serializeInto().
+template <typename T, typename Itr>
+struct IntoSerializer<T, Itr, Serializer<T>,
+                      decltype(std::declval<Serializer<T>>().serializeInto(
+                                   std::declval<const T&>(),
+                                   std::declval<Itr&>()),
+                               void())> {
+  void operator()(const T& val, Itr& output) const {
+    Serializer<T> serializer;
+    serializer.serializeInto(val, output);
+  }
+};
+
+template <typename T, typename Itr>
 void SerializeInto(const T& val, Itr& output) {
-  SerializerTraits<T, S> traits;
-  traits.serializeTo(val, output);
+  IntoSerializer<T, Itr>()(val, output);
 }
 
 // Simple serializers and deserializers for basic types are provided below.
@@ -408,8 +423,8 @@ struct Deserializer<roo::string_view> {
 
 template <typename T1, typename T2>
 struct Serializer<std::pair<T1, T2>> {
-  DynamicSerialized serialize(const std::pair<T1, T2>& val) const {
-    DynamicSerialized result;
+  template <typename RandomItr>
+  void serializeInto(const std::pair<T1, T2>& val, RandomItr& result) const {
     size_t pos1 = result.pos();
     result.seek(2);
     SerializeInto(val.first, result);
@@ -420,11 +435,16 @@ struct Serializer<std::pair<T1, T2>> {
     SerializeInto(val.second, result);
     if (result.pos() > 65535) {
       result.fail(roo_transport::kInvalidArgument);
-      return result;
+      return;
     }
     result.seek(pos2);
     roo_io::WriteBeU16(result, (uint16_t)(result.size() - (pos2 + 2)));
     result.seek(result.size());
+  }
+
+  DynamicSerialized serialize(const std::pair<T1, T2>& val) const {
+    DynamicSerialized result;
+    serializeInto(val, result);
     return result;
   }
 };
