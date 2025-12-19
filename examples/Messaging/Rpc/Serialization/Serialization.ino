@@ -184,7 +184,7 @@ struct Serializer<MyStruct> {
 
 template <>
 struct Deserializer<MyStruct> {
-  // The deserialize function should take a pointer to the data buffer,
+  // The deserialize function takes a pointer to the data buffer,
   // its length, and a reference to the result object to be populated.
   // It should return a Status indicating success or failure of the
   // deserialization.
