@@ -17,7 +17,7 @@ class LinkMessaging : public Messaging {
   LinkMessaging(roo_transport::LinkTransport& link_transport,
                 size_t max_recv_packet_size,
                 uint16_t recv_thread_stack_size = 4096,
-                const char* recv_thread_name = "link_msg_recv");
+                const char* recv_thread_name = "linkMsgRcv");
 
   void begin();
 
