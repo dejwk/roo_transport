@@ -426,20 +426,21 @@ struct Serializer<std::pair<T1, T2>> {
   template <typename RandomItr>
   void serializeInto(const std::pair<T1, T2>& val, RandomItr& result) const {
     size_t pos1 = result.pos();
-    result.seek(2);
+    result.seek(pos1 + 2);
     SerializeInto(val.first, result);
     size_t pos2 = result.pos();
     result.seek(pos1);
     roo_io::WriteBeU16(result, (uint16_t)(result.size() - (pos1 + 2)));
     result.seek(pos2 + 2);
     SerializeInto(val.second, result);
+    size_t fin = result.pos();
     if (result.pos() > 65535) {
       result.fail(roo_transport::kInvalidArgument);
       return;
     }
     result.seek(pos2);
     roo_io::WriteBeU16(result, (uint16_t)(result.size() - (pos2 + 2)));
-    result.seek(result.size());
+    result.seek(fin);
   }
 
   DynamicSerialized serialize(const std::pair<T1, T2>& val) const {
@@ -475,6 +476,75 @@ struct Deserializer<std::pair<T1, T2>> {
       return status;
     }
     return roo_transport::kOk;
+  }
+};
+
+// Tuple.
+
+template <size_t index, typename RandomItr, typename... Types>
+constexpr void SerializeTupleRecursive(const std::tuple<Types...>& t,
+                                         RandomItr& result) {
+  size_t pos1 = result.pos();
+  result.seek(pos1 + 2);
+  SerializeInto(std::get<index>(t), result);
+  if (result.status() != kOk) return;
+  size_t fin = result.pos();
+  result.seek(pos1);
+  roo_io::WriteBeU16(result, (uint16_t)(fin - (pos1 + 2)));
+  result.seek(fin);
+  if constexpr (index < sizeof...(Types) - 1) {
+    SerializeTupleRecursive<index + 1>(t, result);
+  }
+}
+
+template <typename... Types>
+struct Serializer<std::tuple<Types...>> {
+  template <typename RandomItr>
+  constexpr void serializeInto(const std::tuple<Types...>& val,
+                                 RandomItr& result) const {
+    SerializeTupleRecursive<0>(val, result);
+  }
+
+  DynamicSerialized serialize(const std::tuple<Types...>& val) const {
+    DynamicSerialized result;
+    SerializeTupleRecursive<0>(val, result);
+    return result;
+  }
+};
+
+template <size_t index, typename... Types>
+constexpr Status DeserializeTupleRecursive(std::tuple<Types...>& t,
+                                           const roo::byte* data, size_t len) {
+  if (len < 2) {
+    return roo_transport::kInvalidArgument;
+  }
+  uint16_t len1 = roo_io::LoadBeU16(data);
+  if (len < 2 + len1) {
+    return roo_transport::kInvalidArgument;
+  }
+  Deserializer<typename std::tuple_element<index, std::tuple<Types...>>::type>
+      d;
+  Status status = d.deserialize(data + 2, len1, std::get<index>(t));
+  data += (2 + len1);
+  len -= (2 + len1);
+  if (status != kOk) {
+    return status;
+  }
+  if constexpr (index == sizeof...(Types) - 1) {
+    if (len != 0) {
+      return kInvalidArgument;
+    }
+    return kOk;
+  } else {
+    return DeserializeTupleRecursive<index + 1>(t, data, len);
+  }
+}
+
+template <typename... Types>
+struct Deserializer<std::tuple<Types...>> {
+  Status deserialize(const roo::byte* data, size_t len,
+                     std::tuple<Types...>& result) const {
+    return DeserializeTupleRecursive<0>(result, data, len);
   }
 };
 
