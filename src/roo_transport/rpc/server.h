@@ -29,9 +29,10 @@ class UnaryHandler {
 
   void operator()(RequestHandle handle, const roo::byte* payload,
                   size_t payload_size, bool fin) const {
-    RequestDeserializer deserialize;
+    RequestDeserializer deserializer;
     Request req;
-    roo_transport::Status status = deserialize(payload, payload_size, req);
+    roo_transport::Status status =
+        deserializer.deserialize(payload, payload_size, req);
     if (status != roo_transport::kOk) {
       handle.sendFailureResponse(status, "request deserialization failed");
       return;
@@ -42,8 +43,8 @@ class UnaryHandler {
       handle.sendFailureResponse(status, "application error");
       return;
     }
-    ResponseSerializer serialize;
-    auto serialized = serialize(resp);
+    ResponseSerializer serializer;
+    auto serialized = serializer.serialize(resp);
     handle.sendSuccessResponse(serialized.data(), serialized.size(), true);
   }
 
