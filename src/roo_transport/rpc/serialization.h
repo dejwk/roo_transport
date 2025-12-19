@@ -419,28 +419,56 @@ struct Deserializer<roo::string_view> {
   }
 };
 
+// Helper for nested members, delegating to a sub-serializer, but also,
+// prepending the size of the serialized data as a 16-bit big-endian length.
+template <typename T, typename RandomItr>
+void SerializeMemberInto(const T& val, RandomItr& result) {
+  size_t begin = result.pos();
+  result.seek(begin + 2);
+  SerializeInto(val, result);
+  if (result.status() != kOk) return;
+  size_t end = result.pos();
+  size_t len = end - (begin + 2);
+  if (len > 65535) {
+    result.fail(roo_transport::kInvalidArgument);
+    return;
+  }
+  result.seek(begin);
+  roo_io::WriteBeU16(result, (uint16_t)len);
+  result.seek(end);
+}
+
+template <typename T>
+constexpr Status DeserializeMember(const roo::byte*& data, size_t& len,
+                                   T& result) {
+  if (len < 2) {
+    return roo_transport::kInvalidArgument;
+  }
+  uint16_t member_len = roo_io::LoadBeU16(data);
+  if (len < 2 + member_len) {
+    return roo_transport::kInvalidArgument;
+  }
+  data += 2;
+  len -= 2;
+  Deserializer<T> d;
+  Status status = d.deserialize(data, member_len, result);
+  if (status != kOk) {
+    return status;
+  }
+  data += member_len;
+  len -= member_len;
+  return kOk;
+}
+
 // Pair.
 
 template <typename T1, typename T2>
 struct Serializer<std::pair<T1, T2>> {
   template <typename RandomItr>
   void serializeInto(const std::pair<T1, T2>& val, RandomItr& result) const {
-    size_t pos1 = result.pos();
-    result.seek(pos1 + 2);
-    SerializeInto(val.first, result);
-    size_t pos2 = result.pos();
-    result.seek(pos1);
-    roo_io::WriteBeU16(result, (uint16_t)(result.size() - (pos1 + 2)));
-    result.seek(pos2 + 2);
-    SerializeInto(val.second, result);
-    size_t fin = result.pos();
-    if (result.pos() > 65535) {
-      result.fail(roo_transport::kInvalidArgument);
-      return;
-    }
-    result.seek(pos2);
-    roo_io::WriteBeU16(result, (uint16_t)(result.size() - (pos2 + 2)));
-    result.seek(fin);
+    SerializeMemberInto(val.first, result);
+    if (result.status() != kOk) return;
+    SerializeMemberInto(val.second, result);
   }
 
   DynamicSerialized serialize(const std::pair<T1, T2>& val) const {
@@ -454,26 +482,17 @@ template <typename T1, typename T2>
 struct Deserializer<std::pair<T1, T2>> {
   Status deserialize(const roo::byte* data, size_t len,
                      std::pair<T1, T2>& result) const {
-    if (len < 4) {
-      return roo_transport::kInvalidArgument;
-    }
-    uint16_t len1 = roo_io::LoadBeU16(data);
-    if (len1 + 4 > len) {
-      return roo_transport::kInvalidArgument;
-    }
-    Deserializer<T1> d1;
-    Status status = d1.deserialize(data + 2, len1, result.first);
+    Status status;
+    status = DeserializeMember(data, len, result.first);
     if (status != roo_transport::kOk) {
       return status;
     }
-    uint16_t len2 = roo_io::LoadBeU16(data + 2 + len1);
-    if (len1 + 4 + len2 != len) {
-      return roo_transport::kInvalidArgument;
-    }
-    Deserializer<T2> d2;
-    status = d2.deserialize(data + 4 + len1, len2, result.second);
+    status = DeserializeMember(data, len, result.second);
     if (status != roo_transport::kOk) {
       return status;
+    }
+    if (len != 0) {
+      return roo_transport::kInvalidArgument;
     }
     return roo_transport::kOk;
   }
@@ -484,14 +503,8 @@ struct Deserializer<std::pair<T1, T2>> {
 template <size_t index, typename RandomItr, typename... Types>
 constexpr void SerializeTupleRecursive(const std::tuple<Types...>& t,
                                        RandomItr& result) {
-  size_t pos1 = result.pos();
-  result.seek(pos1 + 2);
-  SerializeInto(std::get<index>(t), result);
+  SerializeMemberInto(std::get<index>(t), result);
   if (result.status() != kOk) return;
-  size_t fin = result.pos();
-  result.seek(pos1);
-  roo_io::WriteBeU16(result, (uint16_t)(fin - (pos1 + 2)));
-  result.seek(fin);
   if constexpr (index < sizeof...(Types) - 1) {
     SerializeTupleRecursive<index + 1>(t, result);
   }
@@ -515,29 +528,17 @@ struct Serializer<std::tuple<Types...>> {
 template <size_t index, typename... Types>
 constexpr Status DeserializeTupleRecursive(std::tuple<Types...>& t,
                                            const roo::byte* data, size_t len) {
-  if (len < 2) {
-    return roo_transport::kInvalidArgument;
-  }
-  uint16_t len1 = roo_io::LoadBeU16(data);
-  if (len < 2 + len1) {
-    return roo_transport::kInvalidArgument;
-  }
-  Deserializer<typename std::tuple_element<index, std::tuple<Types...>>::type>
-      d;
-  Status status = d.deserialize(data + 2, len1, std::get<index>(t));
-  data += (2 + len1);
-  len -= (2 + len1);
+  Status status = DeserializeMember(data, len, std::get<index>(t));
   if (status != kOk) {
     return status;
   }
-  if constexpr (index == sizeof...(Types) - 1) {
-    if (len != 0) {
-      return kInvalidArgument;
-    }
-    return kOk;
-  } else {
+  if constexpr (index < sizeof...(Types) - 1) {
     return DeserializeTupleRecursive<index + 1>(t, data, len);
   }
+  if (len != 0) {
+    return kInvalidArgument;
+  }
+  return kOk;
 }
 
 template <typename... Types>
