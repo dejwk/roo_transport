@@ -483,7 +483,7 @@ struct Deserializer<std::pair<T1, T2>> {
 
 template <size_t index, typename RandomItr, typename... Types>
 constexpr void SerializeTupleRecursive(const std::tuple<Types...>& t,
-                                         RandomItr& result) {
+                                       RandomItr& result) {
   size_t pos1 = result.pos();
   result.seek(pos1 + 2);
   SerializeInto(std::get<index>(t), result);
@@ -501,7 +501,7 @@ template <typename... Types>
 struct Serializer<std::tuple<Types...>> {
   template <typename RandomItr>
   constexpr void serializeInto(const std::tuple<Types...>& val,
-                                 RandomItr& result) const {
+                               RandomItr& result) const {
     SerializeTupleRecursive<0>(val, result);
   }
 
