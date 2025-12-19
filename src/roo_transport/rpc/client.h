@@ -56,9 +56,9 @@ class UnaryStub {
   roo_transport::Status callAsync(
       const Request& request,
       std::function<void(roo_transport::Status, Response)> completion_cb) {
-    RequestSerializer serialize;
+    RequestSerializer serializer;
     // Serialize the request message.
-    auto serialized = serialize(request);
+    auto serialized = serializer.serialize(request);
     // Bail in case the argument serialization failed.
     if (serialized.status() != kOk) {
       return serialized.status();
@@ -67,10 +67,11 @@ class UnaryStub {
         function_id_, serialized.data(), serialized.size(),
         [completion_cb](const roo::byte* data, size_t len,
                         roo_transport::Status resp_status) {
-          ResponseDeserializer deserialize;
+          ResponseDeserializer deserializer;
           Response resp;
           if (resp_status == kOk) {
-            resp_status = deserialize((const roo_io::byte*)data, len, resp);
+            resp_status =
+                deserializer.deserialize((const roo_io::byte*)data, len, resp);
           }
           completion_cb(resp_status, std::move(resp));
         });

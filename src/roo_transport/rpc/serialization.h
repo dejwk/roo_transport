@@ -5,17 +5,27 @@
 #include "roo_backport.h"
 #include "roo_backport/byte.h"
 #include "roo_backport/string_view.h"
+#include "roo_io/data/read.h"
+#include "roo_io/data/write.h"
 #include "roo_io/memory/load.h"
 #include "roo_io/memory/store.h"
 #include "roo_transport/rpc/status.h"
 
 namespace roo_transport {
 
+struct Void {};
+
 template <typename T>
 struct Serializer;
 
 template <typename T>
 struct Deserializer;
+
+struct NullSerialized {
+  roo_transport::Status status() const { return kOk; }
+  const roo::byte* data() const { return nullptr; }
+  size_t size() const { return 0; }
+};
 
 // For fixed-size small payloads that can be just copied by value.
 template <size_t N>
@@ -33,7 +43,7 @@ class StaticSerialized {
   roo::byte data_[N];
 };
 
-// For dynamically sized payloads. Stores the data array on the heap.
+// For variably-sized payloads. Stores the data array on the heap.
 class SimpleSerialized {
  public:
   SimpleSerialized() : status_(kOk), data_(nullptr), size_(0) {}
@@ -54,13 +64,113 @@ class SimpleSerialized {
   size_t size_;
 };
 
+// For dynamically-sized payloads. Supports append and write in the middle.
+class DynamicSerialized {
+ public:
+  DynamicSerialized() : status_(kOk), data_(), pos_(0) {}
+
+  //   DynamicSerialized(roo_transport::Status error)
+  //       : status_(error), data_() {}
+
+  //   DynamicSerialized(std::unique_ptr<roo::byte[]> data, size_t size)
+  //       : status_(kOk), data_(std::move(data)), size_(size) {}
+
+  void fail(Status status) {
+    status_ = status;
+    data_.clear();
+    pos_ = 0;
+  }
+
+  roo_transport::Status status() const { return status_; }
+
+  const roo::byte* data() const {
+    return data_.empty() ? nullptr : &*data_.begin();
+  }
+
+  size_t pos() const { return pos_; }
+  size_t size() const { return data_.size(); }
+
+  bool eos() const { return pos_ >= data_.size(); }
+
+  // Implementation of the iterator contract.
+  void write(roo::byte b) {
+    if (eos()) {
+      data_.push_back(b);
+    } else {
+      data_[pos_] = b;
+    }
+    pos_++;
+  }
+
+  size_t write(const roo::byte* buf, size_t count) {
+    if (pos_ > data_.size()) {
+      data_.insert(data_.end(), pos_ - data_.size(), roo::byte{0});
+    }
+    size_t copy_over = data_.size() - pos_;
+    if (copy_over > count) {
+      copy_over = count;
+    }
+    std::copy(buf, buf + copy_over, data_.begin() + pos_);
+    pos_ += copy_over;
+    buf += copy_over;
+    size_t remaining = count - copy_over;
+    if (remaining == 0) {
+      return copy_over;
+    }
+    data_.insert(data_.end(), buf, buf + remaining);
+    pos_ += remaining;
+    return count;
+  }
+
+  void seek(size_t position) { pos_ = position; }
+
+ private:
+  roo_transport::Status status_;
+  std::vector<roo::byte> data_;
+  size_t pos_;
+};
+
+template <typename T, typename S = Serializer<T>>
+struct SerializerTraits {
+  template <typename Itr>
+  void serializeTo(const T& val, Itr& output) {
+    S serializer;
+    auto serialized = serializer.serialize(val);
+    output.write(serialized.data(), serialized.size());
+  }
+};
+
+template <typename T, typename Itr, typename S = Serializer<T>>
+void SerializeInto(const T& val, Itr& output) {
+  SerializerTraits<T, S> traits;
+  traits.serializeTo(val, output);
+}
+
 // Simple serializers and deserializers for basic types are provided below.
+
+// Void.
+
+template <>
+struct Serializer<Void> {
+  NullSerialized serialize(const Void&) const { return NullSerialized(); }
+};
+
+template <>
+struct Deserializer<Void> {
+  roo_transport::Status deserialize(const roo::byte* data, size_t len,
+                                    Void& result) const {
+    if (len != 0) {
+      return roo_transport::kInvalidArgument;
+    }
+    return roo_transport::kOk;
+  }
+};
 
 // Boolean.
 
 template <>
 struct Serializer<bool> {
-  StaticSerialized<1> operator()(bool val) const {
+  StaticSerialized<1> serialize(bool val) const {
     StaticSerialized<1> result;
     roo_io::StoreU8(val, result.data());
     return result;
@@ -69,7 +179,7 @@ struct Serializer<bool> {
 
 template <>
 struct Deserializer<bool> {
-  Status operator()(const roo::byte* data, size_t len, bool& result) const {
+  Status deserialize(const roo::byte* data, size_t len, bool& result) const {
     if (len != 1) {
       return roo_transport::kInvalidArgument;
     }
@@ -86,7 +196,7 @@ struct Deserializer<bool> {
 
 template <>
 struct Serializer<int8_t> {
-  StaticSerialized<1> operator()(int8_t val) const {
+  StaticSerialized<1> serialize(int8_t val) const {
     StaticSerialized<1> result;
     roo_io::StoreS8(val, result.data());
     return result;
@@ -95,7 +205,7 @@ struct Serializer<int8_t> {
 
 template <>
 struct Deserializer<int8_t> {
-  Status operator()(const roo::byte* data, size_t len, int8_t& result) const {
+  Status deserialize(const roo::byte* data, size_t len, int8_t& result) const {
     if (len != 1) {
       return roo_transport::kInvalidArgument;
     }
@@ -108,7 +218,7 @@ struct Deserializer<int8_t> {
 
 template <>
 struct Serializer<uint8_t> {
-  StaticSerialized<1> operator()(uint8_t val) const {
+  StaticSerialized<1> serialize(uint8_t val) const {
     StaticSerialized<1> result;
     roo_io::StoreU8(val, result.data());
     return result;
@@ -117,7 +227,7 @@ struct Serializer<uint8_t> {
 
 template <>
 struct Deserializer<uint8_t> {
-  Status operator()(const roo::byte* data, size_t len, uint8_t& result) const {
+  Status deserialize(const roo::byte* data, size_t len, uint8_t& result) const {
     if (len != 1) {
       return roo_transport::kInvalidArgument;
     }
@@ -130,7 +240,7 @@ struct Deserializer<uint8_t> {
 
 template <>
 struct Serializer<int16_t> {
-  StaticSerialized<2> operator()(int16_t val) const {
+  StaticSerialized<2> serialize(int16_t val) const {
     StaticSerialized<2> result;
     roo_io::StoreBeS16(val, result.data());
     return result;
@@ -139,7 +249,7 @@ struct Serializer<int16_t> {
 
 template <>
 struct Deserializer<int16_t> {
-  Status operator()(const roo::byte* data, size_t len, int16_t& result) const {
+  Status deserialize(const roo::byte* data, size_t len, int16_t& result) const {
     if (len != 2) {
       return roo_transport::kInvalidArgument;
     }
@@ -152,7 +262,7 @@ struct Deserializer<int16_t> {
 
 template <>
 struct Serializer<uint16_t> {
-  StaticSerialized<2> operator()(uint16_t val) const {
+  StaticSerialized<2> serialize(uint16_t val) const {
     StaticSerialized<2> result;
     roo_io::StoreBeU16(val, result.data());
     return result;
@@ -161,7 +271,8 @@ struct Serializer<uint16_t> {
 
 template <>
 struct Deserializer<uint16_t> {
-  Status operator()(const roo::byte* data, size_t len, uint16_t& result) const {
+  Status deserialize(const roo::byte* data, size_t len,
+                     uint16_t& result) const {
     if (len != 2) {
       return roo_transport::kInvalidArgument;
     }
@@ -174,7 +285,7 @@ struct Deserializer<uint16_t> {
 
 template <>
 struct Serializer<int32_t> {
-  StaticSerialized<4> operator()(int32_t val) const {
+  StaticSerialized<4> serialize(int32_t val) const {
     StaticSerialized<4> result;
     roo_io::StoreBeS32(val, result.data());
     return result;
@@ -183,7 +294,7 @@ struct Serializer<int32_t> {
 
 template <>
 struct Deserializer<int32_t> {
-  Status operator()(const roo::byte* data, size_t len, int32_t& result) const {
+  Status deserialize(const roo::byte* data, size_t len, int32_t& result) const {
     if (len != 4) {
       return roo_transport::kInvalidArgument;
     }
@@ -196,7 +307,7 @@ struct Deserializer<int32_t> {
 
 template <>
 struct Serializer<uint32_t> {
-  StaticSerialized<4> operator()(uint32_t val) const {
+  StaticSerialized<4> serialize(uint32_t val) const {
     StaticSerialized<4> result;
     roo_io::StoreBeU32(val, result.data());
     return result;
@@ -205,7 +316,8 @@ struct Serializer<uint32_t> {
 
 template <>
 struct Deserializer<uint32_t> {
-  Status operator()(const roo::byte* data, size_t len, uint32_t& result) const {
+  Status deserialize(const roo::byte* data, size_t len,
+                     uint32_t& result) const {
     if (len != 4) {
       return roo_transport::kInvalidArgument;
     }
@@ -218,7 +330,7 @@ struct Deserializer<uint32_t> {
 
 template <>
 struct Serializer<int64_t> {
-  StaticSerialized<8> operator()(int64_t val) const {
+  StaticSerialized<8> serialize(int64_t val) const {
     StaticSerialized<8> result;
     roo_io::StoreBeS64(val, result.data());
     return result;
@@ -227,7 +339,7 @@ struct Serializer<int64_t> {
 
 template <>
 struct Deserializer<int64_t> {
-  Status operator()(const roo::byte* data, size_t len, int64_t& result) const {
+  Status deserialize(const roo::byte* data, size_t len, int64_t& result) const {
     if (len != 8) {
       return roo_transport::kInvalidArgument;
     }
@@ -240,7 +352,7 @@ struct Deserializer<int64_t> {
 
 template <>
 struct Serializer<uint64_t> {
-  StaticSerialized<8> operator()(uint64_t val) const {
+  StaticSerialized<8> serialize(uint64_t val) const {
     StaticSerialized<8> result;
     roo_io::StoreBeU64(val, result.data());
     return result;
@@ -249,7 +361,8 @@ struct Serializer<uint64_t> {
 
 template <>
 struct Deserializer<uint64_t> {
-  Status operator()(const roo::byte* data, size_t len, uint64_t& result) const {
+  Status deserialize(const roo::byte* data, size_t len,
+                     uint64_t& result) const {
     if (len != 8) {
       return roo_transport::kInvalidArgument;
     }
@@ -276,7 +389,7 @@ class SerializedByteArrayAdapter {
 
 template <>
 struct Serializer<roo::string_view> {
-  SerializedByteArrayAdapter operator()(roo::string_view val) const {
+  SerializedByteArrayAdapter serialize(roo::string_view val) const {
     return SerializedByteArrayAdapter(
         reinterpret_cast<const roo::byte*>(val.data()), val.size());
   }
@@ -284,9 +397,63 @@ struct Serializer<roo::string_view> {
 
 template <>
 struct Deserializer<roo::string_view> {
-  Status operator()(const roo::byte* data, size_t len,
-                    roo::string_view& result) const {
+  Status deserialize(const roo::byte* data, size_t len,
+                     roo::string_view& result) const {
     result = roo::string_view(reinterpret_cast<const char*>(data), len);
+    return roo_transport::kOk;
+  }
+};
+
+// Pair.
+
+template <typename T1, typename T2>
+struct Serializer<std::pair<T1, T2>> {
+  DynamicSerialized serialize(const std::pair<T1, T2>& val) const {
+    DynamicSerialized result;
+    size_t pos1 = result.pos();
+    result.seek(2);
+    SerializeInto(val.first, result);
+    size_t pos2 = result.pos();
+    result.seek(pos1);
+    roo_io::WriteBeU16(result, (uint16_t)(result.size() - (pos1 + 2)));
+    result.seek(pos2 + 2);
+    SerializeInto(val.second, result);
+    if (result.pos() > 65535) {
+      result.fail(roo_transport::kInvalidArgument);
+      return result;
+    }
+    result.seek(pos2);
+    roo_io::WriteBeU16(result, (uint16_t)(result.size() - (pos2 + 2)));
+    result.seek(result.size());
+    return result;
+  }
+};
+
+template <typename T1, typename T2>
+struct Deserializer<std::pair<T1, T2>> {
+  Status deserialize(const roo::byte* data, size_t len,
+                     std::pair<T1, T2>& result) const {
+    if (len < 4) {
+      return roo_transport::kInvalidArgument;
+    }
+    uint16_t len1 = roo_io::LoadBeU16(data);
+    if (len1 + 4 > len) {
+      return roo_transport::kInvalidArgument;
+    }
+    Deserializer<T1> d1;
+    Status status = d1.deserialize(data + 2, len1, result.first);
+    if (status != roo_transport::kOk) {
+      return status;
+    }
+    uint16_t len2 = roo_io::LoadBeU16(data + 2 + len1);
+    if (len1 + 4 + len2 != len) {
+      return roo_transport::kInvalidArgument;
+    }
+    Deserializer<T2> d2;
+    status = d2.deserialize(data + 4 + len1, len2, result.second);
+    if (status != roo_transport::kOk) {
+      return status;
+    }
     return roo_transport::kOk;
   }
 };
