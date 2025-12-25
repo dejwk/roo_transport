@@ -22,8 +22,14 @@ class LinkStream : public Stream {
   int read() override;
   int peek() override;
 
+#ifdef ESP_PLATFORM
+  // These two methods are virtual on ESP32.
   size_t readBytes(char* buffer, size_t length) override;
   size_t readBytes(uint8_t* buffer, size_t length) override;
+#else
+  size_t readBytes(char* buffer, size_t length);
+  size_t readBytes(uint8_t* buffer, size_t length);
+#endif
 
   size_t write(uint8_t) override;
   size_t write(const uint8_t* buffer, size_t size) override;

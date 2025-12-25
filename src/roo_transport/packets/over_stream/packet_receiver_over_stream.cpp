@@ -1,5 +1,7 @@
 #include "roo_transport/packets/over_stream/packet_receiver_over_stream.h"
 
+#include <algorithm>
+
 #include "roo_backport.h"
 #include "roo_backport/byte.h"
 #include "roo_collections.h"

@@ -76,8 +76,12 @@ class SeqNum {
 }  // namespace internal
 }  // namespace roo_transport
 
+namespace roo_logging {
+
 inline roo_logging::Stream& operator<<(roo_logging::Stream& os,
                                        roo_transport::internal::SeqNum seq) {
   os << seq.raw();
   return os;
+}
+
 }
