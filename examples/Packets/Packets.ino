@@ -53,7 +53,12 @@ void server() {
   // The server simulates a simple temperature sensor which reports temperature
   // (in centi-degrees Celsius) once per second, by sending packets over UART
   // (Serial1).
+#ifdef ARDUINO_ARCH_RP2040
+  Serial1.setPinout(kPinServerTx, kPinServerRx);
+  Serial1.begin(5000000, SERIAL_8N1);
+#else
   Serial1.begin(5000000, SERIAL_8N1, kPinServerRx, kPinServerTx);
+#endif
 
   roo_io::ArduinoSerialOutputStream serial1_out(Serial1);
   PacketSenderOverStream sender(serial1_out);
@@ -99,7 +104,12 @@ void processPacket(const roo::byte* buf, size_t len) {
 
 void client() {
   // Handle messages in a loop.
+#ifdef ARDUINO_ARCH_RP2040
+  Serial2.setPinout(kPinClientTx, kPinClientRx);
+  Serial2.begin(5000000, SERIAL_8N1);
+#else
   Serial2.begin(5000000, SERIAL_8N1, kPinClientRx, kPinClientTx);
+#endif
   roo_io::ArduinoSerialInputStream serial2_in(Serial2);
   PacketReceiverOverStream receiver(serial2_in);
   while (true) {

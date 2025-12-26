@@ -14,6 +14,14 @@
 
 namespace roo_transport {
 
+// Generic implementation of the link stream transport, over an arbitrary
+// Arduino Stream. It uses default Arduino APIs to read from and to write to the
+// stream. The user needs to keep calling tryReceive() or receive() to process
+// incoming packets.
+//
+// The class does not provide a stream interface itself. Instead, use LinkStream
+// returned by connect() or connectAsync() methods to read and write data over
+// the reliable link.
 class LinkStreamTransport {
  public:
   LinkStreamTransport(Stream& stream, LinkBufferSize sendbuf = kBufferSize4KB,
