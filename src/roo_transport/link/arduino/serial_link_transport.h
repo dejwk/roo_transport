@@ -134,21 +134,30 @@ class GenericSerialLinkTransport : public LinkStreamTransport {
 
   void begin() {
     LinkStreamTransport::begin();
+    running_ = true;
     roo::thread::attributes attrs;
+#if ROO_THREADS_ATTRIBUTES_SUPPORT_NAME
     attrs.set_name(receiver_thread_name_.c_str());
+#endif
+#if ROO_THREADS_ATTRIBUTES_SUPPORT_PRIORITY
     attrs.set_priority(2);
+#endif
     receiver_thread_ = roo::thread(attrs, [this]() {
-      while (true) {
+      while (running_) {
         this->receive();
       }
     });
   }
 
-  void end() {}
+  void end() {
+    running_ = false;
+    receiver_thread_.join();
+  }
 
  private:
   std::string receiver_thread_name_;
   roo::thread receiver_thread_;
+  roo::atomic<bool> running_{false};
 };
 
 #endif
