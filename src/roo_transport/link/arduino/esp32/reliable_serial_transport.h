@@ -1,6 +1,7 @@
 #pragma once
 
 #if (defined ARDUINO)
+#if (defined ESP32 || defined ROO_TESTING)
 
 #include "Arduino.h"
 #include "roo_io/uart/arduino/serial_input_stream.h"
@@ -14,8 +15,7 @@
 #include "roo_transport/packets/over_stream/packet_sender_over_stream.h"
 
 namespace roo_transport {
-
-#if (defined ESP32 || defined ROO_TESTING)
+namespace esp32 {
 
 // Similar to LinkStreamTransport, but specialized for Serial types on ESP32.
 // The user still needs to initialize the underlying serial (by calling
@@ -117,51 +117,9 @@ class ReliableSerial2Transport
 };
 #endif  // SOC_UART_NUM > 2
 
-#else  // not ESP32
-
-class GenericSerialLinkTransport : public LinkStreamTransport {
- public:
-  GenericSerialLinkTransport(Stream& serial, roo::string_view name,
-                             LinkBufferSize sendbuf = kBufferSize4KB,
-                             LinkBufferSize recvbuf = kBufferSize4KB)
-      : LinkStreamTransport(serial, sendbuf, recvbuf),
-        receiver_thread_name_(name) {}
-
-  GenericSerialLinkTransport(Stream& serial,
-                             LinkBufferSize sendbuf = kBufferSize4KB,
-                             LinkBufferSize recvbuf = kBufferSize4KB)
-      : GenericSerialLinkTransport(serial, "serialRcv", sendbuf, recvbuf) {}
-
-  void begin() {
-    LinkStreamTransport::begin();
-    running_ = true;
-    roo::thread::attributes attrs;
-#if ROO_THREADS_ATTRIBUTES_SUPPORT_NAME
-    attrs.set_name(receiver_thread_name_.c_str());
-#endif
-#if ROO_THREADS_ATTRIBUTES_SUPPORT_PRIORITY
-    attrs.set_priority(2);
-#endif
-    receiver_thread_ = roo::thread(attrs, [this]() {
-      while (running_) {
-        this->receive();
-      }
-    });
-  }
-
-  void end() {
-    running_ = false;
-    receiver_thread_.join();
-  }
-
- private:
-  std::string receiver_thread_name_;
-  roo::thread receiver_thread_;
-  roo::atomic<bool> running_{false};
-};
-
-#endif
-
+}  // namespace esp32
 }  // namespace roo_transport
+
+#endif  // defined(ESP32 || defined ROO_TESTING)
 
 #endif  // defined(ARDUINO)
