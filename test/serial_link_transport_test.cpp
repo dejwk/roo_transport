@@ -107,7 +107,7 @@ struct Emulator {
 namespace roo_transport {
 
 TEST(ReliableSerial, ConstructionDestruction) {
-  SerialLinkTransport transport(Serial1);
+  ReliableSerial1Transport transport;
   LinkStream stream;
   EXPECT_EQ(stream.status(), LinkStatus::kIdle);
 }
