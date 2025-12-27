@@ -5,6 +5,9 @@
 #include "gtest/gtest.h"
 #include "roo_io/ringpipe/ringpipe.h"
 #include "roo_testing/microcontrollers/esp32/fake_esp32.h"
+#include "roo_threads.h"
+#include "roo_threads/atomic.h"
+#include "roo_threads/thread.h"
 
 class UartEndpoint : public FakeUartDevice {
  public:
@@ -69,7 +72,7 @@ class UartTransmitter {
   roo_io::RingPipe& target_;
   UartEndpoint& target_endpoint_;
   roo::thread thread_;
-  std::atomic<bool> closed_{false};
+  roo::atomic<bool> closed_{false};
 };
 
 class UartLink {

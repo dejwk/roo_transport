@@ -5,6 +5,8 @@
 #include "roo_io/memory/store.h"
 #include "roo_io/status.h"
 #include "roo_logging.h"
+#include "roo_threads.h"
+#include "roo_threads/atomic.h"
 #include "roo_threads/mutex.h"
 #include "roo_transport/link/link_transport.h"
 #include "roo_transport/messaging/messaging.h"
@@ -45,7 +47,7 @@ class LinkMessaging : public Messaging {
 
   roo_transport::LinkTransport& transport_;
   roo_transport::Link link_;
-  std::atomic<bool> closed_ = false;
+  roo::atomic<bool> closed_ = false;
 
   std::function<void(ConnectionId connection_id, const roo::byte* data,
                      size_t len)>

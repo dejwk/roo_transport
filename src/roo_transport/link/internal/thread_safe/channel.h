@@ -13,6 +13,7 @@
 #include "roo_io/memory/store.h"
 #include "roo_logging.h"
 #include "roo_threads.h"
+#include "roo_threads/atomic.h"
 #include "roo_threads/mutex.h"
 #include "roo_threads/thread.h"
 #include "roo_transport/link/internal/in_buffer.h"
@@ -162,7 +163,7 @@ class Channel {
 
 #ifdef ROO_USE_THREADS
   roo::thread sender_thread_;
-  std::atomic<bool> active_;
+  roo::atomic<bool> active_;
 
   mutable roo::mutex handshake_mutex_;
 
