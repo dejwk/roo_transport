@@ -17,10 +17,15 @@
 
 using namespace roo_transport;
 
-static const int kPinServerTx = 27;
-static const int kPinServerRx = 14;
-static const int kPinClientTx = 25;
-static const int kPinClientRx = 26;
+static const int kPinServerTx = 12;
+static const int kPinServerRx = 13;
+static const int kPinClientTx = 4;
+static const int kPinClientRx = 5;
+
+// static const int kPinServerTx = 27;
+// static const int kPinServerRx = 14;
+// static const int kPinClientTx = 25;
+// static const int kPinClientRx = 26;
 
 roo::thread server_thread;
 
@@ -32,7 +37,11 @@ ReliableSerial2 serial2;
 
 void server() {
   LOG(INFO) << "Server connecting...";
-  serial1.begin(5000000, SERIAL_8N1, kPinServerRx, kPinServerTx);
+  serial1.setRX(kPinServerRx);
+  serial1.setTX(kPinServerTx);
+  serial1.setFIFOSize(1024);
+  serial1.setPollingMode(false);
+  serial1.begin(921600, SERIAL_8N1);
   LOG(INFO) << "Server connected.";
 
   roo_io::OutputStreamWriter serial1_out(serial1.out());
@@ -40,7 +49,10 @@ void server() {
   while (true) {
     serial1_out.writeBeU32(i++);
     serial1_out.writeString("Hello, world!\n");
-    yield();
+    serial1_out.flush();
+    // Throttle (to 200 messages per second, max) to avoid starving other
+    // threads, particularly in the loopback mode.
+    delay(2);
   }
 }
 
@@ -49,15 +61,19 @@ void server() {
 void startServer() {
   roo::thread::attributes attrs;
   attrs.set_name("server");
-  // Use low priority to avoid starving the (receiving) client thread in the
-  // loopback mode.
+  // Use a reasonably low priority to avoid starving the (receiving) client
+  // thread in the loopback mode.
   attrs.set_priority(1);
   server_thread = roo::thread(attrs, &server);
 }
 
 void client() {
   LOG(INFO) << "Client connecting...";
-  serial2.begin(5000000, SERIAL_8N1, kPinClientRx, kPinClientTx);
+  serial2.setRX(kPinClientRx);
+  serial2.setTX(kPinClientTx);
+  serial2.setFIFOSize(1024);
+  serial2.setPollingMode(false);
+  serial2.begin(921600, SERIAL_8N1);
   LOG(INFO) << "Client connected.";
 
   roo_io::InputStreamReader serial2_in(serial2.in());
@@ -77,4 +93,5 @@ void setup() {
   client();
 }
 
+// Never reached.
 void loop() {}
