@@ -24,8 +24,8 @@ using ReliableSerial2 = esp32::ReliableSerial2;
 
 namespace roo_transport {
 // using rp2040::ReliableSerial;
-using rp2040::ReliableSerial1;
-using rp2040::ReliableSerial2;
+using ReliableSerial1 = rp2040::ReliableSerial1;
+using ReliableSerial2 = rp2040::ReliableSerial2;
 }  // namespace roo_transport
 
 #endif
