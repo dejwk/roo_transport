@@ -12,7 +12,7 @@
 #include "roo_io/core/input_stream.h"
 #include "roo_io/uart/esp32/uart_input_stream.h"
 #include "roo_io/uart/esp32/uart_output_stream.h"
-#include "roo_transport/link/arduino/serial_link_transport.h"
+#include "roo_transport/link/arduino/esp32/reliable_serial_transport.h"
 
 namespace roo_transport {
 namespace esp32 {
@@ -51,7 +51,7 @@ class ReliableEsp32Serial : public LinkStream {
 
  private:
   SerialType& serial_;
-  SerialLinkTransport<SerialType> transport_;
+  Esp32SerialLinkTransport<SerialType> transport_;
 };
 
 // Specialization for HardwareSerial that uses more efficient UART streams
