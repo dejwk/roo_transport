@@ -233,6 +233,10 @@ long Channel::trySend() {
   if (len > 0) {
     packet_sender_.send(buf, len);
   }
+  // Don't send anything besides handshake until we're connected.
+  if (transmitter_.state() != internal::Transmitter::kConnected) {
+    return next_send_micros;
+  }
   len = receiver_.ack(buf);
   if (len > 0) {
     packet_sender_.send(buf, len);
