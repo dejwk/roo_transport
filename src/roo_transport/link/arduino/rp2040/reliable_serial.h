@@ -9,7 +9,7 @@
 
 #include "Arduino.h"
 #include "roo_io/core/input_stream.h"
-#include "roo_transport/link/arduino/reliable_serial_transport.h"
+#include "roo_transport/link/arduino/rp2040/reliable_serial_transport.h"
 
 namespace roo_transport {
 namespace rp2040 {
@@ -62,7 +62,7 @@ class ReliableRp2040SerialUART : public LinkStream {
 
  private:
   SerialUART& serial_;
-  ReliableSerialTransport transport_;
+  rp2040::ReliableUartLinkTransport transport_;
 };
 
 class ReliableSerial1 : public ReliableRp2040SerialUART {
@@ -74,7 +74,7 @@ class ReliableSerial1 : public ReliableRp2040SerialUART {
 
   ReliableSerial1(LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableRp2040SerialUART(Serial1, 1, "", sendbuf, recvbuf) {}
+      : ReliableRp2040SerialUART(Serial1, 1, "serial1", sendbuf, recvbuf) {}
 };
 
 class ReliableSerial2 : public ReliableRp2040SerialUART {
@@ -86,7 +86,7 @@ class ReliableSerial2 : public ReliableRp2040SerialUART {
 
   ReliableSerial2(LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableRp2040SerialUART(Serial2, 2, "", sendbuf, recvbuf) {}
+      : ReliableRp2040SerialUART(Serial2, 2, "serial2", sendbuf, recvbuf) {}
 };
 
 }  // namespace rp2040
