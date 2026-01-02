@@ -1,6 +1,5 @@
 #pragma once
 
-#include <atomic>
 #include <memory>
 
 #include "roo_transport/link/internal/thread_safe/compile_guard.h"

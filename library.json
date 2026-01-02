@@ -16,7 +16,7 @@
     "version": "1.0.2",
     "homepage": "https://github.com/dejwk/roo_transport",
     "frameworks": [
-        "Arduino"
+        "*"
     ],
     "build": {
         "srcDir": "src",

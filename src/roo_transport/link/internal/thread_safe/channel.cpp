@@ -1,6 +1,8 @@
 #include "roo_transport/link/internal/thread_safe/compile_guard.h"
 #ifdef ROO_USE_THREADS
 
+#include <cmath>
+
 #include "roo_transport/link/internal/protocol.h"
 #include "roo_transport/link/internal/thread_safe/channel.h"
 
@@ -518,7 +520,7 @@ void Channel::packetReceived(const roo::byte* buf, size_t len) {
 void Channel::sendLoop() {
   while (active_) {
     long delay_micros = trySend();
-    yield();
+    roo::this_thread::yield();
     if (delay_micros > 0) {
       // Wait for the delay, or the notification that we have data to send,
       // whichever comes first.

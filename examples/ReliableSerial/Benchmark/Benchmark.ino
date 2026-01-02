@@ -91,7 +91,7 @@ void server() {
     }
     out.writeByteArray(data.get(), len);
     out.flush();
-    yield();
+    roo::this_thread::yield();
   }
 }
 
@@ -105,19 +105,18 @@ void latencyTest(roo_io::InputStreamReader& in,
   const size_t kNumSamples = 1000;
   float rtt[kNumSamples];
   for (size_t i = 0; i < kNumSamples; i++) {
-    uint32_t start = micros();
+    roo_time::Uptime start = roo_time::Uptime::Now();
     out.writeVarU64(1);
     out.flush();
     in.readU8();
-    uint32_t end = micros();
-    rtt[i] = (end - start);
+    roo_time::Uptime end = roo_time::Uptime::Now();
+    rtt[i] = (end - start).inMillisFloat();
   }
   std::sort(rtt, rtt + kNumSamples);
   Serial.printf(
       "Round-trip times [ms]: (min, p50, p90, p99, max) : %f, %f, %f, %f, %f\n",
-      rtt[0] / 1000.0f, rtt[kNumSamples / 2] / 1000.0f,
-      rtt[(kNumSamples * 9) / 10] / 1000.0f,
-      rtt[(kNumSamples * 99) / 100] / 1000.0f, rtt[kNumSamples - 1] / 1000.0f);
+      rtt[0], rtt[kNumSamples / 2], rtt[(kNumSamples * 9) / 10],
+      rtt[(kNumSamples * 99) / 100], rtt[kNumSamples - 1]);
   Serial.println("Latency test completed.");
 }
 
@@ -131,7 +130,7 @@ void throughputTest(roo_io::InputStreamReader& in,
 
   const uint32_t kMessageSize = 512 * 1024;
   uint32_t total_time_us = 0;
-  uint32_t start = micros();
+  roo_time::Uptime start = roo_time::Uptime::Now();
   out.writeVarU64(kMessageSize);
   out.flush();
   size_t remaining = kMessageSize;
@@ -139,11 +138,11 @@ void throughputTest(roo_io::InputStreamReader& in,
     remaining -= in.readByteArray(buf.get(), 256);
   }
   remaining -= in.readByteArray(buf.get(), remaining);
-  uint32_t end = micros();
-  float time_s = ((end - start) / 1e6f);
+  roo_time::Uptime end = roo_time::Uptime::Now();
+  float time_s = (end - start).inSecondsFloat();
   float throughput_mbps = (kMessageSize / time_s) / (1000.0f * 1000.0f / 8.0f);
-  Serial.printf("Throughput for message size of %d KB: %f Mbps\n",
-                kMessageSize / 1024, throughput_mbps);
+  Serial.printf("Throughput for message size of %d KB: %f Mbps\n", kMessageSize / 1024,
+         throughput_mbps);
   Serial.println("Throughput test completed.");
 }
 

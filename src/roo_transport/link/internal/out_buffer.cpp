@@ -1,5 +1,7 @@
 #include "roo_transport/link/internal/out_buffer.h"
 
+#include <cmath>
+
 #include "roo_io/memory/load.h"
 #include "roo_io/memory/store.h"
 #include "roo_transport/link/internal/protocol.h"
