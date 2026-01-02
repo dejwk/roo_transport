@@ -7,6 +7,8 @@
 #if (defined ESP32 || defined ROO_TESTING)
 #include "esp_random.h"
 #define RANDOM_INTEGER esp_random
+#elif (defined ARDUINO_ARCH_RP2040)
+#define RANDOM_INTEGER rp2040.hwrand32
 #else
 #define RANDOM_INTEGER rand
 #endif
@@ -459,8 +461,7 @@ void Channel::packetReceived(const roo::byte* buf, size_t len) {
   uint16_t header = roo_io::LoadBeU16(buf);
   bool control_bit = internal::GetPacketControlBit(header);
   auto type = internal::GetPacketType(header);
-  if (type != internal::kHandshakePacket &&
-      control_bit == my_control_bit()) {
+  if (type != internal::kHandshakePacket && control_bit == my_control_bit()) {
     LOG(WARNING) << "Cross-talk detected. Check the wiring.";
     return;
   }
@@ -525,7 +526,7 @@ void Channel::sendLoop() {
 void Channel::begin() {
   roo::thread::attributes attrs;
   attrs.set_stack_size(4096);
-#if (defined ESP32 || defined ROO_TESTING)
+#if (defined __FREERTOS)
   // Set the priority just the notch below the receiver thread, so that it
   // doesn't starve the receiver thread (which receives acks) but is still high.
   attrs.set_priority(configMAX_PRIORITIES - 2);
