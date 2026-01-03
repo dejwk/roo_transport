@@ -78,6 +78,11 @@ class Esp32SerialLinkTransport {
 
   LinkTransport& transport() { return transport_; }
 
+  // Allow implicit conversion to LinkTransport&, so that this Arduino wrapper
+  // can be used seamlessly in place of LinkTransport when a reference to the
+  // latter is needed (e.g., when constructing LinkMessaging).
+  operator LinkTransport&() { return transport_; }
+
  private:
   SerialType& serial_;
   roo_io::ArduinoSerialOutputStream output_;
