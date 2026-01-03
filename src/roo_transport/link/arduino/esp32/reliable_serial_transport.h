@@ -4,8 +4,11 @@
 #if (defined ESP32 || defined ROO_TESTING)
 
 #include "Arduino.h"
+#include "hal/uart_types.h"
 #include "roo_io/uart/arduino/serial_input_stream.h"
 #include "roo_io/uart/arduino/serial_output_stream.h"
+#include "roo_io/uart/esp32/uart_input_stream.h"
+#include "roo_io/uart/esp32/uart_output_stream.h"
 #include "roo_threads.h"
 #include "roo_threads/thread.h"
 #include "roo_transport/link/arduino/link_stream.h"
@@ -17,46 +20,64 @@
 namespace roo_transport {
 namespace esp32 {
 
+template <typename SerialType>
+class Esp32SerialLinkTransportBase {
+ public:
+  Esp32SerialLinkTransportBase(SerialType& serial, uart_port_t ignored)
+      : serial_(serial), output_(serial_), input_(serial_) {}
+
+ protected:
+  SerialType& serial_;
+  roo_io::ArduinoSerialOutputStream output_;
+  roo_io::ArduinoSerialInputStream input_;
+};
+
+// Specialization for HardwareSerial that uses more efficient UART streams
+// (directly using esp-idf UART driver).
+template <>
+class Esp32SerialLinkTransportBase<HardwareSerial> {
+ public:
+  Esp32SerialLinkTransportBase(HardwareSerial& serial, uart_port_t port)
+      : serial_(serial), output_(port), input_(port) {}
+
+ protected:
+  HardwareSerial& serial_;
+  roo_io::Esp32UartOutputStream output_;
+  roo_io::Esp32UartInputStream input_;
+};
+
 // Similar to LinkStreamTransport, but specialized for Serial types on ESP32.
 // The user still needs to initialize the underlying serial (by calling
 // begin()), but there is no need to call receive() or tryReceive() to process
 // incoming packets; this class takes care of that by registering the receive
 // handlers.
 template <typename SerialType>
-class Esp32SerialLinkTransport {
+class Esp32SerialLinkTransport
+    : public Esp32SerialLinkTransportBase<SerialType> {
  public:
-  Esp32SerialLinkTransport(SerialType& serial, roo::string_view name,
+  Esp32SerialLinkTransport(SerialType& serial, uart_port_t port,
+                           roo::string_view name,
                            LinkBufferSize sendbuf = kBufferSize4KB,
                            LinkBufferSize recvbuf = kBufferSize4KB)
-      : serial_(serial),
-        output_(serial_),
-        input_(serial_),
-        sender_(output_),
-        receiver_(input_),
-        transport_(sender_, name, sendbuf, recvbuf) {}
-
-  Esp32SerialLinkTransport(SerialType& serial,
-                           LinkBufferSize sendbuf = kBufferSize4KB,
-                           LinkBufferSize recvbuf = kBufferSize4KB)
-      : Esp32SerialLinkTransport(serial, "", sendbuf, recvbuf) {}
+      : Esp32SerialLinkTransportBase<SerialType>(serial, port),
+        sender_(this->output_),
+        receiver_(this->input_),
+        transport_(sender_, name, sendbuf, recvbuf),
+        process_fn_([this](const roo::byte* buf, size_t len) {
+          transport_.processIncomingPacket(buf, len);
+        }) {}
 
   void begin() {
     transport_.begin();
-    serial_.onReceive([this]() {
-      receiver_.tryReceive([this](const roo::byte* buf, size_t len) {
-        transport_.processIncomingPacket(buf, len);
-      });
-    });
-    serial_.onReceiveError([this](hardwareSerial_error_t) {
-      receiver_.tryReceive([this](const roo::byte* buf, size_t len) {
-        transport_.processIncomingPacket(buf, len);
-      });
-    });
+    this->serial_.onReceive([this]() { receiver_.tryReceive(process_fn_); });
+    this->serial_.onReceiveError(
+        [this](hardwareSerial_error_t) { receiver_.tryReceive(process_fn_); });
   }
 
   void end() {
-    serial_.onReceive(nullptr);
-    serial_.end();
+    this->serial_.onReceive(nullptr);
+    this->serial_.onReceiveError(nullptr);
+    transport_.end();
   }
 
   LinkStream connect(std::function<void()> disconnect_fn = nullptr) {
@@ -84,13 +105,12 @@ class Esp32SerialLinkTransport {
   operator LinkTransport&() { return transport_; }
 
  private:
-  SerialType& serial_;
-  roo_io::ArduinoSerialOutputStream output_;
-  roo_io::ArduinoSerialInputStream input_;
   PacketSenderOverStream sender_;
   PacketReceiverOverStream receiver_;
 
   LinkTransport transport_;
+
+  std::function<void(const roo::byte* buf, size_t len)> process_fn_;
 };
 
 class ReliableSerialTransport
@@ -98,7 +118,8 @@ class ReliableSerialTransport
  public:
   ReliableSerialTransport(LinkBufferSize sendbuf = kBufferSize4KB,
                           LinkBufferSize recvbuf = kBufferSize4KB)
-      : Esp32SerialLinkTransport<decltype(Serial)>(Serial, sendbuf, recvbuf) {}
+      : Esp32SerialLinkTransport<decltype(Serial)>(Serial, UART_NUM_0, "serial",
+                                                   sendbuf, recvbuf) {}
 };
 
 #if SOC_UART_NUM > 1
@@ -107,8 +128,8 @@ class ReliableSerial1Transport
  public:
   ReliableSerial1Transport(LinkBufferSize sendbuf = kBufferSize4KB,
                            LinkBufferSize recvbuf = kBufferSize4KB)
-      : Esp32SerialLinkTransport<decltype(Serial1)>(Serial1, sendbuf, recvbuf) {
-  }
+      : Esp32SerialLinkTransport<decltype(Serial1)>(
+            Serial1, UART_NUM_1, "serial1", sendbuf, recvbuf) {}
 };
 #endif  // SOC_UART_NUM > 1
 #if SOC_UART_NUM > 2
@@ -117,8 +138,8 @@ class ReliableSerial2Transport
  public:
   ReliableSerial2Transport(LinkBufferSize sendbuf = kBufferSize4KB,
                            LinkBufferSize recvbuf = kBufferSize4KB)
-      : Esp32SerialLinkTransport<decltype(Serial2)>(Serial2, sendbuf, recvbuf) {
-  }
+      : Esp32SerialLinkTransport<decltype(Serial2)>(
+            Serial2, UART_NUM_2, "serial2", sendbuf, recvbuf) {}
 };
 #endif  // SOC_UART_NUM > 2
 
