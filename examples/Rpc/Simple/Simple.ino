@@ -103,7 +103,7 @@ struct Emulator {
 
 #include "roo_threads.h"
 #include "roo_transport.h"
-#include "roo_transport/link/arduino/serial_link_transport.h"
+#include "roo_transport/link/arduino/reliable_serial.h"
 #include "roo_transport/link/link_messaging.h"
 #include "roo_transport/rpc/client.h"
 #include "roo_transport/rpc/rpc.h"
@@ -178,10 +178,10 @@ FunctionTable rpc_function_table = {
 };
 
 // Declares the reliable bidirectional server-side transport over UART.
-SerialLinkTransport<decltype(Serial1)> server_serial(Serial1);
+ReliableSerial1 server_serial;
 
 // Declares the messaging layer on top of the reliable transport.
-LinkMessaging server_messaging(server_serial.transport(), kMaxPayloadSize);
+LinkMessaging server_messaging(server_serial, kMaxPayloadSize);
 
 // Declares the RPC server on top of the messaging layer.
 RpcServer rpc_server(server_messaging, &rpc_function_table);
@@ -214,10 +214,10 @@ void server() {
 #if MODE == MODE_LOOPBACK || MODE == MODE_CLIENT
 
 // Declares the reliable bidirectional client-side transport over UART.
-SerialLinkTransport<decltype(Serial2)> client_serial(Serial2);
+ReliableSerial2 client_serial;
 
 // Declares the messaging layer on top of the reliable transport.
-LinkMessaging client_messaging(client_serial.transport(), kMaxPayloadSize);
+LinkMessaging client_messaging(client_serial, kMaxPayloadSize);
 
 // Declares the RPC client on top of the messaging layer.
 RpcClient rpc_client(client_messaging);

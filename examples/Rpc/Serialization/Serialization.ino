@@ -97,7 +97,7 @@ struct Emulator {
 
 #include "roo_threads.h"
 #include "roo_transport.h"
-#include "roo_transport/link/arduino/serial_link_transport.h"
+#include "roo_transport/link/arduino/reliable_serial.h"
 #include "roo_transport/link/link_messaging.h"
 #include "roo_transport/rpc/client.h"
 #include "roo_transport/rpc/rpc.h"
@@ -254,8 +254,8 @@ FunctionTable rpc_function_table = {
     {kFnStructToVoid, UnaryHandler<MyStruct, Void>(fnStructToVoid)},
 };
 
-SerialLinkTransport<decltype(Serial1)> server_serial(Serial1);
-LinkMessaging server_messaging(server_serial.transport(), kMaxPayloadSize);
+ReliableSerial1 server_serial;
+LinkMessaging server_messaging(server_serial, kMaxPayloadSize);
 RpcServer rpc_server(server_messaging, &rpc_function_table);
 
 // This is our server's entry point.
@@ -274,8 +274,8 @@ void server() {
 
 #if MODE == MODE_LOOPBACK || MODE == MODE_CLIENT
 
-SerialLinkTransport<decltype(Serial2)> client_serial(Serial2);
-LinkMessaging client_messaging(client_serial.transport(), kMaxPayloadSize);
+ReliableSerial2 client_serial;
+LinkMessaging client_messaging(client_serial, kMaxPayloadSize);
 RpcClient rpc_client(client_messaging);
 
 // Declares the stub for our single RPC function. Uses the UnaryStub helper
