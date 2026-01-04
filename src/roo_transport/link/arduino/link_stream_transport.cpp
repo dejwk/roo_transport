@@ -28,6 +28,11 @@ LinkStream LinkStreamTransport::connect(std::function<void()> disconnect_fn) {
   return LinkStream(std::move(link));
 }
 
+LinkStream LinkStreamTransport::connectOrDie() {
+  return connect(
+      []() { LOG(FATAL) << "LinkTransport: peer reset; rebooting"; });
+}
+
 size_t LinkStreamTransport::tryReceive() {
   return receiver_.tryReceive([this](const roo::byte* buf, size_t len) {
     transport_.processIncomingPacket(buf, len);

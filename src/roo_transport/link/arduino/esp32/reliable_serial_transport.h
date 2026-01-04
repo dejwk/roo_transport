@@ -80,14 +80,26 @@ class Esp32SerialLinkTransport
     transport_.end();
   }
 
+  // Establishes a new connection and returns the Link object representing it.
   LinkStream connect(std::function<void()> disconnect_fn = nullptr) {
     LinkStream link = connectAsync(std::move(disconnect_fn));
     link.awaitConnected();
     return LinkStream(std::move(link));
   }
 
+  // Establishes a new connection asynchronously and returns the Link object
+  // representing it. Until the connection is established, the link will be in
+  // the "connecting" state.
   LinkStream connectAsync(std::function<void()> disconnect_fn = nullptr) {
     return LinkStream(transport_.connect(std::move(disconnect_fn)));
+  }
+
+  // Establishes a new connection and returns the Link object representing it.
+  // If the peer attempts reconnection (e.g. after a reset), the program
+  // will terminate (usually to reconnect after reboot).
+  LinkStream connectOrDie() {
+    return connect(
+        []() { LOG(FATAL) << "LinkTransport: peer reset; rebooting"; });
   }
 
   uint32_t packets_sent() const { return transport_.packets_sent(); }
@@ -118,7 +130,12 @@ class ReliableSerialTransport
  public:
   ReliableSerialTransport(LinkBufferSize sendbuf = kBufferSize4KB,
                           LinkBufferSize recvbuf = kBufferSize4KB)
-      : Esp32SerialLinkTransport<decltype(Serial)>(Serial, UART_NUM_0, "serial",
+      : ReliableSerialTransport("serial", sendbuf, recvbuf) {}
+
+  ReliableSerialTransport(roo::string_view name,
+                          LinkBufferSize sendbuf = kBufferSize4KB,
+                          LinkBufferSize recvbuf = kBufferSize4KB)
+      : Esp32SerialLinkTransport<decltype(Serial)>(Serial, UART_NUM_0, name,
                                                    sendbuf, recvbuf) {}
 };
 
@@ -128,8 +145,13 @@ class ReliableSerial1Transport
  public:
   ReliableSerial1Transport(LinkBufferSize sendbuf = kBufferSize4KB,
                            LinkBufferSize recvbuf = kBufferSize4KB)
-      : Esp32SerialLinkTransport<decltype(Serial1)>(
-            Serial1, UART_NUM_1, "serial1", sendbuf, recvbuf) {}
+      : ReliableSerial1Transport("serial1", sendbuf, recvbuf) {}
+
+  ReliableSerial1Transport(roo::string_view name,
+                           LinkBufferSize sendbuf = kBufferSize4KB,
+                           LinkBufferSize recvbuf = kBufferSize4KB)
+      : Esp32SerialLinkTransport<decltype(Serial1)>(Serial1, UART_NUM_1, name,
+                                                    sendbuf, recvbuf) {}
 };
 #endif  // SOC_UART_NUM > 1
 #if SOC_UART_NUM > 2
@@ -138,8 +160,13 @@ class ReliableSerial2Transport
  public:
   ReliableSerial2Transport(LinkBufferSize sendbuf = kBufferSize4KB,
                            LinkBufferSize recvbuf = kBufferSize4KB)
-      : Esp32SerialLinkTransport<decltype(Serial2)>(
-            Serial2, UART_NUM_2, "serial2", sendbuf, recvbuf) {}
+      : ReliableSerial2Transport("serial2", sendbuf, recvbuf) {}
+
+  ReliableSerial2Transport(roo::string_view name,
+                           LinkBufferSize sendbuf = kBufferSize4KB,
+                           LinkBufferSize recvbuf = kBufferSize4KB)
+      : Esp32SerialLinkTransport<decltype(Serial2)>(Serial2, UART_NUM_2, name,
+                                                    sendbuf, recvbuf) {}
 };
 #endif  // SOC_UART_NUM > 2
 

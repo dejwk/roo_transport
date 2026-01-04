@@ -26,8 +26,21 @@ class LinkTransport {
   // Supply an incoming packet received from the underlying transport.
   void processIncomingPacket(const roo::byte* buf, size_t len);
 
+  // Establishes a new connection and returns the Link object representing it.
   Link connect(std::function<void()> disconnect_fn = nullptr);
+
+  // Establishes a new connection asynchronously and returns the Link object
+  // representing it. Until the connection is established, the link will be in
+  // the "connecting" state.
   Link connectAsync(std::function<void()> disconnect_fn = nullptr);
+
+  // Establishes a new connection and returns the Link object representing it.
+  // If the peer attempts reconnection (e.g. after a reset), the program
+  // will terminate (usually to reconnect after reboot).
+  Link connectOrDie() {
+    return connect(
+        []() { LOG(FATAL) << "LinkTransport: peer reset; rebooting"; });
+  }
 
   uint32_t packets_sent() const { return channel_.packets_sent(); }
   uint32_t packets_delivered() const { return channel_.packets_delivered(); }

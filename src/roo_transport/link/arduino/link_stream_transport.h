@@ -31,6 +31,7 @@ class LinkStreamTransport {
 
   LinkStream connect(std::function<void()> disconnect_fn = nullptr);
   LinkStream connectAsync(std::function<void()> disconnect_fn = nullptr);
+  LinkStream connectOrDie();
 
   uint32_t packets_sent() const { return transport_.packets_sent(); }
   uint32_t packets_delivered() const { return transport_.packets_delivered(); }
