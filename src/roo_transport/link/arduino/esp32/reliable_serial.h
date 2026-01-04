@@ -3,98 +3,172 @@
 #if (defined ARDUINO)
 #if (defined ESP32 || defined ROO_TESTING)
 
-// Defines classes ReliableSerial, and (depending on the exact SOC also
-// ReliableSerial1 and ReliableSerial2, which are meant as near-drop-in
-// replacements for Serial, Serial1, and Serial2, respectively, that add a
-// reliable transport layer on top of the underlying UART connection.
-
 #include "Arduino.h"
-#include "roo_io/core/input_stream.h"
+#include "hal/uart_types.h"
+#include "roo_io/uart/arduino/serial_input_stream.h"
+#include "roo_io/uart/arduino/serial_output_stream.h"
 #include "roo_io/uart/esp32/uart_input_stream.h"
 #include "roo_io/uart/esp32/uart_output_stream.h"
-#include "roo_transport/link/arduino/esp32/reliable_serial_transport.h"
+#include "roo_threads.h"
+#include "roo_threads/thread.h"
+#include "roo_transport/link/arduino/link_stream.h"
+#include "roo_transport/link/arduino/link_stream_transport.h"
+#include "roo_transport/link/link_transport.h"
+#include "roo_transport/packets/over_stream/packet_receiver_over_stream.h"
+#include "roo_transport/packets/over_stream/packet_sender_over_stream.h"
 
 namespace roo_transport {
 namespace esp32 {
 
 template <typename SerialType>
-class ReliableEsp32Serial : public LinkStream {
+class Esp32SerialLinkTransportBase {
  public:
-  ReliableEsp32Serial(SerialType& serial, uart_port_t num,
-                      LinkBufferSize sendbuf = kBufferSize4KB,
-                      LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableEsp32Serial(serial, num, "", sendbuf, recvbuf) {}
+  Esp32SerialLinkTransportBase(SerialType& serial, uart_port_t ignored)
+      : serial_(serial), output_(serial_), input_(serial_) {}
 
-  ReliableEsp32Serial(SerialType& serial, uart_port_t num,
-                      roo::string_view name,
-                      LinkBufferSize sendbuf = kBufferSize4KB,
-                      LinkBufferSize recvbuf = kBufferSize4KB)
-      : serial_(serial), transport_(serial, num, name, sendbuf, recvbuf) {}
+ protected:
+  SerialType& serial_;
+  roo_io::ArduinoSerialOutputStream output_;
+  roo_io::ArduinoSerialInputStream input_;
+};
 
-  void begin(unsigned long baud, uint32_t config = SERIAL_8N1,
-             int8_t rxPin = -1, int8_t txPin = -1, bool invert = false,
-             unsigned long timeout_ms = 20000UL,
-             uint8_t rxfifo_full_thrhd = 112) {
-    serial_.setRxBufferSize(4096);
-    serial_.begin(baud, config, rxPin, txPin, invert, timeout_ms,
-                  rxfifo_full_thrhd);
+// Specialization for HardwareSerial that uses more efficient UART streams
+// (directly using esp-idf UART driver).
+template <>
+class Esp32SerialLinkTransportBase<HardwareSerial> {
+ public:
+  Esp32SerialLinkTransportBase(HardwareSerial& serial, uart_port_t port)
+      : serial_(serial), output_(port), input_(port) {}
+
+ protected:
+  HardwareSerial& serial_;
+  roo_io::Esp32UartOutputStream output_;
+  roo_io::Esp32UartInputStream input_;
+};
+
+// Similar to LinkStreamTransport, but specialized for Serial types on ESP32.
+// The user still needs to initialize the underlying serial (by calling
+// begin()), but there is no need to call receive() or tryReceive() to process
+// incoming packets; this class takes care of that by registering the receive
+// handlers.
+template <typename SerialType>
+class Esp32SerialLinkTransport
+    : public Esp32SerialLinkTransportBase<SerialType> {
+ public:
+  Esp32SerialLinkTransport(SerialType& serial, uart_port_t port,
+                           roo::string_view name,
+                           LinkBufferSize sendbuf = kBufferSize4KB,
+                           LinkBufferSize recvbuf = kBufferSize4KB)
+      : Esp32SerialLinkTransportBase<SerialType>(serial, port),
+        sender_(this->output_),
+        receiver_(this->input_),
+        transport_(sender_, name, sendbuf, recvbuf),
+        process_fn_([this](const roo::byte* buf, size_t len) {
+          transport_.processIncomingPacket(buf, len);
+        }) {}
+
+  void begin() {
     transport_.begin();
-    set(transport_.transport().connect([]() {
-      LOG(FATAL) << "Reliable serial: peer reset detected; rebooting";
-    }));
+    this->serial_.onReceive([this]() { receiver_.tryReceive(process_fn_); });
+    this->serial_.onReceiveError(
+        [this](hardwareSerial_error_t) { receiver_.tryReceive(process_fn_); });
   }
 
   void end() {
-    out().close();
-    in().close();
-    serial_.end();
+    this->serial_.onReceive(nullptr);
+    this->serial_.onReceiveError(nullptr);
+    transport_.end();
   }
 
+  // Establishes a new connection and returns the Link object representing it.
+  LinkStream connect(std::function<void()> disconnect_fn = nullptr) {
+    LinkStream link = connectAsync(std::move(disconnect_fn));
+    link.awaitConnected();
+    return LinkStream(std::move(link));
+  }
+
+  // Establishes a new connection asynchronously and returns the Link object
+  // representing it. Until the connection is established, the link will be in
+  // the "connecting" state.
+  LinkStream connectAsync(std::function<void()> disconnect_fn = nullptr) {
+    return LinkStream(transport_.connect(std::move(disconnect_fn)));
+  }
+
+  // Establishes a new connection and returns the Link object representing it.
+  // If the peer attempts reconnection (e.g. after a reset), the program
+  // will terminate (usually to reconnect after reboot).
+  LinkStream connectOrDie() {
+    return connect(
+        []() { LOG(FATAL) << "LinkTransport: peer reset; rebooting"; });
+  }
+
+  uint32_t packets_sent() const { return transport_.packets_sent(); }
+  uint32_t packets_delivered() const { return transport_.packets_delivered(); }
+  uint32_t packets_received() const { return transport_.packets_received(); }
+
+  size_t receiver_bytes_received() const { return receiver_.bytes_received(); }
+  size_t receiver_bytes_accepted() const { return receiver_.bytes_accepted(); }
+
+  LinkTransport& transport() { return transport_; }
+
+  // Allow implicit conversion to LinkTransport&, so that this Arduino wrapper
+  // can be used seamlessly in place of LinkTransport when a reference to the
+  // latter is needed (e.g., when constructing LinkMessaging).
+  operator LinkTransport&() { return transport_; }
+
  private:
-  SerialType& serial_;
-  Esp32SerialLinkTransport<SerialType> transport_;
+  PacketSenderOverStream sender_;
+  PacketReceiverOverStream receiver_;
+
+  LinkTransport transport_;
+
+  std::function<void(const roo::byte* buf, size_t len)> process_fn_;
 };
 
-class ReliableSerial : public ReliableEsp32Serial<decltype(Serial)> {
+class ReliableSerial : public Esp32SerialLinkTransport<decltype(Serial)> {
  public:
-  ReliableSerial(roo::string_view name, LinkBufferSize sendbuf = kBufferSize4KB,
-                 LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableEsp32Serial(Serial, UART_NUM_0, name, sendbuf, recvbuf) {}
-
   ReliableSerial(LinkBufferSize sendbuf = kBufferSize4KB,
                  LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableEsp32Serial(Serial, UART_NUM_0, "serial", sendbuf, recvbuf) {}
+      : ReliableSerial("serial", sendbuf, recvbuf) {}
+
+  ReliableSerial(roo::string_view name, LinkBufferSize sendbuf = kBufferSize4KB,
+                 LinkBufferSize recvbuf = kBufferSize4KB)
+      : Esp32SerialLinkTransport<decltype(Serial)>(Serial, UART_NUM_0, name,
+                                                   sendbuf, recvbuf) {}
 };
 
 #if SOC_UART_NUM > 1
-class ReliableSerial1 : public ReliableEsp32Serial<decltype(Serial1)> {
+class ReliableSerial1 : public Esp32SerialLinkTransport<decltype(Serial1)> {
  public:
+  ReliableSerial1(LinkBufferSize sendbuf = kBufferSize4KB,
+                  LinkBufferSize recvbuf = kBufferSize4KB)
+      : ReliableSerial1("serial1", sendbuf, recvbuf) {}
+
   ReliableSerial1(roo::string_view name,
                   LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableEsp32Serial(Serial1, UART_NUM_1, name, sendbuf, recvbuf) {}
-
-  ReliableSerial1(LinkBufferSize sendbuf = kBufferSize4KB,
-                  LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableEsp32Serial(Serial1, UART_NUM_1, "serial1", sendbuf, recvbuf) {}
+      : Esp32SerialLinkTransport<decltype(Serial1)>(Serial1, UART_NUM_1, name,
+                                                    sendbuf, recvbuf) {}
 };
 #endif  // SOC_UART_NUM > 1
 #if SOC_UART_NUM > 2
-class ReliableSerial2 : public ReliableEsp32Serial<decltype(Serial2)> {
+class ReliableSerial2 : public Esp32SerialLinkTransport<decltype(Serial2)> {
  public:
+  ReliableSerial2(LinkBufferSize sendbuf = kBufferSize4KB,
+                  LinkBufferSize recvbuf = kBufferSize4KB)
+      : ReliableSerial2("serial2", sendbuf, recvbuf) {}
+
   ReliableSerial2(roo::string_view name,
                   LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableEsp32Serial(Serial2, UART_NUM_2, name, sendbuf, recvbuf) {}
-
-  ReliableSerial2(LinkBufferSize sendbuf = kBufferSize4KB,
-                  LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableEsp32Serial(Serial2, UART_NUM_2, "serial2", sendbuf, recvbuf) {}
+      : Esp32SerialLinkTransport<decltype(Serial2)>(Serial2, UART_NUM_2, name,
+                                                    sendbuf, recvbuf) {}
 };
 #endif  // SOC_UART_NUM > 2
 
 }  // namespace esp32
 }  // namespace roo_transport
 
-#endif  // ESP32 || ROO_TESTING
+#endif  // defined(ESP32 || defined ROO_TESTING)
+
 #endif  // defined(ARDUINO)
