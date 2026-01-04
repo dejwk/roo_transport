@@ -2,94 +2,101 @@
 
 #if defined(ARDUINO_ARCH_RP2040)
 
-// Defines classes ReliableSerial, ReliableSerial1 and ReliableSerial2, which
-// are meant as near-drop-in replacements for Serial, Serial1, and Serial2,
-// respectively, that add a reliable transport layer on top of the underlying
-// UART connection.
-
 #include "Arduino.h"
-#include "roo_io/core/input_stream.h"
-#include "roo_transport/link/arduino/rp2040/reliable_serial_transport.h"
+#include "roo_threads.h"
+#include "roo_threads/atomic.h"
+#include "roo_transport/link/arduino/link_stream_transport.h"
 
 namespace roo_transport {
 namespace rp2040 {
 
-class ReliableRp2040SerialUART : public LinkStream {
+// Implementation of the LinkStreamTransport that uses a newly created receiver
+// thread to read from the underlying serial.
+class ReliableUartLinkTransport : public LinkStreamTransport {
  public:
-  ReliableRp2040SerialUART(SerialUART& serial, uint8_t num,
-                           LinkBufferSize sendbuf = kBufferSize4KB,
-                           LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableRp2040SerialUART(serial, num, "", sendbuf, recvbuf) {}
+  ReliableUartLinkTransport(SerialUART &serial, roo::string_view name,
+                            LinkBufferSize sendbuf = kBufferSize4KB,
+                            LinkBufferSize recvbuf = kBufferSize4KB)
+      : LinkStreamTransport(serial, sendbuf, recvbuf),
+        serial_(serial),
+        receiver_thread_name_(name) {}
 
-  ReliableRp2040SerialUART(SerialUART& serial, uint8_t num,
-                           roo::string_view name,
-                           LinkBufferSize sendbuf = kBufferSize4KB,
-                           LinkBufferSize recvbuf = kBufferSize4KB)
-      : serial_(serial), transport_(serial, name, sendbuf, recvbuf) {}
+  ReliableUartLinkTransport(SerialUART &serial,
+                            LinkBufferSize sendbuf = kBufferSize4KB,
+                            LinkBufferSize recvbuf = kBufferSize4KB)
+      : ReliableUartLinkTransport(serial, "serialRcv", sendbuf, recvbuf) {}
 
-  void begin(unsigned long baud, uint32_t config = SERIAL_8N1) {
-    serial_.begin(baud, config);
-    transport_.begin();
-    set(transport_.transport().connect([]() {
-      LOG(FATAL) << "Reliable serial: peer reset detected; rebooting";
-    }));
+  void begin() {
+    LinkStreamTransport::begin();
+    running_ = true;
+    roo::thread::attributes attrs;
+    attrs.set_name(receiver_thread_name_.c_str());
+    // Run at high priority to ensure timely processing of incoming packets.
+    attrs.set_priority(configMAX_PRIORITIES - 1);
+    receiver_thread_ = roo::thread(attrs, [this]() {
+      while (running_) {
+        int avail = serial_.available();
+        if (avail == 0) {
+          // Don't busy-wait; give lower-priority tasks a chance to run.
+          while (true) {
+            roo::this_thread::sleep_for(roo_time::Millis(1));
+            int avail = serial_.available();
+            if (avail > 0) {
+              break;
+            }
+          }
+        }
+        tryReceive();
+      }
+    });
   }
 
   void end() {
-    out().close();
-    in().close();
-    serial_.end();
+    running_ = false;
+    receiver_thread_.join();
   }
-
-  bool setRX(pin_size_t pin) { return serial_.setRX(pin); }
-  bool setTX(pin_size_t pin) { return serial_.setTX(pin); }
-  bool setRTS(pin_size_t pin) { return serial_.setRTS(pin); }
-  bool setCTS(pin_size_t pin) { return serial_.setCTS(pin); }
-
-  bool setPinout(pin_size_t tx, pin_size_t rx) {
-    return serial_.setPinout(tx, rx);
-  }
-
-  bool setInvertTX(bool invert = true) { return serial_.setInvertTX(invert); }
-  bool setInvertRX(bool invert = true) { return serial_.setInvertRX(invert); }
-
-  bool setInvertControl(bool invert = true) {
-    return serial_.setInvertControl(invert);
-  }
-
-  bool setFIFOSize(size_t size) { return serial_.setFIFOSize(size); }
-  bool setPollingMode(bool mode = true) { return serial_.setPollingMode(mode); }
 
  private:
-  SerialUART& serial_;
-  rp2040::ReliableUartLinkTransport transport_;
+  SerialUART &serial_;
+  std::string receiver_thread_name_;
+  roo::thread receiver_thread_;
+  roo::atomic<bool> running_{false};
 };
 
-class ReliableSerial1 : public ReliableRp2040SerialUART {
+// class ReliableSerialTransport
+//     : public Rp2040ReliableSerialTransport<decltype(Serial)> {
+//  public:
+//   ReliableSerialTransport(LinkBufferSize sendbuf = kBufferSize4KB,
+//                           LinkBufferSize recvbuf = kBufferSize4KB)
+//       : Rp2040SerialLinkTransport<decltype(Serial)>(Serial, sendbuf, recvbuf)
+//       {}
+// };
+
+class ReliableSerial1 : public ReliableUartLinkTransport {
  public:
+  ReliableSerial1(LinkBufferSize sendbuf = kBufferSize4KB,
+                  LinkBufferSize recvbuf = kBufferSize4KB)
+      : ReliableSerial1("serial1", sendbuf, recvbuf) {}
+
   ReliableSerial1(roo::string_view name,
                   LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableRp2040SerialUART(Serial1, 1, name, sendbuf, recvbuf) {}
-
-  ReliableSerial1(LinkBufferSize sendbuf = kBufferSize4KB,
-                  LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableRp2040SerialUART(Serial1, 1, "serial1", sendbuf, recvbuf) {}
+      : ReliableUartLinkTransport(Serial1, name, sendbuf, recvbuf) {}
 };
 
-class ReliableSerial2 : public ReliableRp2040SerialUART {
+class ReliableSerial2 : public ReliableUartLinkTransport {
  public:
+  ReliableSerial2(LinkBufferSize sendbuf = kBufferSize4KB,
+                  LinkBufferSize recvbuf = kBufferSize4KB)
+      : ReliableSerial2("serial2", sendbuf, recvbuf) {}
+
   ReliableSerial2(roo::string_view name,
                   LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableRp2040SerialUART(Serial2, 2, name, sendbuf, recvbuf) {}
-
-  ReliableSerial2(LinkBufferSize sendbuf = kBufferSize4KB,
-                  LinkBufferSize recvbuf = kBufferSize4KB)
-      : ReliableRp2040SerialUART(Serial2, 2, "serial2", sendbuf, recvbuf) {}
+      : ReliableUartLinkTransport(Serial2, name, sendbuf, recvbuf) {}
 };
 
 }  // namespace rp2040
 }  // namespace roo_transport
 
-#endif  // defined(ARDUINO_ARCH_RP2040)
+#endif  // defined(ARDUINO)
