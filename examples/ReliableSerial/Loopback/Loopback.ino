@@ -17,34 +17,52 @@
 
 using namespace roo_transport;
 
+#if defined(ESP_PLATFORM)
+
+static const int kPinServerTx = 27;
+static const int kPinServerRx = 14;
+static const int kPinClientTx = 25;
+static const int kPinClientRx = 26;
+
+static const uint32_t baud_rate = 5000000;
+
+#elif defined(ARDUINO_ARCH_RP2040)
+
 static const int kPinServerTx = 12;
 static const int kPinServerRx = 13;
 static const int kPinClientTx = 4;
 static const int kPinClientRx = 5;
 
-// static const int kPinServerTx = 27;
-// static const int kPinServerRx = 14;
-// static const int kPinClientTx = 25;
-// static const int kPinClientRx = 26;
+static const uint32_t baud_rate = 115200;
+
+#else
+#error "Unsupported platform"
+#endif
 
 roo::thread server_thread;
 
-// ReliableSerial1 and ReliableSerial2 are (near) drop-in replacements for
-// Serial1 and Serial2, that implement a reliable transport on top the
-// underlying UART connection.
-ReliableSerial1 serial1;
-ReliableSerial2 serial2;
+// ReliableSerial1 and ReliableSerial2 are wrappers for Serial1 and Serial2,
+// accordingly, that implement a reliable transport on top the underlying UART
+// connection.
+ReliableSerial1 reliable_serial1;
+ReliableSerial2 reliable_serial2;
 
 void server() {
   LOG(INFO) << "Server connecting...";
-  serial1.setRX(kPinServerRx);
-  serial1.setTX(kPinServerTx);
-  serial1.setFIFOSize(1024);
-  serial1.setPollingMode(false);
-  serial1.begin(921600, SERIAL_8N1);
+#if defined(ESP_PLATFORM)
+  Serial1.setRxBufferSize(4096);
+  Serial1.begin(baud_rate, SERIAL_8N1, kPinServerRx, kPinServerTx);
+#elif defined(ARDUINO_ARCH_RP2040)
+  Serial1.setRx(kPinServerRx);
+  Serial1.setTx(kPinServerTx);
+  Serial1.setFIFOSize(1024);
+  Serial1.begin(baud_rate, SERIAL_8N1);
+#endif
+  reliable_serial1.begin();
+  LinkStream link = reliable_serial1.connectOrDie();
   LOG(INFO) << "Server connected.";
 
-  roo_io::OutputStreamWriter serial1_out(serial1.out());
+  roo_io::OutputStreamWriter serial1_out(link.out());
   uint32_t i = 0;
   while (true) {
     serial1_out.writeBeU32(i++);
@@ -69,14 +87,21 @@ void startServer() {
 
 void client() {
   LOG(INFO) << "Client connecting...";
-  serial2.setRX(kPinClientRx);
-  serial2.setTX(kPinClientTx);
-  serial2.setFIFOSize(1024);
-  serial2.setPollingMode(false);
-  serial2.begin(921600, SERIAL_8N1);
+#if defined(ESP_PLATFORM)
+  Serial2.setRxBufferSize(4096);
+  Serial2.begin(baud_rate, SERIAL_8N1, kPinClientRx, kPinClientTx);
+#elif defined(ARDUINO_ARCH_RP2040)
+  Serial2.setRx(kPinClientRx);
+  Serial2.setTx(kPinClientTx);
+  Serial2.setFIFOSize(1024);
+  Serial2.begin(baud_rate, SERIAL_8N1);
+#endif
+  reliable_serial2.begin();
+  LinkStream link = reliable_serial2.connectOrDie();
+  CHECK_EQ(link.status(), LinkStatus::kConnected);
   LOG(INFO) << "Client connected.";
 
-  roo_io::InputStreamReader serial2_in(serial2.in());
+  roo_io::InputStreamReader serial2_in(link.in());
   while (true) {
     uint32_t idx = serial2_in.readBeU32();
     std::string msg = serial2_in.readString();

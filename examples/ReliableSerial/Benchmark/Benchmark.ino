@@ -36,12 +36,27 @@
 
 using namespace roo_transport;
 
+#if defined(ESP_PLATFORM)
+
 static const int kPinServerTx = 27;
 static const int kPinServerRx = 14;
 static const int kPinClientTx = 25;
 static const int kPinClientRx = 26;
 
 static const uint32_t baud_rate = 5000000;
+
+#elif defined(ARDUINO_ARCH_RP2040)
+
+static const int kPinServerTx = 12;
+static const int kPinServerRx = 13;
+static const int kPinClientTx = 4;
+static const int kPinClientRx = 5;
+
+static const uint32_t baud_rate = 115200;
+
+#else
+#error "Unsupported platform"
+#endif
 
 // Build for a single microcontroller in loopback mode.
 #define MODE_LOOPBACK 0
@@ -59,8 +74,8 @@ static const uint32_t baud_rate = 5000000;
 
 roo::thread server_thread;
 
-ReliableSerial1 serial1("server");
-ReliableSerial2 serial2("client");
+ReliableSerial1 reliable_serial1;
+ReliableSerial2 reliable_serial2;
 
 #if MODE == MODE_LOOPBACK || MODE == MODE_SERVER
 
@@ -71,7 +86,17 @@ void server() {
   // The argument is variable-length-encoded, so that small requests (e.g. 1
   // byte) incur minimal overhead (also 1 byte).
   Serial.println("Server connecting...");
-  serial1.begin(baud_rate, SERIAL_8N1, kPinServerRx, kPinServerTx);
+#if defined(ESP_PLATFORM)
+  Serial1.setRxBufferSize(4096);
+  Serial1.begin(baud_rate, SERIAL_8N1, kPinServerRx, kPinServerTx);
+#elif defined(ARDUINO_ARCH_RP2040)
+  Serial1.setRx(kPinServerRx);
+  Serial1.setTx(kPinServerTx);
+  Serial1.setFIFOSize(1024);
+  Serial1.begin(baud_rate, SERIAL_8N1);
+#endif
+  reliable_serial1.begin();
+  LinkStream link = reliable_serial1.connectOrDie();
   Serial.println("Server connected.");
 
   // Generate data that we will serve.
@@ -80,8 +105,8 @@ void server() {
     data[i] = (roo::byte)i;
   }
 
-  roo_io::InputStreamReader in(serial1.in());
-  roo_io::OutputStreamWriter out(serial1.out());
+  roo_io::InputStreamReader in(link.in());
+  roo_io::OutputStreamWriter out(link.out());
   uint32_t i = 0;
   while (true) {
     uint32_t len = in.readVarU64();
@@ -141,19 +166,29 @@ void throughputTest(roo_io::InputStreamReader& in,
   roo_time::Uptime end = roo_time::Uptime::Now();
   float time_s = (end - start).inSecondsFloat();
   float throughput_mbps = (kMessageSize / time_s) / (1000.0f * 1000.0f / 8.0f);
-  Serial.printf("Throughput for message size of %d KB: %f Mbps\n", kMessageSize / 1024,
-         throughput_mbps);
+  Serial.printf("Throughput for message size of %d KB: %f Mbps\n",
+                kMessageSize / 1024, throughput_mbps);
   Serial.println("Throughput test completed.");
 }
 
 void client() {
   Serial.println("Client connecting...");
-  serial2.begin(baud_rate, SERIAL_8N1, kPinClientRx, kPinClientTx);
-  CHECK_EQ(serial2.status(), LinkStatus::kConnected);
+#if defined(ESP_PLATFORM)
+  Serial2.setRxBufferSize(4096);
+  Serial2.begin(baud_rate, SERIAL_8N1, kPinClientRx, kPinClientTx);
+#elif defined(ARDUINO_ARCH_RP2040)
+  Serial2.setRx(kPinClientRx);
+  Serial2.setTx(kPinClientTx);
+  Serial2.setFIFOSize(1024);
+  Serial2.begin(baud_rate, SERIAL_8N1);
+#endif
+  reliable_serial2.begin();
+  LinkStream link = reliable_serial2.connectOrDie();
+  CHECK_EQ(link.status(), LinkStatus::kConnected);
   Serial.println("Client connected.");
 
-  roo_io::InputStreamReader in(serial2.in());
-  roo_io::OutputStreamWriter out(serial2.out());
+  roo_io::InputStreamReader in(link.in());
+  roo_io::OutputStreamWriter out(link.out());
 
   while (true) {
     latencyTest(in, out);
