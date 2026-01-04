@@ -53,8 +53,7 @@ void server() {
   Serial1.setRxBufferSize(4096);
   Serial1.begin(baud_rate, SERIAL_8N1, kPinServerRx, kPinServerTx);
 #elif defined(ARDUINO_ARCH_RP2040)
-  Serial1.setRx(kPinServerRx);
-  Serial1.setTx(kPinServerTx);
+  Serial1.setPinout(kPinServerTx, kPinServerRx);
   Serial1.setFIFOSize(1024);
   Serial1.begin(baud_rate, SERIAL_8N1);
 #endif
@@ -91,8 +90,7 @@ void client() {
   Serial2.setRxBufferSize(4096);
   Serial2.begin(baud_rate, SERIAL_8N1, kPinClientRx, kPinClientTx);
 #elif defined(ARDUINO_ARCH_RP2040)
-  Serial2.setRx(kPinClientRx);
-  Serial2.setTx(kPinClientTx);
+  Serial2.setPinout(kPinClientTx, kPinClientRx);
   Serial2.setFIFOSize(1024);
   Serial2.begin(baud_rate, SERIAL_8N1);
 #endif

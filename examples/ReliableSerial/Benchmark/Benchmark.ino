@@ -28,6 +28,8 @@
 // should notice that the benchmark stalls, and then seamlessly resumes once the
 // connection is restored.
 
+#include <algorithm>
+
 #include "roo_io.h"
 #include "roo_io/data/input_stream_reader.h"
 #include "roo_io/data/output_stream_writer.h"
@@ -90,8 +92,7 @@ void server() {
   Serial1.setRxBufferSize(4096);
   Serial1.begin(baud_rate, SERIAL_8N1, kPinServerRx, kPinServerTx);
 #elif defined(ARDUINO_ARCH_RP2040)
-  Serial1.setRx(kPinServerRx);
-  Serial1.setTx(kPinServerTx);
+  Serial1.setPinout(kPinServerTx, kPinServerRx);
   Serial1.setFIFOSize(1024);
   Serial1.begin(baud_rate, SERIAL_8N1);
 #endif
@@ -128,7 +129,7 @@ void latencyTest(roo_io::InputStreamReader& in,
                  roo_io::OutputStreamWriter& out) {
   Serial.println("Starting latency test...");
   const size_t kNumSamples = 1000;
-  float rtt[kNumSamples];
+  std::unique_ptr<float[]> rtt(new float[kNumSamples]);
   for (size_t i = 0; i < kNumSamples; i++) {
     roo_time::Uptime start = roo_time::Uptime::Now();
     out.writeVarU64(1);
@@ -137,7 +138,7 @@ void latencyTest(roo_io::InputStreamReader& in,
     roo_time::Uptime end = roo_time::Uptime::Now();
     rtt[i] = (end - start).inMillisFloat();
   }
-  std::sort(rtt, rtt + kNumSamples);
+  std::sort(&rtt[0], &rtt[kNumSamples]);
   Serial.printf(
       "Round-trip times [ms]: (min, p50, p90, p99, max) : %f, %f, %f, %f, %f\n",
       rtt[0], rtt[kNumSamples / 2], rtt[(kNumSamples * 9) / 10],
@@ -153,7 +154,7 @@ void throughputTest(roo_io::InputStreamReader& in,
   // prints the throughput.
   std::unique_ptr<roo::byte[]> buf(new roo::byte[256]);
 
-  const uint32_t kMessageSize = 512 * 1024;
+  const uint32_t kMessageSize = baud_rate / 5;
   uint32_t total_time_us = 0;
   roo_time::Uptime start = roo_time::Uptime::Now();
   out.writeVarU64(kMessageSize);
@@ -177,8 +178,7 @@ void client() {
   Serial2.setRxBufferSize(4096);
   Serial2.begin(baud_rate, SERIAL_8N1, kPinClientRx, kPinClientTx);
 #elif defined(ARDUINO_ARCH_RP2040)
-  Serial2.setRx(kPinClientRx);
-  Serial2.setTx(kPinClientTx);
+  Serial2.setPinout(kPinClientTx, kPinClientRx);
   Serial2.setFIFOSize(1024);
   Serial2.begin(baud_rate, SERIAL_8N1);
 #endif
