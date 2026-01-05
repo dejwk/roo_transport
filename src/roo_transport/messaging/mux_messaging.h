@@ -53,6 +53,9 @@ class MuxMessaging {
 
 class MuxMessaging::Channel : public Messaging {
  public:
+  using Messaging::send;
+  using Messaging::sendContinuation;
+
   Channel(MuxMessaging& messaging, ChannelId id)
       : messaging_(messaging), id_(id) {
     messaging_.registerChannel(*this);

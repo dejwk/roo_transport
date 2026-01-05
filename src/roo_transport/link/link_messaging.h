@@ -16,6 +16,9 @@ namespace roo_transport {
 // Implementation of the Messaging interface over a LinkTransport.
 class LinkMessaging : public Messaging {
  public:
+  using Messaging::send;
+  using Messaging::sendContinuation;
+
   LinkMessaging(roo_transport::LinkTransport& link_transport,
                 size_t max_recv_packet_size,
                 uint16_t recv_thread_stack_size = 4096,
