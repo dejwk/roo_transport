@@ -127,4 +127,12 @@ enum RpcStatus {
   kDataLoss = 15
 };
 
+const char* RpcStatusAsString(RpcStatus status);
+
+inline roo_logging::Stream& operator<<(roo_logging::Stream& s,
+                                       RpcStatus status) {
+  s << RpcStatusAsString(status);
+  return s;
+}
+
 }  // namespace roo_transport
