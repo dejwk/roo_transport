@@ -105,10 +105,27 @@ struct Emulator {
 
 using namespace roo_transport;
 
+#if defined(ESP_PLATFORM)
+
 static const int kPinServerTx = 27;
 static const int kPinServerRx = 14;
 static const int kPinClientTx = 25;
 static const int kPinClientRx = 26;
+
+static const uint32_t kBaudRate = 5000000;
+
+#elif defined(ARDUINO_ARCH_RP2040)
+
+static const int kPinServerTx = 12;
+static const int kPinServerRx = 13;
+static const int kPinClientTx = 4;
+static const int kPinClientRx = 5;
+
+static const uint32_t kBaudRate = 115200;
+
+#else
+#error "Unsupported platform"
+#endif
 
 // Build for a single microcontroller in loopback mode.
 #define MODE_LOOPBACK 0
@@ -120,7 +137,7 @@ static const int kPinClientRx = 26;
 #define MODE_CLIENT 2
 
 // Select the desired mode.
-#define MODE LOOPBACK
+#define MODE MODE_LOOPBACK
 // #define MODE MODE_SERVER
 // #define MODE MODE_CLIENT
 
@@ -195,7 +212,7 @@ struct Deserializer<MyStruct> {
   // The data and len pointers are advanced as necessary.
   RpcStatus deserialize(const roo::byte* data, size_t len,
                         MyStruct& result) const {
-    Status status;
+    RpcStatus status;
     status = DeserializeMember(data, len, result.a);
     if (status != roo_transport::kOk) {
       return status;
@@ -222,26 +239,26 @@ static const int kMaxPayloadSize = 1024;
 
 #if MODE == MODE_LOOPBACK || MODE == MODE_SERVER
 
-Status fnIntToVoid(int32_t x, Void& result) {
+RpcStatus fnIntToVoid(int32_t x, Void& result) {
   LOG(INFO) << "Server: Received an intToVoid request " << x;
   return kOk;
 }
 
-Status fnPairToInt(const MyPair& val, int32_t& result) {
+RpcStatus fnPairToInt(const MyPair& val, int32_t& result) {
   LOG(INFO) << "Server: Received a pairToInt request {" << val.first << ", "
             << val.second << "}. Returning 1";
   result = 1;
   return kOk;
 }
 
-Status fnTupleToVoid(const MyTuple& val, Void& result) {
+RpcStatus fnTupleToVoid(const MyTuple& val, Void& result) {
   LOG(INFO) << "Server: Received a tupleToVoid request {"
             << (int)std::get<0>(val) << ", " << std::get<1>(val) << ", "
             << std::get<2>(val) << "}";
   return kOk;
 }
 
-Status fnStructToVoid(const MyStruct& val, Void& result) {
+RpcStatus fnStructToVoid(const MyStruct& val, Void& result) {
   LOG(INFO) << "Server: Received a structToVoid request {" << (int)val.a << ", "
             << val.b << ", " << val.c << "}";
   return kOk;
@@ -260,7 +277,14 @@ RpcServer rpc_server(server_messaging, &rpc_function_table);
 
 // This is our server's entry point.
 void server() {
-  Serial1.begin(5000000, SERIAL_8N1, kPinServerRx, kPinServerTx);
+#if defined(ESP_PLATFORM)
+  Serial1.setRxBufferSize(4096);
+  Serial1.begin(kBaudRate, SERIAL_8N1, kPinServerRx, kPinServerTx);
+#elif defined(ARDUINO_ARCH_RP2040)
+  Serial1.setPinout(kPinServerTx, kPinServerRx);
+  Serial1.setFIFOSize(1024);
+  Serial1.begin(kBaudRate, SERIAL_8N1);
+#endif
   server_serial.begin();
   rpc_server.begin();
   server_messaging.begin();
@@ -288,8 +312,14 @@ UnaryStub<MyTuple, Void> tuple_to_void_stub(rpc_client, kFnTupleToVoid);
 UnaryStub<MyStruct, Void> struct_to_void_stub(rpc_client, kFnStructToVoid);
 
 void client() {
-  // Initialize UART.
-  Serial2.begin(5000000, SERIAL_8N1, kPinClientRx, kPinClientTx);
+#if defined(ESP_PLATFORM)
+  Serial2.setRxBufferSize(4096);
+  Serial2.begin(kBaudRate, SERIAL_8N1, kPinClientRx, kPinClientTx);
+#elif defined(ARDUINO_ARCH_RP2040)
+  Serial2.setPinout(kPinClientTx, kPinClientRx);
+  Serial2.setFIFOSize(1024);
+  Serial2.begin(kBaudRate, SERIAL_8N1);
+#endif
   client_serial.begin();
   rpc_client.begin();
   client_messaging.begin();
@@ -298,7 +328,7 @@ void client() {
     {
       Void result;
       LOG(INFO) << "Client: calling intToVoid(42)";
-      Status status = int_to_void_stub.call(42, result);
+      RpcStatus status = int_to_void_stub.call(42, result);
       if (status == kOk) {
         LOG(INFO) << "Client: intToVoid RPC succeeded.";
       } else {
@@ -309,7 +339,7 @@ void client() {
     {
       int32_t result;
       LOG(INFO) << "Client: calling pairToInt({42, Foo})";
-      Status status = pair_to_int_stub.call({42, "Foo"}, result);
+      RpcStatus status = pair_to_int_stub.call({42, "Foo"}, result);
       if (status == kOk) {
         LOG(INFO) << "Client: pairToInt RPC succeeded. Received " << result;
       } else {
@@ -320,7 +350,7 @@ void client() {
     {
       Void result;
       LOG(INFO) << "Client: calling tupleToVoid({42, 5, Bar})";
-      Status status = tuple_to_void_stub.call({42, 5, "Bar"}, result);
+      RpcStatus status = tuple_to_void_stub.call({42, 5, "Bar"}, result);
       if (status == kOk) {
         LOG(INFO) << "Client: tupleToVoid RPC succeeded.";
       } else {
@@ -331,7 +361,7 @@ void client() {
     {
       Void result;
       LOG(INFO) << "Client: calling structToVoid({42, 5, Bar})";
-      Status status = struct_to_void_stub.call({42, 5, "Bar"}, result);
+      RpcStatus status = struct_to_void_stub.call({42, 5, "Bar"}, result);
       if (status == kOk) {
         LOG(INFO) << "Client: structToVoid RPC succeeded.";
       } else {

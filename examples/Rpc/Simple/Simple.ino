@@ -111,10 +111,27 @@ struct Emulator {
 
 using namespace roo_transport;
 
+#if defined(ESP_PLATFORM)
+
 static const int kPinServerTx = 27;
 static const int kPinServerRx = 14;
 static const int kPinClientTx = 25;
 static const int kPinClientRx = 26;
+
+static const uint32_t kBaudRate = 5000000;
+
+#elif defined(ARDUINO_ARCH_RP2040)
+
+static const int kPinServerTx = 12;
+static const int kPinServerRx = 13;
+static const int kPinClientTx = 4;
+static const int kPinClientRx = 5;
+
+static const uint32_t kBaudRate = 115200;
+
+#else
+#error "Unsupported platform"
+#endif
 
 // Build for a single microcontroller in loopback mode.
 #define MODE_LOOPBACK 0
@@ -126,7 +143,7 @@ static const int kPinClientRx = 26;
 #define MODE_CLIENT 2
 
 // Select the desired mode.
-#define MODE LOOPBACK
+#define MODE MODE_LOOPBACK
 // #define MODE MODE_SERVER
 // #define MODE MODE_CLIENT
 
@@ -154,7 +171,7 @@ static const int kMaxPayloadSize = 32;
 
 #if MODE == MODE_LOOPBACK || MODE == MODE_SERVER
 
-Status calcSquare(uint32_t x, uint32_t& result) {
+RpcStatus calcSquare(uint32_t x, uint32_t& result) {
   Serial.printf("Server: Received a request to square %d\n", x);
 
   // Pretend to be doing something useful.
@@ -189,7 +206,14 @@ RpcServer rpc_server(server_messaging, &rpc_function_table);
 // This is our server's entry point.
 void server() {
   // Initialize UART.
-  Serial1.begin(5000000, SERIAL_8N1, kPinServerRx, kPinServerTx);
+#if defined(ESP_PLATFORM)
+  Serial1.setRxBufferSize(4096);
+  Serial1.begin(kBaudRate, SERIAL_8N1, kPinServerRx, kPinServerTx);
+#elif defined(ARDUINO_ARCH_RP2040)
+  Serial1.setPinout(kPinServerTx, kPinServerRx);
+  Serial1.setFIFOSize(1024);
+  Serial1.begin(kBaudRate, SERIAL_8N1);
+#endif
 
   // Initialize the reliable serial transport.
   server_serial.begin();
@@ -229,7 +253,14 @@ UnaryStub<uint32_t, uint32_t> square_stub(rpc_client, kSquareFn);
 
 void client() {
   // Initialize UART.
-  Serial2.begin(5000000, SERIAL_8N1, kPinClientRx, kPinClientTx);
+#if defined(ESP_PLATFORM)
+  Serial2.setRxBufferSize(4096);
+  Serial2.begin(kBaudRate, SERIAL_8N1, kPinClientRx, kPinClientTx);
+#elif defined(ARDUINO_ARCH_RP2040)
+  Serial2.setPinout(kPinClientTx, kPinClientRx);
+  Serial2.setFIFOSize(1024);
+  Serial2.begin(kBaudRate, SERIAL_8N1);
+#endif
 
   // Initialize the reliable serial transport.
   client_serial.begin();

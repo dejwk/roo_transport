@@ -166,7 +166,7 @@ static const uint32_t kBaudRate = 115200;
 #define MODE_CLIENT 2
 
 // Select the desired mode.
-#define MODE LOOPBACK
+#define MODE MODE_LOOPBACK
 // #define MODE MODE_SERVER
 // #define MODE MODE_CLIENT
 
