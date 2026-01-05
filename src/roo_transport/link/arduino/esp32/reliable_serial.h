@@ -125,6 +125,14 @@ class Esp32SerialLinkTransport
   std::function<void(const roo::byte* buf, size_t len)> process_fn_;
 };
 
+// NOTE: these clases rely on the event task created by the Arduino core. By
+// default, that task gets created with a very low stack size of just 2048
+// bytes. In practice, it might be insufficient, especially if you enable any
+// connection logging. Therefore, it is recommended to increase the stack size
+// by adding the following line to your platformio.ini or Arduino build flags:
+//
+// -D ARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=3072
+
 class ReliableSerial : public Esp32SerialLinkTransport<decltype(Serial)> {
  public:
   ReliableSerial(LinkBufferSize sendbuf = kBufferSize4KB,
