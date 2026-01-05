@@ -11,14 +11,14 @@ ThreadSafeTransmitter::ThreadSafeTransmitter(unsigned int sendbuf_log2)
 
 bool ThreadSafeTransmitter::checkConnectionStatus(
     uint32_t my_stream_id, roo_io::Status& status) const {
-  if (transmitter_.state() == Transmitter::kBroken ||
-      (transmitter_.state() != Transmitter::kIdle &&
-       my_stream_id != transmitter_.my_stream_id())) {
-    status = roo_io::kConnectionError;
-    return false;
+  if ((transmitter_.state() == Transmitter::kConnected ||
+       transmitter_.state() == Transmitter::kConnecting) &&
+      my_stream_id == transmitter_.my_stream_id()) {
+    status = roo_io::kOk;
+    return true;
   }
-  status = roo_io::kOk;
-  return true;
+  status = roo_io::kConnectionError;
+  return false;
 }
 
 size_t ThreadSafeTransmitter::write(const roo::byte* buf, size_t count,
