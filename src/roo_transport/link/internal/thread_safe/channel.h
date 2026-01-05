@@ -118,9 +118,7 @@ class Channel {
 
   void sendLoop();
 
-  std::string getLogPrefix() const {
-    return name_.empty() ? "" : ("(" + name_ + ") ");
-  }
+  roo::string_view getLogPrefix() const { return log_prefix_; }
 
   bool my_control_bit() const { return my_stream_id_ > peer_stream_id_; }
 
@@ -169,7 +167,7 @@ class Channel {
   roo::condition_variable connected_cv_;
 #endif
 
-  std::string name_;
+  std::string log_prefix_;
   std::string send_thread_name_;
 };
 

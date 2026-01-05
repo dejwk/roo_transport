@@ -52,8 +52,10 @@ Channel::Channel(PacketSender& sender, LinkBufferSize sendbuf,
       disconnect_fn_(nullptr),
       sender_thread_(),
       active_(true),
-      name_(name),
-      send_thread_name_(name_.empty() ? "send_loop" : name_ + "-send") {
+      log_prefix_(name.empty() ? std::string("")
+                               : (std::string("(").append(name).append(") "))),
+      send_thread_name_(log_prefix_.empty() ? "send_loop"
+                                            : log_prefix_ + "-send") {
   CHECK_LE((unsigned int)sendbuf, 12);
   CHECK_LE((unsigned int)sendbuf, recvbuf);
 }
@@ -255,7 +257,6 @@ long Channel::trySend() {
 }
 
 namespace {
-
 struct HandshakePacket {
   uint16_t self_seq_num;
   uint32_t self_stream_id;
