@@ -54,8 +54,8 @@ Channel::Channel(PacketSender& sender, LinkBufferSize sendbuf,
       active_(true),
       log_prefix_(name.empty() ? std::string("")
                                : (std::string("(").append(name).append(") "))),
-      send_thread_name_(log_prefix_.empty() ? "send_loop"
-                                            : log_prefix_ + "-send") {
+      send_thread_name_(name.empty() ? "send_loop"
+                                     : std::string(name) + "-send") {
   CHECK_LE((unsigned int)sendbuf, 12);
   CHECK_LE((unsigned int)sendbuf, recvbuf);
 }
@@ -533,7 +533,7 @@ void Channel::sendLoop() {
 void Channel::begin() {
   roo::thread::attributes attrs;
   attrs.set_stack_size(4096);
-#if (defined __FREERTOS)
+#if (defined __FREERTOS || defined ESP_PLATFORM)
   // Set the priority just the notch below the receiver thread, so that it
   // doesn't starve the receiver thread (which receives acks) but is still high.
   attrs.set_priority(configMAX_PRIORITIES - 2);
