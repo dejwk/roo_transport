@@ -11,9 +11,9 @@ void RpcClient::begin() { messaging_.setReceiver(dispatcher_); }
 
 void RpcClient::end() { messaging_.unsetReceiver(); }
 
-Status RpcClient::sendUnaryRpc(RpcFunctionId function_id,
-                               const roo::byte* payload, size_t payload_size,
-                               RpcClient::UnaryCompletionCb cb) {
+RpcStatus RpcClient::sendUnaryRpc(RpcFunctionId function_id,
+                                  const roo::byte* payload, size_t payload_size,
+                                  RpcClient::UnaryCompletionCb cb) {
   uint32_t stream_id = new_stream(std::move(cb));
   RpcHeader header = RpcHeader::NewUnaryRequest(function_id, stream_id);
   roo::byte header_bytes[RpcHeader::kMaxSerializedSize];
@@ -23,15 +23,15 @@ Status RpcClient::sendUnaryRpc(RpcFunctionId function_id,
   Messaging::ConnectionId connection_id;
   return messaging_.send(header_bytes, header_size, payload, payload_size,
                          &connection_id)
-             ? Status::kOk
-             : Status::kUnavailable;
+             ? RpcStatus::kOk
+             : RpcStatus::kUnavailable;
 }
 
-Status RpcClient::sendUnaryRpcWithTimeout(RpcFunctionId function_id,
-                                          const roo::byte* payload,
-                                          size_t payload_size,
-                                          uint32_t timeout_ms,
-                                          RpcClient::UnaryCompletionCb cb) {
+RpcStatus RpcClient::sendUnaryRpcWithTimeout(RpcFunctionId function_id,
+                                             const roo::byte* payload,
+                                             size_t payload_size,
+                                             uint32_t timeout_ms,
+                                             RpcClient::UnaryCompletionCb cb) {
   uint32_t stream_id = new_stream(std::move(cb));
   RpcHeader header =
       RpcHeader::NewUnaryRequest(function_id, stream_id, timeout_ms);
@@ -42,8 +42,8 @@ Status RpcClient::sendUnaryRpcWithTimeout(RpcFunctionId function_id,
   Messaging::ConnectionId connection_id;
   return messaging_.send(header_bytes, header_size, payload, payload_size,
                          &connection_id)
-             ? Status::kOk
-             : Status::kUnavailable;
+             ? RpcStatus::kOk
+             : RpcStatus::kUnavailable;
 }
 
 RpcStreamId RpcClient::new_stream(RpcClient::UnaryCompletionCb cb) {
@@ -87,7 +87,7 @@ void RpcClient::handleResponse(Messaging::ConnectionId connection_id,
     }
   }
 
-  Status status = Status::kOk;
+  RpcStatus status = RpcStatus::kOk;
   if (header.isLastMessage()) {
     status = header.responseStatus();
   }

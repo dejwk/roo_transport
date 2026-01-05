@@ -28,7 +28,7 @@ class RpcHeader {
   static RpcHeader NewUnaryRequest(RpcFunctionId function_id,
                                    RpcStreamId stream_id, uint32_t timeout_ms);
 
-  static RpcHeader NewUnaryResponse(RpcStreamId stream_id, Status status);
+  static RpcHeader NewUnaryResponse(RpcStreamId stream_id, RpcStatus status);
 
   size_t serialize(roo::byte* buffer, size_t buffer_size) const;
   size_t deserialize(const roo::byte* buffer, size_t buffer_size);
@@ -42,7 +42,7 @@ class RpcHeader {
   RpcFunctionId functionId() const;
   uint32_t timeoutMs() const;
 
-  Status responseStatus() const;
+  RpcStatus responseStatus() const;
 
  private:
   MessageType type_;
@@ -57,7 +57,7 @@ class RpcHeader {
       uint32_t timeout_ms_;
     } new_request_;
     struct {
-      Status status_;
+      RpcStatus status_;
     } last_response_;
     struct {
       // No additional fields.

@@ -10,7 +10,8 @@ void RequestHandle::sendSuccessResponse(const roo::byte* payload,
                                payload_size);
 }
 
-void RequestHandle::sendFailureResponse(Status status, roo::string_view msg) const {
+void RequestHandle::sendFailureResponse(RpcStatus status,
+                                        roo::string_view msg) const {
   server_->sendFailureResponse(connection_id_, stream_id_, status, msg);
 }
 

@@ -193,8 +193,8 @@ struct Deserializer<MyStruct> {
   // The helper reads a 2-byte big-endian length prefix, then uses the
   // appropriate deserializer to read that many bytes into the result member.
   // The data and len pointers are advanced as necessary.
-  roo_transport::Status deserialize(const roo::byte* data, size_t len,
-                                    MyStruct& result) const {
+  RpcStatus deserialize(const roo::byte* data, size_t len,
+                        MyStruct& result) const {
     Status status;
     status = DeserializeMember(data, len, result.a);
     if (status != roo_transport::kOk) {

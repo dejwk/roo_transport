@@ -245,7 +245,7 @@ void client() {
   while (true) {
     for (uint32_t request = 1; request < 1000; request++) {
       uint32_t response;
-      roo_transport::Status result = square_stub.call(request, response);
+      RpcStatus result = square_stub.call(request, response);
       if (result != roo_transport::kOk) {
         Serial.printf("RPC failed: %d\n", result);
       } else {

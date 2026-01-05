@@ -17,16 +17,17 @@ namespace roo_transport {
 class RpcClient {
  public:
   using UnaryCompletionCb = std::function<void(
-      const roo::byte* data, size_t data_size, Status status)>;
+      const roo::byte* data, size_t data_size, RpcStatus status)>;
 
   explicit RpcClient(Messaging& messaging);
 
-  Status sendUnaryRpc(RpcFunctionId function_id, const roo::byte* payload,
-                      size_t payload_size, UnaryCompletionCb cb);
+  RpcStatus sendUnaryRpc(RpcFunctionId function_id, const roo::byte* payload,
+                         size_t payload_size, UnaryCompletionCb cb);
 
-  Status sendUnaryRpcWithTimeout(RpcFunctionId function_id,
-                                 const roo::byte* payload, size_t payload_size,
-                                 uint32_t timeout_ms, UnaryCompletionCb cb);
+  RpcStatus sendUnaryRpcWithTimeout(RpcFunctionId function_id,
+                                    const roo::byte* payload,
+                                    size_t payload_size, uint32_t timeout_ms,
+                                    UnaryCompletionCb cb);
 
   ~RpcClient() = default;
 
@@ -85,7 +86,7 @@ class UnaryStub {
   UnaryStub(RpcClient& client, RpcFunctionId function_id)
       : client_(client), function_id_(function_id) {}
 
-  roo_transport::Status call(const Request& request, Response& response) {
+  RpcStatus call(const Request& request, Response& response) {
     roo::latch completed(1);
     RequestSerializer serializer;
     // Serialize the request message.
@@ -94,11 +95,11 @@ class UnaryStub {
     if (serialized.status() != kOk) {
       return serialized.status();
     }
-    roo_transport::Status status;
-    roo_transport::Status req_status = client_.sendUnaryRpc(
+    RpcStatus status;
+    RpcStatus req_status = client_.sendUnaryRpc(
         function_id_, serialized.data(), serialized.size(),
         [&completed, &response, &status](const roo::byte* data, size_t len,
-                                         roo_transport::Status resp_status) {
+                                         RpcStatus resp_status) {
           ResponseDeserializer deserializer;
           if (resp_status == kOk) {
             resp_status = deserializer.deserialize((const roo_io::byte*)data,
@@ -114,9 +115,8 @@ class UnaryStub {
     return status;
   }
 
-  roo_transport::Status callAsync(
-      const Request& request,
-      std::function<void(roo_transport::Status, Response)> completion_cb) {
+  RpcStatus callAsync(const Request& request,
+                      std::function<void(RpcStatus, Response)> completion_cb) {
     RequestSerializer serializer;
     // Serialize the request message.
     auto serialized = serializer.serialize(request);
@@ -127,7 +127,7 @@ class UnaryStub {
     return client_.sendUnaryRpc(
         function_id_, serialized.data(), serialized.size(),
         [completion_cb](const roo::byte* data, size_t len,
-                        roo_transport::Status resp_status) {
+                        RpcStatus resp_status) {
           ResponseDeserializer deserializer;
           Response resp;
           if (resp_status == kOk) {

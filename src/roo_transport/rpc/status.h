@@ -5,7 +5,7 @@
 namespace roo_transport {
 
 // Modeled after Google's gRPC status codes.
-enum Status {
+enum RpcStatus {
   // Success (not an error).
   kOk = 0,
 

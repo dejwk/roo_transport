@@ -17,7 +17,7 @@ uint32_t RpcHeader::timeoutMs() const {
   return new_request_.timeout_ms_;
 }
 
-Status RpcHeader::responseStatus() const {
+RpcStatus RpcHeader::responseStatus() const {
   CHECK(type_ == kResponse && last_message_);
   return last_response_.status_;
 }
@@ -49,7 +49,7 @@ RpcHeader RpcHeader::NewUnaryRequest(RpcFunctionId function_id,
   return header;
 }
 
-RpcHeader RpcHeader::NewUnaryResponse(RpcStreamId stream_id, Status status) {
+RpcHeader RpcHeader::NewUnaryResponse(RpcStreamId stream_id, RpcStatus status) {
   RpcHeader header;
   header.type_ = kResponse;
   header.first_message_ = true;
@@ -100,7 +100,7 @@ size_t RpcHeader::deserialize(const roo::byte* buffer, size_t buffer_size) {
       new_request_.timeout_ms_ = 0;
     }
   } else if (type_ == kResponse && last_message_) {
-    last_response_.status_ = (Status)roo_io::ReadU8(it);
+    last_response_.status_ = (RpcStatus)roo_io::ReadU8(it);
   }
   if (it.status() != roo_io::kOk) {
     return 0;

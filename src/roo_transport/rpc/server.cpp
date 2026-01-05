@@ -39,7 +39,7 @@ void RpcServer::handleRequest(Messaging::ConnectionId connection_id,
     auto handler_it = handlers_->find(function_id);
     if (handler_it == handlers_->end()) {
       sendFailureResponse(connection_id, header.streamId(),
-                          Status::kUnimplemented,
+                          RpcStatus::kUnimplemented,
                           roo::string_view("Unknown function ID"));
       return;
     }
@@ -88,7 +88,7 @@ void RpcServer::sendSuccessResponse(Messaging::ConnectionId connection_id,
   if (!prepForResponse(connection_id, stream_id)) {
     return;
   }
-  RpcHeader header = RpcHeader::NewUnaryResponse(stream_id, Status::kOk);
+  RpcHeader header = RpcHeader::NewUnaryResponse(stream_id, RpcStatus::kOk);
   roo::byte header_bytes[RpcHeader::kMaxSerializedSize];
   size_t header_size =
       header.serialize(header_bytes, RpcHeader::kMaxSerializedSize);
@@ -97,7 +97,7 @@ void RpcServer::sendSuccessResponse(Messaging::ConnectionId connection_id,
 }
 
 void RpcServer::sendFailureResponse(Messaging::ConnectionId connection_id,
-                                    RpcStreamId stream_id, Status status,
+                                    RpcStreamId stream_id, RpcStatus status,
                                     roo::string_view msg) {
   if (!prepForResponse(connection_id, stream_id)) {
     return;

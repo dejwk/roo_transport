@@ -23,7 +23,7 @@ template <typename T>
 struct Deserializer;
 
 struct NullSerialized {
-  roo_transport::Status status() const { return kOk; }
+  RpcStatus status() const { return kOk; }
   const roo::byte* data() const { return nullptr; }
   size_t size() const { return 0; }
 };
@@ -34,7 +34,7 @@ class StaticSerialized {
  public:
   StaticSerialized() = default;
 
-  roo_transport::Status status() const { return kOk; }
+  RpcStatus status() const { return kOk; }
   const roo::byte* data() const { return data_; }
   size_t size() const { return N; }
 
@@ -49,18 +49,18 @@ class SimpleSerialized {
  public:
   SimpleSerialized() : status_(kOk), data_(nullptr), size_(0) {}
 
-  SimpleSerialized(roo_transport::Status error)
+  SimpleSerialized(RpcStatus error)
       : status_(error), data_(nullptr), size_(0) {}
 
   SimpleSerialized(std::unique_ptr<roo::byte[]> data, size_t size)
       : status_(kOk), data_(std::move(data)), size_(size) {}
 
-  roo_transport::Status status() const { return status_; }
+  RpcStatus status() const { return status_; }
   const roo::byte* data() const { return data_.get(); }
   size_t size() const { return size_; }
 
  private:
-  roo_transport::Status status_;
+  RpcStatus status_;
   std::unique_ptr<roo::byte[]> data_;
   size_t size_;
 };
@@ -70,19 +70,19 @@ class DynamicSerialized {
  public:
   DynamicSerialized() : status_(kOk), data_(), pos_(0) {}
 
-  //   DynamicSerialized(roo_transport::Status error)
+  //   DynamicSerialized(RpcStatus error)
   //       : status_(error), data_() {}
 
   //   DynamicSerialized(std::unique_ptr<roo::byte[]> data, size_t size)
   //       : status_(kOk), data_(std::move(data)), size_(size) {}
 
-  void fail(Status status) {
+  void fail(RpcStatus status) {
     status_ = status;
     data_.clear();
     pos_ = 0;
   }
 
-  roo_transport::Status status() const { return status_; }
+  RpcStatus status() const { return status_; }
 
   const roo::byte* data() const {
     return data_.empty() ? nullptr : &*data_.begin();
@@ -129,7 +129,7 @@ class DynamicSerialized {
   void seek(size_t position) { pos_ = position; }
 
  private:
-  roo_transport::Status status_;
+  RpcStatus status_;
   std::vector<roo::byte> data_;
   size_t pos_;
 };
@@ -173,8 +173,7 @@ struct Serializer<Void> {
 
 template <>
 struct Deserializer<Void> {
-  roo_transport::Status deserialize(const roo::byte* data, size_t len,
-                                    Void& result) const {
+  RpcStatus deserialize(const roo::byte* data, size_t len, Void& result) const {
     if (len != 0) {
       return roo_transport::kInvalidArgument;
     }
@@ -195,7 +194,7 @@ struct Serializer<bool> {
 
 template <>
 struct Deserializer<bool> {
-  Status deserialize(const roo::byte* data, size_t len, bool& result) const {
+  RpcStatus deserialize(const roo::byte* data, size_t len, bool& result) const {
     if (len != 1) {
       return roo_transport::kInvalidArgument;
     }
@@ -221,7 +220,8 @@ struct Serializer<int8_t> {
 
 template <>
 struct Deserializer<int8_t> {
-  Status deserialize(const roo::byte* data, size_t len, int8_t& result) const {
+  RpcStatus deserialize(const roo::byte* data, size_t len,
+                        int8_t& result) const {
     if (len != 1) {
       return roo_transport::kInvalidArgument;
     }
@@ -243,7 +243,8 @@ struct Serializer<uint8_t> {
 
 template <>
 struct Deserializer<uint8_t> {
-  Status deserialize(const roo::byte* data, size_t len, uint8_t& result) const {
+  RpcStatus deserialize(const roo::byte* data, size_t len,
+                        uint8_t& result) const {
     if (len != 1) {
       return roo_transport::kInvalidArgument;
     }
@@ -265,7 +266,8 @@ struct Serializer<int16_t> {
 
 template <>
 struct Deserializer<int16_t> {
-  Status deserialize(const roo::byte* data, size_t len, int16_t& result) const {
+  RpcStatus deserialize(const roo::byte* data, size_t len,
+                        int16_t& result) const {
     if (len != 2) {
       return roo_transport::kInvalidArgument;
     }
@@ -287,8 +289,8 @@ struct Serializer<uint16_t> {
 
 template <>
 struct Deserializer<uint16_t> {
-  Status deserialize(const roo::byte* data, size_t len,
-                     uint16_t& result) const {
+  RpcStatus deserialize(const roo::byte* data, size_t len,
+                        uint16_t& result) const {
     if (len != 2) {
       return roo_transport::kInvalidArgument;
     }
@@ -310,7 +312,8 @@ struct Serializer<int32_t> {
 
 template <>
 struct Deserializer<int32_t> {
-  Status deserialize(const roo::byte* data, size_t len, int32_t& result) const {
+  RpcStatus deserialize(const roo::byte* data, size_t len,
+                        int32_t& result) const {
     if (len != 4) {
       return roo_transport::kInvalidArgument;
     }
@@ -332,8 +335,8 @@ struct Serializer<uint32_t> {
 
 template <>
 struct Deserializer<uint32_t> {
-  Status deserialize(const roo::byte* data, size_t len,
-                     uint32_t& result) const {
+  RpcStatus deserialize(const roo::byte* data, size_t len,
+                        uint32_t& result) const {
     if (len != 4) {
       return roo_transport::kInvalidArgument;
     }
@@ -355,7 +358,8 @@ struct Serializer<int64_t> {
 
 template <>
 struct Deserializer<int64_t> {
-  Status deserialize(const roo::byte* data, size_t len, int64_t& result) const {
+  RpcStatus deserialize(const roo::byte* data, size_t len,
+                        int64_t& result) const {
     if (len != 8) {
       return roo_transport::kInvalidArgument;
     }
@@ -377,8 +381,8 @@ struct Serializer<uint64_t> {
 
 template <>
 struct Deserializer<uint64_t> {
-  Status deserialize(const roo::byte* data, size_t len,
-                     uint64_t& result) const {
+  RpcStatus deserialize(const roo::byte* data, size_t len,
+                        uint64_t& result) const {
     if (len != 8) {
       return roo_transport::kInvalidArgument;
     }
@@ -394,7 +398,7 @@ class SerializedByteArrayAdapter {
   SerializedByteArrayAdapter(const roo::byte* data, size_t size)
       : data_(data), size_(size) {}
 
-  Status status() const { return kOk; }
+  RpcStatus status() const { return kOk; }
   const roo::byte* data() const { return data_; }
   size_t size() const { return size_; }
 
@@ -413,8 +417,8 @@ struct Serializer<roo::string_view> {
 
 template <>
 struct Deserializer<roo::string_view> {
-  Status deserialize(const roo::byte* data, size_t len,
-                     roo::string_view& result) const {
+  RpcStatus deserialize(const roo::byte* data, size_t len,
+                        roo::string_view& result) const {
     result = roo::string_view(reinterpret_cast<const char*>(data), len);
     return roo_transport::kOk;
   }
@@ -440,8 +444,8 @@ void SerializeMemberInto(const T& val, RandomItr& result) {
 }
 
 template <typename T>
-constexpr Status DeserializeMember(const roo::byte*& data, size_t& len,
-                                   T& result) {
+constexpr RpcStatus DeserializeMember(const roo::byte*& data, size_t& len,
+                                      T& result) {
   if (len < 2) {
     return roo_transport::kInvalidArgument;
   }
@@ -452,7 +456,7 @@ constexpr Status DeserializeMember(const roo::byte*& data, size_t& len,
   data += 2;
   len -= 2;
   Deserializer<T> d;
-  Status status = d.deserialize(data, member_len, result);
+  RpcStatus status = d.deserialize(data, member_len, result);
   if (status != kOk) {
     return status;
   }
@@ -481,9 +485,9 @@ struct Serializer<std::pair<T1, T2>> {
 
 template <typename T1, typename T2>
 struct Deserializer<std::pair<T1, T2>> {
-  Status deserialize(const roo::byte* data, size_t len,
-                     std::pair<T1, T2>& result) const {
-    Status status;
+  RpcStatus deserialize(const roo::byte* data, size_t len,
+                        std::pair<T1, T2>& result) const {
+    RpcStatus status;
     status = DeserializeMember(data, len, result.first);
     if (status != roo_transport::kOk) {
       return status;
@@ -527,9 +531,10 @@ struct Serializer<std::tuple<Types...>> {
 };
 
 template <size_t index, typename... Types>
-constexpr Status DeserializeTupleRecursive(std::tuple<Types...>& t,
-                                           const roo::byte* data, size_t len) {
-  Status status = DeserializeMember(data, len, std::get<index>(t));
+constexpr RpcStatus DeserializeTupleRecursive(std::tuple<Types...>& t,
+                                              const roo::byte* data,
+                                              size_t len) {
+  RpcStatus status = DeserializeMember(data, len, std::get<index>(t));
   if (status != kOk) {
     return status;
   }
@@ -544,8 +549,8 @@ constexpr Status DeserializeTupleRecursive(std::tuple<Types...>& t,
 
 template <typename... Types>
 struct Deserializer<std::tuple<Types...>> {
-  Status deserialize(const roo::byte* data, size_t len,
-                     std::tuple<Types...>& result) const {
+  RpcStatus deserialize(const roo::byte* data, size_t len,
+                        std::tuple<Types...>& result) const {
     return DeserializeTupleRecursive<0>(result, data, len);
   }
 };

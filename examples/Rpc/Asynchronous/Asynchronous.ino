@@ -253,7 +253,7 @@ void client() {
     LOG(INFO) << "Client: sending request #" << request_idx << ": " << delay_ms
               << " ms";
     timer_stub.callAsync(arg, [delay_ms, request_idx, start_time](
-                                  roo_transport::Status status, Void result) {
+                                  RpcStatus status, Void result) {
       if (status != roo_transport::kOk) {
         LOG(INFO) << "Client: RPC failed for request " << request_idx << ": "
                   << status;

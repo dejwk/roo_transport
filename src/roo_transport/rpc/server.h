@@ -23,7 +23,7 @@ template <typename Request, typename Response,
           typename ResponseSerializer = Serializer<Response>>
 class UnaryHandler {
  public:
-  using Fn = std::function<Status(const Request&, Response&)>;
+  using Fn = std::function<RpcStatus(const Request&, Response&)>;
 
   UnaryHandler(Fn fn) : fn_(std::move(fn)) {}
 
@@ -31,8 +31,7 @@ class UnaryHandler {
                   size_t payload_size, bool fin) const {
     RequestDeserializer deserializer;
     Request req;
-    roo_transport::Status status =
-        deserializer.deserialize(payload, payload_size, req);
+    RpcStatus status = deserializer.deserialize(payload, payload_size, req);
     if (status != roo_transport::kOk) {
       handle.sendFailureResponse(status, "request deserialization failed");
       return;
@@ -59,7 +58,7 @@ template <typename Request, typename Response,
 class AsyncUnaryHandler {
  public:
   using Fn = std::function<void(const Request&,
-                                std::function<void(Status, Response)>)>;
+                                std::function<void(RpcStatus, Response)>)>;
 
   AsyncUnaryHandler(Fn fn) : fn_(std::move(fn)) {}
 
@@ -67,13 +66,12 @@ class AsyncUnaryHandler {
                   size_t payload_size, bool fin) const {
     RequestDeserializer deserializer;
     Request req;
-    roo_transport::Status status =
-        deserializer.deserialize(payload, payload_size, req);
+    RpcStatus status = deserializer.deserialize(payload, payload_size, req);
     if (status != roo_transport::kOk) {
       handle.sendFailureResponse(status, "request deserialization failed");
       return;
     }
-    fn_(req, [handle](Status resp_status, Response resp_val) {
+    fn_(req, [handle](RpcStatus resp_status, Response resp_val) {
       if (resp_status != roo_transport::kOk) {
         handle.sendFailureResponse(resp_status, "application error");
         return;
@@ -121,7 +119,7 @@ class RpcServer {
                            size_t len);
 
   void sendFailureResponse(Messaging::ConnectionId connection_id,
-                           RpcStreamId stream_id, Status status,
+                           RpcStreamId stream_id, RpcStatus status,
                            roo::string_view msg);
 
   // Returns true if the response should be sent; false otherwise. Destroys the

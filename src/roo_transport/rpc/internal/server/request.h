@@ -59,7 +59,7 @@ class RequestHandle {
   void sendSuccessResponse(const roo::byte* payload, size_t payload_size,
                            bool last) const;
 
-  void sendFailureResponse(Status status, roo::string_view msg) const;
+  void sendFailureResponse(RpcStatus status, roo::string_view msg) const;
 
  private:
   mutable RpcServer* server_;
