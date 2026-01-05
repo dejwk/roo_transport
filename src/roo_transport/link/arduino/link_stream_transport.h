@@ -42,6 +42,11 @@ class LinkStreamTransport {
 
   LinkTransport& transport() { return transport_; }
 
+  // Allow implicit conversion to LinkTransport&, so that this Arduino wrapper
+  // can be used seamlessly in place of LinkTransport when a reference to the
+  // latter is needed (e.g., when constructing LinkMessaging).
+  operator LinkTransport&() { return transport_; }
+
   // Attempts to receive one or more packets without blocking. Returns the
   // number of packets received.
   size_t tryReceive();

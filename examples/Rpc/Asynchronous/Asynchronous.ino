@@ -120,6 +120,8 @@ struct Emulator {
 // kPinClientTx, and kPinClientRx below. Make sure to cross the wires, i.e. to
 // connect kPinServerTx with kPinClientRx, and kPinServerRx with kPinClientTx.
 
+#include <functional>
+
 #include "roo_scheduler.h"
 #include "roo_threads.h"
 #include "roo_threads/semaphore.h"
@@ -132,10 +134,27 @@ struct Emulator {
 
 using namespace roo_transport;
 
+#if defined(ESP_PLATFORM)
+
 static const int kPinServerTx = 27;
 static const int kPinServerRx = 14;
 static const int kPinClientTx = 25;
 static const int kPinClientRx = 26;
+
+static const uint32_t kBaudRate = 5000000;
+
+#elif defined(ARDUINO_ARCH_RP2040)
+
+static const int kPinServerTx = 12;
+static const int kPinServerRx = 13;
+static const int kPinClientTx = 4;
+static const int kPinClientRx = 5;
+
+static const uint32_t kBaudRate = 115200;
+
+#else
+#error "Unsupported platform"
+#endif
 
 // Build for a single microcontroller in loopback mode.
 #define MODE_LOOPBACK 0
@@ -177,8 +196,9 @@ constexpr uint32_t kMaxConcurrentRequests = 200;
 roo::counting_semaphore<kMaxConcurrentRequests> pending_requests(
     kMaxConcurrentRequests);
 
-void scheduleTimer(const TimerArg& arg,
-                   std::function<void(Status status, Void& result)> callback) {
+void scheduleTimer(
+    const TimerArg& arg,
+    std::function<void(RpcStatus status, Void& result)> callback) {
   LOG(INFO) << "Server: received a request #" << arg.first << " to delay for "
             << arg.second << " ms";
   pending_requests.acquire();
@@ -207,7 +227,14 @@ LinkMessaging server_messaging(server_serial, kMaxPayloadSize);
 RpcServer rpc_server(server_messaging, &rpc_function_table);
 
 void server() {
-  Serial1.begin(5000000, SERIAL_8N1, kPinServerRx, kPinServerTx);
+#if defined(ESP_PLATFORM)
+  Serial1.setRxBufferSize(4096);
+  Serial1.begin(kBaudRate, SERIAL_8N1, kPinServerRx, kPinServerTx);
+#elif defined(ARDUINO_ARCH_RP2040)
+  Serial1.setPinout(kPinServerTx, kPinServerRx);
+  Serial1.setFIFOSize(1024);
+  Serial1.begin(kBaudRate, SERIAL_8N1);
+#endif
   server_serial.begin();
   rpc_server.begin();
   server_messaging.begin();
@@ -231,7 +258,14 @@ RpcClient rpc_client(client_messaging);
 UnaryStub<TimerArg, Void> timer_stub(rpc_client, kTimerFn);
 
 void client() {
-  Serial2.begin(5000000, SERIAL_8N1, kPinClientRx, kPinClientTx);
+#if defined(ESP_PLATFORM)
+  Serial2.setRxBufferSize(4096);
+  Serial2.begin(kBaudRate, SERIAL_8N1, kPinClientRx, kPinClientTx);
+#elif defined(ARDUINO_ARCH_RP2040)
+  Serial2.setPinout(kPinClientTx, kPinClientRx);
+  Serial2.setFIFOSize(1024);
+  Serial2.begin(kBaudRate, SERIAL_8N1);
+#endif
   client_serial.begin();
   rpc_client.begin();
   client_messaging.begin();
