@@ -104,7 +104,12 @@ void LinkMessaging::receiveLoop() {
       roo::byte serialized_size[4];
       size_t count = in.readFully(serialized_size, 4);
       if (count < 4) {
-        LOG(ERROR) << "Error: " << in.status();
+        if (in.status() == roo_io::kConnectionError &&
+            link_.status() == LinkStatus::kBroken) {
+          LOG(WARNING) << "Connection reset by peer.";
+        } else {
+          LOG(ERROR) << "Error: " << in.status();
+        }
         reset(connection_id);
         break;
       }
@@ -117,7 +122,12 @@ void LinkMessaging::receiveLoop() {
       }
       size_t read = in.readFully(incoming_payload.get(), incoming_size);
       if (read < incoming_size) {
-        LOG(ERROR) << "Error: " << in.status();
+        if (in.status() == roo_io::kConnectionError &&
+            link_.status() == LinkStatus::kBroken) {
+          LOG(WARNING) << "Connection reset by peer.";
+        } else {
+          LOG(ERROR) << "Error: " << in.status();
+        }
         reset(connection_id);
         break;
       }
