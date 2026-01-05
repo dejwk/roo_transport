@@ -73,13 +73,9 @@ void RpcServer::handleRequest(Messaging::ConnectionId connection_id,
 
 void RpcServer::reconnected() {
   roo::lock_guard<roo::mutex> guard(mutex_);
-  for (auto it = pending_calls_.begin(); it != pending_calls_.end(); ++it) {
-    // it->second.cancel();
-    if (it->second.serverFin()) {
-      // The server has already finished sending responses; remove the call.
-      pending_calls_.erase(it);
-    }
-  }
+  // Clear the info about pending requests, so that new requests don't clash
+  // when they use the same stream IDs.
+  pending_calls_.clear();
 }
 
 void RpcServer::sendSuccessResponse(Messaging::ConnectionId connection_id,
