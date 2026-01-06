@@ -109,14 +109,32 @@ void server() {
   roo_io::InputStreamReader in(link.in());
   roo_io::OutputStreamWriter out(link.out());
   uint32_t i = 0;
+
+  // For tracking packet loss.
+  LinkTransport::StatsMonitor stats = reliable_serial1.statsMonitor();
+  uint32_t packets_sent;
+  uint32_t packets_delivered;
+
   while (true) {
     uint32_t len = in.readVarU64();
+    bool report_stats = (len > 1000);
+    if (report_stats) {
+      packets_sent = stats.packets_sent();
+      packets_delivered = stats.packets_delivered();
+    }
     while (len > 256) {
       out.writeByteArray(data.get(), 256);
       len -= 256;
     }
     out.writeByteArray(data.get(), len);
     out.flush();
+    if (report_stats) {
+      packets_sent = stats.packets_sent() - packets_sent;
+      packets_delivered = stats.packets_delivered() - packets_delivered;
+      Serial.printf("Packet stats: sent=%d, delivered=%d, loss=%f\n",
+                    packets_sent, packets_delivered,
+                    1.0f - (float)packets_delivered / packets_sent);
+    }
     roo::this_thread::yield();
   }
 }

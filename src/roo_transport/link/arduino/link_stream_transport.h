@@ -29,16 +29,21 @@ class LinkStreamTransport {
 
   void begin();
 
+  // Establishes a new connection and returns the LinkStream object representing
+  // it. The optional function parameter will be called when the link gets
+  // disconnected.
   LinkStream connect(std::function<void()> disconnect_fn = nullptr);
+
+  // Establishes a new connection asynchronously and returns the LinkStream
+  // object representing it. Until the connection is established, the link will
+  // be in the "connecting" state. The optional function parameter will be
+  // called when the link gets disconnected.
   LinkStream connectAsync(std::function<void()> disconnect_fn = nullptr);
+
+  // Establishes a new connection and returns the LinkStream object representing
+  // it. If the peer attempts reconnection (e.g. after a reset), the program
+  // will terminate (usually to reconnect after reboot).
   LinkStream connectOrDie();
-
-  uint32_t packets_sent() const { return transport_.packets_sent(); }
-  uint32_t packets_delivered() const { return transport_.packets_delivered(); }
-  uint32_t packets_received() const { return transport_.packets_received(); }
-
-  size_t receiver_bytes_received() const { return receiver_.bytes_received(); }
-  size_t receiver_bytes_accepted() const { return receiver_.bytes_accepted(); }
 
   LinkTransport& transport() { return transport_; }
 
@@ -54,6 +59,10 @@ class LinkStreamTransport {
   // Attempts to receive one or more packets, blocking if necessary until at
   // least one packet is received. Returns the number of packets received.
   size_t receive();
+
+  LinkTransport::StatsMonitor statsMonitor() {
+    return LinkTransport::StatsMonitor(transport_);
+  }
 
  private:
   Stream& stream_;

@@ -11,6 +11,8 @@ namespace roo_transport {
 
 class LinkTransport {
  public:
+  class StatsMonitor;
+
   LinkTransport(PacketSender& sender, LinkBufferSize sendbuf = kBufferSize4KB,
                 LinkBufferSize recvbuf = kBufferSize4KB);
 
@@ -27,11 +29,15 @@ class LinkTransport {
   void processIncomingPacket(const roo::byte* buf, size_t len);
 
   // Establishes a new connection and returns the Link object representing it.
+  // The optional function parameter will be called when the link gets
+  // disconnected.
   Link connect(std::function<void()> disconnect_fn = nullptr);
 
   // Establishes a new connection asynchronously and returns the Link object
   // representing it. Until the connection is established, the link will be in
   // the "connecting" state.
+  // The optional function parameter will be called when the link gets
+  // disconnected.
   Link connectAsync(std::function<void()> disconnect_fn = nullptr);
 
   // Establishes a new connection and returns the Link object representing it.
@@ -41,6 +47,17 @@ class LinkTransport {
     return connect(
         []() { LOG(FATAL) << "LinkTransport: peer reset; rebooting"; });
   }
+
+ private:
+  friend class StatsMonitor;
+
+  PacketSender& sender_;
+  Channel channel_;
+};
+
+class LinkTransport::StatsMonitor {
+ public:
+  StatsMonitor(LinkTransport& transport) : channel_(transport.channel_) {}
 
   // Returns the count of packets sent over the link transport since start
   // (including retransmissions). The counter does not reset on new connections.
@@ -55,8 +72,7 @@ class LinkTransport {
   uint32_t packets_received() const { return channel_.packets_received(); }
 
  private:
-  PacketSender& sender_;
-  Channel channel_;
+  Channel& channel_;
 };
 
 }  // namespace roo_transport

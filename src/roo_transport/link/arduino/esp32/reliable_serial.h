@@ -102,19 +102,16 @@ class Esp32SerialLinkTransport
         []() { LOG(FATAL) << "LinkTransport: peer reset; rebooting"; });
   }
 
-  uint32_t packets_sent() const { return transport_.packets_sent(); }
-  uint32_t packets_delivered() const { return transport_.packets_delivered(); }
-  uint32_t packets_received() const { return transport_.packets_received(); }
-
-  size_t receiver_bytes_received() const { return receiver_.bytes_received(); }
-  size_t receiver_bytes_accepted() const { return receiver_.bytes_accepted(); }
-
   LinkTransport& transport() { return transport_; }
 
   // Allow implicit conversion to LinkTransport&, so that this Arduino wrapper
   // can be used seamlessly in place of LinkTransport when a reference to the
   // latter is needed (e.g., when constructing LinkMessaging).
   operator LinkTransport&() { return transport_; }
+
+  LinkTransport::StatsMonitor statsMonitor() {
+    return LinkTransport::StatsMonitor(transport_);
+  }
 
  private:
   PacketSenderOverStream sender_;
