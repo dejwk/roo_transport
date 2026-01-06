@@ -42,8 +42,16 @@ class LinkTransport {
         []() { LOG(FATAL) << "LinkTransport: peer reset; rebooting"; });
   }
 
+  // Returns the count of packets sent over the link transport since start
+  // (including retransmissions). The counter does not reset on new connections.
   uint32_t packets_sent() const { return channel_.packets_sent(); }
+
+  // Returns the count of packets confirmed as delivered by the peer since
+  // start. The counter does not reset on new connections.
   uint32_t packets_delivered() const { return channel_.packets_delivered(); }
+
+  // Returns the count of packets received from the peer since start. The
+  // counter does not reset on new connections.
   uint32_t packets_received() const { return channel_.packets_received(); }
 
  private:
