@@ -27,8 +27,8 @@
     ],
     "dependencies": {
         "dejwk/roo_collections": ">=1.4.0",
-        "dejwk/roo_io": ">=2.1.0",
-        "dejwk/roo_logging": ">=1.5.0",
+        "dejwk/roo_io": ">=2.1.1",
+        "dejwk/roo_logging": ">=1.5.1",
         "dejwk/roo_threads": ">=1.2.0"
     }
 }
