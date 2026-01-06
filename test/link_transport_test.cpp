@@ -75,7 +75,7 @@ TEST(LinkTransport, SimpleConnectSendDisconnect) {
 TEST(LinkTransport, SyncConnect) {
   LinkLoopback loopback;
 
-  roo::thread server([&]() {
+  roo::thread server_thread([&]() {
     Link server = loopback.server().connect();
     EXPECT_EQ(server.status(), LinkStatus::kConnected);
     EXPECT_EQ(server.in().status(), roo_io::kOk);
@@ -102,13 +102,13 @@ TEST(LinkTransport, SyncConnect) {
   EXPECT_EQ(memcmp(buf, "Response", 9), 0);
   EXPECT_EQ(client.in().status(), roo_io::kEndOfStream);
 
-  server.join();
+  server_thread.join();
 }
 
 TEST(LinkTransport, SyncConnectReconnect) {
   LinkLoopback loopback;
 
-  roo::thread server([&]() {
+  roo::thread server_thread([&]() {
     Link server_throwaway = loopback.server().connect();
     // Note: by the time we're checking, might already be broken by the
     // subsequent client reconnect.
@@ -151,13 +151,13 @@ TEST(LinkTransport, SyncConnectReconnect) {
   EXPECT_EQ(memcmp(buf, "Response", 9), 0);
   EXPECT_EQ(client.in().status(), roo_io::kEndOfStream);
 
-  server.join();
+  server_thread.join();
 }
 
 TEST(LinkTransport, SyncConnectCommReconnect) {
   LinkLoopback loopback;
 
-  roo::thread server([&]() {
+  roo::thread server_thread([&]() {
     Link server = loopback.server().connect();
     EXPECT_EQ(server.status(), LinkStatus::kConnected);
     EXPECT_EQ(server.in().status(), roo_io::kOk);
@@ -189,7 +189,7 @@ TEST(LinkTransport, SyncConnectCommReconnect) {
   client = loopback.client().connect();
   EXPECT_EQ(client.status(), LinkStatus::kConnected);
 
-  server.join();
+  server_thread.join();
 }
 
 TEST(LinkTransport, ThrashingReconnect) {
