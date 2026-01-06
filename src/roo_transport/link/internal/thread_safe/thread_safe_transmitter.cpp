@@ -73,8 +73,10 @@ void ThreadSafeTransmitter::close(uint32_t my_stream_id,
   if (!checkConnectionStatus(my_stream_id, stream_status)) return;
   transmitter_.close();
   outgoing_data_ready = true;
-  while (transmitter_.hasPendingData()) {
+  if (!transmitter_.hasPendingData()) return;
+  while (true) {
     all_acked_.wait(guard);
+    if (!transmitter_.hasPendingData()) return;
     if (!checkConnectionStatus(my_stream_id, stream_status)) return;
   }
 }
