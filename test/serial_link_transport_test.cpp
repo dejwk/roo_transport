@@ -1,5 +1,3 @@
-#include "roo_transport/link/arduino/serial_link_transport.h"
-
 #include "Arduino.h"
 #include "Stream.h"
 #include "gtest/gtest.h"
@@ -8,6 +6,7 @@
 #include "roo_threads.h"
 #include "roo_threads/atomic.h"
 #include "roo_threads/thread.h"
+#include "roo_transport/link/arduino/reliable_serial.h"
 
 class UartEndpoint : public FakeUartDevice {
  public:
@@ -110,7 +109,7 @@ struct Emulator {
 namespace roo_transport {
 
 TEST(ReliableSerial, ConstructionDestruction) {
-  ReliableSerial1Transport transport;
+  ReliableSerial1 transport;
   LinkStream stream;
   EXPECT_EQ(stream.status(), LinkStatus::kIdle);
 }
@@ -168,8 +167,8 @@ class TransferTest : public ::testing::Test {
     });
   }
 
-  ReliableSerial1Transport transport1;
-  ReliableSerial2Transport transport2;
+  ReliableSerial1 transport1;
+  ReliableSerial2 transport2;
 
   roo::thread server_thread_;
   roo::thread client_thread_;

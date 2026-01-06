@@ -133,6 +133,12 @@ class Esp32SerialLinkTransport
 //
 // -D ARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=3072
 
+#if defined(ROO_TESTING)
+#define UART_NUM_0 0
+#define UART_NUM_1 1
+#define UART_NUM_2 2
+#endif
+
 class ReliableSerial : public Esp32SerialLinkTransport<decltype(Serial)> {
  public:
   ReliableSerial(LinkBufferSize sendbuf = kBufferSize4KB,
