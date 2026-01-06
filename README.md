@@ -7,4 +7,6 @@ RPC (remote procedure calls).
 Additionally, the library provides a more foundational packet transport, which provides UDP-like (or, ESP-NOW-like) functionality: transmission of small packets, with the possibility
 of packet loss, but ensuring integrity of packets that get transmitted.
 
+Finally, the library supplies a functional RPC framework that works on top of this reliable messaging.
+
 See the included examples.
