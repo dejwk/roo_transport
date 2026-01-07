@@ -228,12 +228,16 @@ size_t Receiver::ack(roo::byte* buf) {
   }
 }
 
-bool Receiver::handleDataPacket(uint16_t seq_id, const roo::byte* payload,
-                                size_t len, bool is_final,
-                                bool& has_new_data_to_read) {
+bool Receiver::handleDataPacket(bool control_bit, uint16_t seq_id,
+                                const roo::byte* payload, size_t len,
+                                bool is_final, bool& has_new_data_to_read) {
   has_new_data_to_read = false;
   bool has_ack_to_send = false;
   if (state_ == kConnecting || state_ == kIdle) {
+    return false;
+  }
+  if (control_bit == control_bit_) {
+    LOG(WARNING) << "Cross-talk detected; check wiring and power.";
     return false;
   }
   SeqNum seq = in_ring_.restorePosHighBits(seq_id, 12);

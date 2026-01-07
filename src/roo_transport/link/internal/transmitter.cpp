@@ -219,8 +219,17 @@ void Transmitter::init(uint32_t my_stream_id, SeqNum new_start) {
   has_pending_eof_ = false;
 }
 
-bool Transmitter::ack(uint16_t seq_id, const roo::byte* ack_bitmap,
-                      size_t ack_bitmap_len) {
+bool Transmitter::ack(bool control_bit, uint16_t seq_id,
+                      const roo::byte* ack_bitmap, size_t ack_bitmap_len) {
+  if (state_ != kConnected) {
+    // Send queue is empty anyway. The ack is either bogus or comes from a
+    // previous connection.
+    return false;
+  }
+  if (control_bit == control_bit_) {
+    LOG(WARNING) << "Cross-talk detected. Check wiring and power.";
+    return false;
+  }
   // Remove all buffers up to the acked position.
   SeqNum seq = out_ring_.restorePosHighBits(seq_id, 12);
   if (seq > out_ring_.end()) {
@@ -285,9 +294,13 @@ bool Transmitter::ack(uint16_t seq_id, const roo::byte* ack_bitmap,
   return rushed;
 }
 
-bool Transmitter::updateRecvHimark(uint16_t recv_himark) {
+bool Transmitter::updateRecvHimark(bool control_bit, uint16_t recv_himark) {
   if (state_ != kConnected) return false;
   // Update to available slots received.
+  if (control_bit_ == control_bit) {
+    LOG(WARNING) << "Cross-talk detected. Check wiring and power.";
+    return false;
+  }
   SeqNum new_recv_himark = out_ring_.restorePosHighBits(recv_himark, 12);
   if (new_recv_himark < recv_himark_ ||
       new_recv_himark > out_ring_.end() + peer_receive_buffer_size_) {

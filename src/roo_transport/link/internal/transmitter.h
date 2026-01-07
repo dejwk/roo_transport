@@ -17,7 +17,7 @@ class Transmitter {
 
     // We initiated the handshake, but the peer has not yet acknowledged receipt
     // of our stream ID. We may buffer data locally, but we should refrain from
-    // trying to send it.
+    // trying to send it. Send queue is empty.
     kConnecting = 1,
 
     // Indicates that the peer acknowledged receipt of our stream ID and seq, so
@@ -25,7 +25,7 @@ class Transmitter {
     kConnected = 2,
 
     // Indicates that peer has abruptly terminated a previously valid
-    // connection.
+    // connection. Send queue is empty.
     kBroken = 3,
   };
 
@@ -73,11 +73,12 @@ class Transmitter {
   // Called when an 'ack' package is received. Removes acked packages from the
   // send queue. Returns true if there is a packet that should be immediately
   // re-delivered, without waiting for its expiration.
-  bool ack(uint16_t seq_id, const roo::byte* ack_bitmap, size_t ack_bitmap_len);
+  bool ack(bool control_bit, uint16_t seq_id, const roo::byte* ack_bitmap,
+           size_t ack_bitmap_len);
 
   // Returns true if the recv himark has changed, making room for new data to
   // send.
-  bool updateRecvHimark(uint16_t recv_himark);
+  bool updateRecvHimark(bool control_bit, uint16_t recv_himark);
 
  private:
   OutBuffer& getOutBuffer(SeqNum seq) {

@@ -120,14 +120,14 @@ size_t ThreadSafeReceiver::updateRecvHimark(roo::byte* buf,
   return receiver_.updateRecvHimark(buf, next_send_micros);
 }
 
-bool ThreadSafeReceiver::handleDataPacket(uint16_t seq_id,
+bool ThreadSafeReceiver::handleDataPacket(bool control_bit, uint16_t seq_id,
                                           const roo::byte* payload, size_t len,
                                           bool is_final) {
   bool has_new_data_to_read = false;
   bool has_ack_to_send;
   roo::lock_guard<roo::mutex> guard(mutex_);
-  has_ack_to_send = receiver_.handleDataPacket(seq_id, payload, len, is_final,
-                                               has_new_data_to_read);
+  has_ack_to_send = receiver_.handleDataPacket(
+      control_bit, seq_id, payload, len, is_final, has_new_data_to_read);
   if (has_new_data_to_read) {
     has_data_.notify_all();
   }

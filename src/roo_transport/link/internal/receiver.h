@@ -51,8 +51,9 @@ class Receiver {
   size_t ack(roo::byte* buf);
   size_t updateRecvHimark(roo::byte* buf, long& next_send_micros);
 
-  bool handleDataPacket(uint16_t seq_id, const roo::byte* payload, size_t len,
-                        bool is_final, bool& has_new_data_to_read);
+  bool handleDataPacket(bool control_bit, uint16_t seq_id,
+                        const roo::byte* payload, size_t len, bool is_final,
+                        bool& has_new_data_to_read);
 
   bool empty() const { return in_ring_.empty(); }
 

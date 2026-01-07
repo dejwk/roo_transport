@@ -42,8 +42,8 @@ class ThreadSafeReceiver {
   size_t ack(roo::byte* buf);
   size_t updateRecvHimark(roo::byte* buf, long& next_send_micros);
 
-  bool handleDataPacket(uint16_t seq_id, const roo::byte* payload, size_t len,
-                        bool is_final);
+  bool handleDataPacket(bool control_bit, uint16_t seq_id,
+                        const roo::byte* payload, size_t len, bool is_final);
 
   bool empty() const {
     roo::lock_guard<roo::mutex> guard(mutex_);

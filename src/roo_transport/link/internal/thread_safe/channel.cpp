@@ -471,18 +471,15 @@ void Channel::packetReceived(const roo::byte* buf, size_t len) {
   uint16_t header = roo_io::LoadBeU16(buf);
   bool control_bit = internal::GetPacketControlBit(header);
   auto type = internal::GetPacketType(header);
-  if (type != internal::kHandshakePacket && control_bit == my_control_bit()) {
-    LOG(WARNING) << "Cross-talk detected. Check the wiring.";
-    return;
-  }
   switch (type) {
     case internal::kDataAckPacket: {
-      transmitter_.ack(header & 0x0FFF, buf + 2, len - 2, outgoing_data_ready);
+      transmitter_.ack(control_bit, header & 0x0FFF, buf + 2, len - 2,
+                       outgoing_data_ready);
       break;
     }
     case internal::kFlowControlPacket: {
       // Update to available slots received.
-      transmitter_.updateRecvHimark(header & 0x0FFF);
+      transmitter_.updateRecvHimark(control_bit, header & 0x0FFF);
       break;
     }
     case internal::kHandshakePacket: {
@@ -506,8 +503,8 @@ void Channel::packetReceived(const roo::byte* buf, size_t len) {
     }
     case internal::kDataPacket:
     case internal::kFinPacket: {
-      if (receiver_.handleDataPacket(header & 0x0FFF, buf + 2, len - 2,
-                                     type == internal::kFinPacket)) {
+      if (receiver_.handleDataPacket(control_bit, header & 0x0FFF, buf + 2,
+                                     len - 2, type == internal::kFinPacket)) {
         outgoing_data_ready = true;
       }
       break;

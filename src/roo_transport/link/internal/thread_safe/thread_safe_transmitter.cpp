@@ -112,11 +112,12 @@ void ThreadSafeTransmitter::init(uint32_t my_stream_id, SeqNum new_start) {
   all_acked_.notify_all();
 }
 
-void ThreadSafeTransmitter::ack(uint16_t seq_id, const roo::byte* ack_bitmap,
+void ThreadSafeTransmitter::ack(bool control_bit, uint16_t seq_id,
+                                const roo::byte* ack_bitmap,
                                 size_t ack_bitmap_len,
                                 bool& outgoing_data_ready) {
   roo::lock_guard<roo::mutex> guard(mutex_);
-  if (transmitter_.ack(seq_id, ack_bitmap, ack_bitmap_len)) {
+  if (transmitter_.ack(control_bit, seq_id, ack_bitmap, ack_bitmap_len)) {
     // We have a new packet ready to be sent.
     outgoing_data_ready = true;
   }

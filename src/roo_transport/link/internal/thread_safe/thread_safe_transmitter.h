@@ -73,12 +73,12 @@ class ThreadSafeTransmitter {
     return transmitter_.front();
   }
 
-  void ack(uint16_t seq_id, const roo::byte* ack_bitmap, size_t ack_bitmap_len,
-           bool& outgoing_data_ready);
+  void ack(bool control_bit, uint16_t seq_id, const roo::byte* ack_bitmap,
+           size_t ack_bitmap_len, bool& outgoing_data_ready);
 
-  void updateRecvHimark(uint16_t recv_himark) {
+  void updateRecvHimark(bool control_bit, uint16_t recv_himark) {
     roo::lock_guard<roo::mutex> guard(mutex_);
-    if (transmitter_.updateRecvHimark(recv_himark)) {
+    if (transmitter_.updateRecvHimark(control_bit, recv_himark)) {
       has_space_.notify_all();
     }
   }
