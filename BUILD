@@ -1,3 +1,6 @@
+load("@rules_cc//cc:cc_library.bzl", "cc_library")
+load("@rules_cc//cc:cc_test.bzl", "cc_test")
+
 cc_library(
     name = "roo_transport",
     srcs = glob(
@@ -7,11 +10,14 @@ cc_library(
         ],
         exclude = ["test/**"],
     ),
+    defines = [
+        "ARDUINO=10000",
+        "MLOG_roo_transport_reliable_channel_connection=1",
+    ],
     includes = [
         "src",
     ],
     visibility = ["//visibility:public"],
-    defines = ["ARDUINO=10000", "MLOG_roo_transport_reliable_channel_connection=1"],
     deps = [
         "@roo_collections",
         "@roo_io",
@@ -22,6 +28,7 @@ cc_library(
 
 cc_test(
     name = "packets_over_stream_test",
+    size = "small",
     srcs = [
         "test/packets_over_stream_test.cpp",
     ],
@@ -33,11 +40,11 @@ cc_test(
         "//test/helpers",
         "@roo_testing//:arduino_gtest_main",
     ],
-    size = "small",
 )
 
 cc_test(
     name = "link_transport_test",
+    size = "small",
     srcs = [
         "test/link_transport_test.cpp",
     ],
@@ -49,11 +56,11 @@ cc_test(
         "//test/helpers",
         "@roo_testing//:arduino_gtest_main",
     ],
-    size = "small",
 )
 
 cc_test(
     name = "serial_link_transport_test",
+    size = "small",
     srcs = [
         "test/serial_link_transport_test.cpp",
     ],
@@ -64,13 +71,13 @@ cc_test(
         ":roo_transport",
         "//test/helpers",
         "@roo_testing//:arduino_gtest_main",
-        "@roo_testing//roo_testing/microcontrollers/esp32"
+        "@roo_testing//roo_testing/microcontrollers/esp32",
     ],
-    size = "small",
 )
 
 cc_test(
     name = "link_messaging_test",
+    size = "small",
     srcs = [
         "test/link_messaging_test.cpp",
     ],
@@ -80,8 +87,7 @@ cc_test(
     deps = [
         ":roo_transport",
         "//test/helpers",
-        "@roo_testing//:arduino_gtest_main",
         "@roo_io",
+        "@roo_testing//:arduino_gtest_main",
     ],
-    size = "small",
 )
