@@ -55,14 +55,14 @@ TEST(LinkTransport, SimpleConnectSendDisconnect) {
   EXPECT_EQ(client.out().status(), roo_io::kClosed);
   roo::byte buf[10];
   size_t n = server.in().readFully(buf, 10);
-  EXPECT_EQ(n, 8);
+  EXPECT_EQ(n, size_t{8});
   EXPECT_EQ(memcmp(buf, "Request", 8), 0);
   EXPECT_EQ(server.in().status(), roo_io::kEndOfStream);
   server.out().writeFully((const roo::byte*)"Response", 9);
   server.out().close();
   EXPECT_EQ(server.out().status(), roo_io::kClosed);
   n = client.in().readFully(buf, 10);
-  EXPECT_EQ(n, 9);
+  EXPECT_EQ(n, size_t{9});
   EXPECT_EQ(memcmp(buf, "Response", 9), 0);
   EXPECT_EQ(client.in().status(), roo_io::kEndOfStream);
 
@@ -82,7 +82,7 @@ TEST(LinkTransport, SyncConnect) {
     EXPECT_EQ(server.out().status(), roo_io::kOk);
     roo::byte buf[10];
     size_t n = server.in().readFully(buf, 10);
-    EXPECT_EQ(n, 8);
+    EXPECT_EQ(n, size_t{8});
     EXPECT_EQ(memcmp(buf, "Request", 8), 0);
     EXPECT_EQ(server.in().status(), roo_io::kEndOfStream);
     server.out().writeFully((const roo::byte*)"Response", 9);
@@ -98,7 +98,7 @@ TEST(LinkTransport, SyncConnect) {
   EXPECT_EQ(client.out().status(), roo_io::kClosed);
   roo::byte buf[10];
   size_t n = client.in().readFully(buf, 10);
-  EXPECT_EQ(n, 9);
+  EXPECT_EQ(n, size_t{9});
   EXPECT_EQ(memcmp(buf, "Response", 9), 0);
   EXPECT_EQ(client.in().status(), roo_io::kEndOfStream);
 
@@ -123,7 +123,7 @@ TEST(LinkTransport, SyncConnectReconnect) {
     EXPECT_EQ(server.out().status(), roo_io::kOk);
     roo::byte buf[10];
     size_t n = server.in().readFully(buf, 10);
-    EXPECT_EQ(n, 8);
+    EXPECT_EQ(n, size_t{8});
     EXPECT_EQ(memcmp(buf, "Request", 8), 0);
     EXPECT_EQ(server.in().status(), roo_io::kEndOfStream);
     server.out().writeFully((const roo::byte*)"Response", 9);
@@ -147,7 +147,7 @@ TEST(LinkTransport, SyncConnectReconnect) {
   EXPECT_EQ(client.out().status(), roo_io::kClosed);
   roo::byte buf[10];
   size_t n = client.in().readFully(buf, 10);
-  EXPECT_EQ(n, 9);
+  EXPECT_EQ(n, size_t{9});
   EXPECT_EQ(memcmp(buf, "Response", 9), 0);
   EXPECT_EQ(client.in().status(), roo_io::kEndOfStream);
 
@@ -164,7 +164,7 @@ TEST(LinkTransport, SyncConnectCommReconnect) {
     EXPECT_EQ(server.out().status(), roo_io::kOk);
     roo::byte buf[10];
     size_t n = server.in().readFully(buf, 10);
-    EXPECT_EQ(n, 8);
+    EXPECT_EQ(n, size_t{8});
     EXPECT_EQ(memcmp(buf, "Request", 8), 0);
     EXPECT_EQ(server.in().status(), roo_io::kEndOfStream);
     server.out().writeFully((const roo::byte*)"Response", 9);
@@ -183,7 +183,7 @@ TEST(LinkTransport, SyncConnectCommReconnect) {
   EXPECT_EQ(client.out().status(), roo_io::kClosed);
   roo::byte buf[10];
   size_t n = client.in().readFully(buf, 10);
-  EXPECT_EQ(n, 9);
+  EXPECT_EQ(n, size_t{9});
   EXPECT_EQ(memcmp(buf, "Response", 9), 0);
   EXPECT_EQ(client.in().status(), roo_io::kEndOfStream);
   client = loopback.client().connect();
@@ -341,7 +341,7 @@ TEST_P(TransferTest, LargeRequestResponse) {
       roo::byte buf[1000];
       size_t count = rand() % 1000 + 1;
       size_t n = in.read(buf, count);
-      ASSERT_GT(n, 0);
+      ASSERT_GT(n, size_t{0});
       for (size_t i = 0; i < n; i++) {
         EXPECT_EQ(buf[i], request[request_byte_idx + i]);
       }
@@ -357,7 +357,7 @@ TEST_P(TransferTest, LargeRequestResponse) {
         count = kResponseSize - response_byte_idx;
       }
       size_t n = out.write(&response[response_byte_idx], count);
-      ASSERT_GT(n, 0);
+      ASSERT_GT(n, size_t{0});
       response_byte_idx += n;
     }
   });
@@ -370,7 +370,7 @@ TEST_P(TransferTest, LargeRequestResponse) {
         count = kRequestSize - request_byte_idx;
       }
       size_t n = out.write(&request[request_byte_idx], count);
-      ASSERT_GT(n, 0);
+      ASSERT_GT(n, size_t{0});
       request_byte_idx += n;
     }
     out.close();
@@ -381,13 +381,13 @@ TEST_P(TransferTest, LargeRequestResponse) {
       EXPECT_EQ(in.status(), roo_io::kOk);
       size_t count = rand() % 1000 + 1;
       size_t n = in.read(buf, count);
-      ASSERT_GT(n, 0);
+      ASSERT_GT(n, size_t{0});
       for (size_t i = 0; i < n; i++) {
         EXPECT_EQ(buf[i], response[response_byte_idx + i]);
       }
       response_byte_idx += n;
     }
-    EXPECT_EQ(in.read(buf, 1), 0);
+    EXPECT_EQ(in.read(buf, 1), size_t{0});
     EXPECT_EQ(in.status(), roo_io::kEndOfStream);
   });
 
@@ -414,13 +414,13 @@ TEST_P(TransferTest, BidiStreaming) {
         EXPECT_EQ(in.status(), roo_io::kOk);
         size_t count = rand() % 1000 + 1;
         size_t n = in.read(buf, count);
-        ASSERT_GT(n, 0);
+        ASSERT_GT(n, size_t{0});
         for (size_t i = 0; i < n; i++) {
           EXPECT_EQ(buf[i], request[request_byte_idx + i]);
         }
         request_byte_idx += n;
       }
-      EXPECT_EQ(in.read(buf, 1), 0);
+      EXPECT_EQ(in.read(buf, 1), size_t{0});
       EXPECT_EQ(in.status(), roo_io::kEndOfStream);
     });
     size_t response_byte_idx = 0;
@@ -431,7 +431,7 @@ TEST_P(TransferTest, BidiStreaming) {
         count = kResponseSize - response_byte_idx;
       }
       size_t n = out.write(&response[response_byte_idx], count);
-      ASSERT_GT(n, 0);
+      ASSERT_GT(n, size_t{0});
       response_byte_idx += n;
     }
     out.close();
@@ -448,13 +448,13 @@ TEST_P(TransferTest, BidiStreaming) {
         EXPECT_EQ(in.status(), roo_io::kOk);
         size_t count = rand() % 1000 + 1;
         size_t n = in.read(buf, count);
-        ASSERT_GT(n, 0);
+        ASSERT_GT(n, size_t{0});
         for (size_t i = 0; i < n; i++) {
           EXPECT_EQ(buf[i], response[response_byte_idx + i]);
         }
         response_byte_idx += n;
       }
-      EXPECT_EQ(in.read(buf, 1), 0);
+      EXPECT_EQ(in.read(buf, 1), size_t{0});
       EXPECT_EQ(in.status(), roo_io::kEndOfStream);
     });
 
@@ -465,7 +465,7 @@ TEST_P(TransferTest, BidiStreaming) {
         count = kRequestSize - request_byte_idx;
       }
       size_t n = out.write(&request[request_byte_idx], count);
-      ASSERT_GT(n, 0);
+      ASSERT_GT(n, size_t{0});
       request_byte_idx += n;
     }
     out.close();

@@ -28,7 +28,7 @@ class OutBuffer {
   size_t write(const roo::byte* buf, size_t count) {
     if (finished_) return 0;
     size_t capacity = 248 - size_;
-    CHECK_GT(capacity, 0);
+    CHECK_GT(capacity, size_t{0});
     if (count >= capacity) {
       count = capacity;
       flushed_ = true;

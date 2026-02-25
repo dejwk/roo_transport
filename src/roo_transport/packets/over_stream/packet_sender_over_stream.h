@@ -17,7 +17,7 @@ namespace roo_transport {
 class PacketSenderOverStream : public PacketSender {
  public:
   /// Maximum payload size of one packet.
-  constexpr static int kMaxPacketSize = 250;
+  constexpr static size_t kMaxPacketSize = 250u;
 
   /// Creates sender writing framed transport packets to `out`.
   ///

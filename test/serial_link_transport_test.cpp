@@ -219,7 +219,7 @@ TEST_F(TransferTest, TransferByteByByte) {
 TEST_F(TransferTest, BlockingTransfer) {
   server([](LinkStream& stream) {
     roo::byte buf[64];
-    EXPECT_EQ(13, stream.in().readFully(buf, 13));
+    EXPECT_EQ(size_t{13}, stream.in().readFully(buf, 13));
     buf[13] = roo::byte{0};
     EXPECT_STREQ("Hello, world!", (const char*)buf);
     stream.out().writeFully((const roo::byte*)"Hello, ", 7);
@@ -231,7 +231,7 @@ TEST_F(TransferTest, BlockingTransfer) {
     // Flush is optional; the stream auto-flushes.
     // stream.out().flush();
     roo::byte buf[64];
-    EXPECT_EQ(12, stream.in().readFully(buf, 12));
+    EXPECT_EQ(size_t{12}, stream.in().readFully(buf, 12));
     buf[12] = roo::byte{0};
     EXPECT_STREQ("Hello, back!", (const char*)buf);
   });

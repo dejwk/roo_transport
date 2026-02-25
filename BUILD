@@ -11,7 +11,6 @@ cc_library(
         exclude = ["test/**"],
     ),
     defines = [
-        "ARDUINO=10000",
         "MLOG_roo_transport_reliable_channel_connection=1",
     ],
     includes = [

@@ -56,8 +56,9 @@ Channel::Channel(PacketSender& sender, LinkBufferSize sendbuf,
                                : (std::string("(").append(name).append(") "))),
       send_thread_name_(name.empty() ? "send_loop"
                                      : std::string(name) + "-send") {
-  CHECK_LE((unsigned int)sendbuf, 12);
-  CHECK_LE((unsigned int)sendbuf, recvbuf);
+  CHECK_LE(static_cast<unsigned int>(sendbuf), 12u);
+  CHECK_LE(static_cast<unsigned int>(sendbuf),
+           static_cast<unsigned int>(recvbuf));
 }
 
 Channel::~Channel() { end(); }
