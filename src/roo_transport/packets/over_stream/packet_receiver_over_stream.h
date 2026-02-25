@@ -10,37 +10,32 @@
 
 namespace roo_transport {
 
-// Receives packets sent by PacketSender. Implements data integrity (ensures
-// data correctness) over a potentially unreliable underlying stream, such as
-// UART/Serial.
-//
-// The data arrives in packets up to 250 bytes in size. The transport guarantees
-// that receives packets have been transmitted correctly, although some packets
-// may have gotten lost. If data corruption is detected in a packet, the entire
-// packet is dropped.
-//
-// The underlying implementation uses 32-bit hashes to verify integrity, and
-// uses COBS encoding to make sure that the receiver can recognize packet
-// boundaries even in case of data loss or corruption.
+/// Receives packets sent by `PacketSenderOverStream` via a potentially
+/// unreliable stream (for example UART/Serial).
+///
+/// Uses 32-bit hashes to validate packet integrity and COBS framing to recover
+/// packet boundaries even under byte loss/corruption.
+///
+/// Delivers only packets that pass integrity checks; corrupted packets are
+/// dropped, and packet loss is possible.
 class PacketReceiverOverStream : public PacketReceiver {
  public:
-  // Creates a packet receiver that reads data from the underlying input stream
-  // (assumed unreliable), and invoking the specified callback `receiver_fn`
-  // when a valid packet is received.
-  //
-  // The receiver_fn can be left unspecified, and supplied later by calling
-  // `setReceiverFn`.
+  /// Creates a receiver reading framed bytes from `in`.
   PacketReceiverOverStream(roo_io::InputStream& in);
 
   size_t tryReceive(const ReceiverFn& receiver_fn) override;
 
   size_t receive(const ReceiverFn& receiver_fn) override;
 
-  // Returns the total amount of bytes received, including bytes rejected due to
-  // communication errors.
+  /// Returns total raw bytes read from the underlying stream.
+  ///
+  /// Includes bytes that were part of malformed/corrupted packets.
   size_t bytes_received() const { return bytes_received_; }
 
-  // Returns the total amount of bytes correctly retrieved.
+  /// Returns total bytes accepted as valid framed packets.
+  ///
+  /// This is transport-level byte count (framing/hash included), not just
+  /// payload length.
   size_t bytes_accepted() const { return bytes_accepted_; }
 
  private:

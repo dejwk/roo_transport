@@ -10,13 +10,10 @@
 
 namespace roo_transport {
 
-// Abstract interface for messaging over a reliable channel. The messages are
-// byte arrays of arbitrary length. The implementation must guarantee
-// in-order delivery and message integrity.
-//
-// Messages may get lost when the underlying channel gets reset (e.g. if the
-// peer reconnects after a restart). The interface provides both the sender and
-// the receiver with means to handle message loss.
+/// Abstract interface for message exchange over a reliable channel.
+///
+/// Messages are arbitrary-length byte arrays with in-order, integrity-checked
+/// delivery. Messages may be lost across channel reset/reconnect boundaries.
 class Messaging {
  public:
   using ConnectionId = uint32_t;
@@ -26,47 +23,42 @@ class Messaging {
 
   virtual ~Messaging() = default;
 
-  // Should be called before initialization (e.g. begin() etc.)
+  /// Registers message receiver. Call before channel initialization.
   void setReceiver(Receiver& receiver) { receiver_ = &receiver; }
 
+  /// Unregisters receiver.
   void unsetReceiver() { receiver_ = nullptr; }
 
-  // Sends the specified message (unconditionally). Returns true on success,
-  // false otherwise. True does not guarantee that the message gets delivered.
-  // If connection_id is not nullptr, it is set to the (sender-side)
-  // connection ID that was used to send the message. (That connection ID may be
-  // later used for sendContinuation; see below).
+  /// Sends message with optional header and payload.
+  ///
+  /// @param connection_id Optional out parameter receiving sender-side
+  /// connection id used for this send.
+  /// @return true if accepted for send.
   virtual bool send(const roo::byte* header, size_t header_size,
                     const roo::byte* payload, size_t payload_size,
                     ConnectionId* connection_id) = 0;
 
-  // Sends the specified message, using the specified sender-side connection ID.
-  // Fails if that connection has been closed. Returns false if send cannot be
-  // completed because the connection ID has already been closed; true
-  // otherwise. (Note: true response does not guarantee delivery).
-  //
-  // This method is intended for use:
-  // (1) for RPC responses, which should be sent on the same connection as the
-  //     request (or not at all),
-  // (2) for message strams that should be 'atomic' (sent entirely on the same
-  //     connection).
+  /// Sends continuation payload on an existing sender-side connection.
+  ///
+  /// Intended for connection-affine responses (e.g. RPC) and atomic message
+  /// streams.
   virtual bool sendContinuation(ConnectionId connection_id,
                                 const roo::byte* header, size_t header_size,
                                 const roo::byte* payload,
                                 size_t payload_size) = 0;
 
-  // Convenience for header-less messages.
+  /// Convenience overload for header-less messages.
   virtual bool send(const roo::byte* payload, size_t payload_size,
                     ConnectionId* connection_id) {
     return send(nullptr, 0, payload, payload_size, connection_id);
   }
 
-  // Convenience for header-less stateless messages.
+  /// Convenience overload for header-less stateless messages.
   bool send(const roo::byte* payload, size_t payload_size) {
     return send(payload, payload_size, nullptr);
   }
 
-  // Convenience for header-less continuation messages.
+  /// Convenience overload for header-less continuation messages.
   virtual bool sendContinuation(ConnectionId connection_id,
                                 const roo::byte* payload, size_t payload_size) {
     return sendContinuation(connection_id, nullptr, 0, payload, payload_size);
@@ -75,10 +67,10 @@ class Messaging {
  protected:
   Messaging() = default;
 
-  // Dispatches a received message to the registered receiver.
+  /// Dispatches received message to registered receiver.
   void received(ConnectionId connection_id, const roo::byte* data, size_t len);
 
-  // Dispatches a reset notification to the registered receiver.
+  /// Dispatches reset notification to registered receiver.
   void reset(ConnectionId connection_id);
 
  private:
@@ -89,16 +81,16 @@ class Messaging::Receiver {
  public:
   virtual ~Receiver() = default;
 
-  // Called when a new message is received on the channel. The (receiver-side)
-  // connection ID can be used to ensure that response messages (e.g. RPC
-  // responses) are sent on the same connection, using
-  // channel.sendContinuation().
+  /// Called when message is received.
+  ///
+  /// `connection_id` identifies receiver-side channel context and can be used
+  /// for connection-affine responses via `sendContinuation()`.
   virtual void received(ConnectionId connection_id, const roo::byte* data,
                         size_t len) = 0;
 
-  // Notifies the recipient that the underlying connection has been closed,
-  // and that any state associated with previously received messages using
-  // that connection ID should be cleared.
+  /// Notifies that underlying connection was closed/reset.
+  ///
+  /// Receiver should clear connection-associated state.
   virtual void reset(ConnectionId connection_id) {}
 };
 

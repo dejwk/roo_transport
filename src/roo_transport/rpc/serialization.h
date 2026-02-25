@@ -28,7 +28,7 @@ struct NullSerialized {
   size_t size() const { return 0; }
 };
 
-// For fixed-size small payloads that can be just copied by value.
+/// Serialized holder for small fixed-size payloads.
 template <size_t N>
 class StaticSerialized {
  public:
@@ -44,7 +44,7 @@ class StaticSerialized {
   roo::byte data_[N];
 };
 
-// For variably-sized payloads. Stores the data array on the heap.
+/// Serialized holder for variable-sized payloads stored on heap.
 class SimpleSerialized {
  public:
   SimpleSerialized() : status_(kOk), data_(nullptr), size_(0) {}
@@ -65,7 +65,7 @@ class SimpleSerialized {
   size_t size_;
 };
 
-// For dynamically-sized payloads. Supports append and write in the middle.
+/// Mutable serialized buffer supporting append and random-position writes.
 class DynamicSerialized {
  public:
   DynamicSerialized() : status_(kOk), data_(), pos_(0) {}
@@ -93,7 +93,7 @@ class DynamicSerialized {
 
   bool eos() const { return pos_ >= data_.size(); }
 
-  // Implementation of the iterator contract.
+  /// Iterator contract: writes one byte at current position and advances.
   void write(roo::byte b) {
     if (eos()) {
       if (pos_ > data_.size()) {
@@ -134,7 +134,7 @@ class DynamicSerialized {
   size_t pos_;
 };
 
-// Default implementation that implements SerializeInto in terms of serialize().
+/// Default bridge implementing `SerializeInto()` via `serialize()`.
 template <typename T, typename Itr, typename S = Serializer<T>, typename = void>
 struct IntoSerializer {
   void operator()(const T& val, Itr& output) const {
@@ -144,7 +144,7 @@ struct IntoSerializer {
   }
 };
 
-// Override for serializers that provide serializeInto().
+/// Specialization using `Serializer<T>::serializeInto()` when available.
 template <typename T, typename Itr>
 struct IntoSerializer<T, Itr, Serializer<T>,
                       decltype(std::declval<Serializer<T>>().serializeInto(
@@ -162,9 +162,9 @@ void SerializeInto(const T& val, Itr& output) {
   IntoSerializer<T, Itr>()(val, output);
 }
 
-// Simple serializers and deserializers for basic types are provided below.
+/// Simple serializers/deserializers for basic types are provided below.
 
-// Void.
+/// `Void`.
 
 template <>
 struct Serializer<Void> {
@@ -181,7 +181,7 @@ struct Deserializer<Void> {
   }
 };
 
-// Boolean.
+/// `bool`.
 
 template <>
 struct Serializer<bool> {
@@ -207,7 +207,7 @@ struct Deserializer<bool> {
   }
 };
 
-// Int8.
+/// `int8_t`.
 
 template <>
 struct Serializer<int8_t> {
@@ -230,7 +230,7 @@ struct Deserializer<int8_t> {
   }
 };
 
-// UInt8.
+/// `uint8_t`.
 
 template <>
 struct Serializer<uint8_t> {
@@ -253,7 +253,7 @@ struct Deserializer<uint8_t> {
   }
 };
 
-// Int16.
+/// `int16_t`.
 
 template <>
 struct Serializer<int16_t> {
@@ -276,7 +276,7 @@ struct Deserializer<int16_t> {
   }
 };
 
-// UInt16.
+/// `uint16_t`.
 
 template <>
 struct Serializer<uint16_t> {
@@ -299,7 +299,7 @@ struct Deserializer<uint16_t> {
   }
 };
 
-// Int32.
+/// `int32_t`.
 
 template <>
 struct Serializer<int32_t> {
@@ -322,7 +322,7 @@ struct Deserializer<int32_t> {
   }
 };
 
-// UInt32.
+/// `uint32_t`.
 
 template <>
 struct Serializer<uint32_t> {
@@ -345,7 +345,7 @@ struct Deserializer<uint32_t> {
   }
 };
 
-// Int64.
+/// `int64_t`.
 
 template <>
 struct Serializer<int64_t> {
@@ -368,7 +368,7 @@ struct Deserializer<int64_t> {
   }
 };
 
-// UInt64.
+/// `uint64_t`.
 
 template <>
 struct Serializer<uint64_t> {
@@ -391,7 +391,7 @@ struct Deserializer<uint64_t> {
   }
 };
 
-// String.
+/// `roo::string_view`.
 
 class SerializedByteArrayAdapter {
  public:
@@ -424,8 +424,7 @@ struct Deserializer<roo::string_view> {
   }
 };
 
-// Helper for nested members, delegating to a sub-serializer, but also,
-// prepending the size of the serialized data as a 16-bit big-endian length.
+/// Serializes nested member with 16-bit big-endian length prefix.
 template <typename T, typename RandomItr>
 void SerializeMemberInto(const T& val, RandomItr& result) {
   size_t begin = result.pos();
@@ -465,7 +464,7 @@ constexpr RpcStatus DeserializeMember(const roo::byte*& data, size_t& len,
   return kOk;
 }
 
-// Pair.
+/// `std::pair<T1, T2>`.
 
 template <typename T1, typename T2>
 struct Serializer<std::pair<T1, T2>> {
@@ -503,7 +502,7 @@ struct Deserializer<std::pair<T1, T2>> {
   }
 };
 
-// Tuple.
+/// `std::tuple<Types...>`.
 
 template <size_t index, typename RandomItr, typename... Types>
 constexpr void SerializeTupleRecursive(const std::tuple<Types...>& t,

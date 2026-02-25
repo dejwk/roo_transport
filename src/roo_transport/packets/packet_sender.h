@@ -6,23 +6,21 @@
 
 namespace roo_transport {
 
-// Abstraction for sending packets over some medium.
-//
-// The caller needs to provide data in packets up to kMaxPacketSize (250
-// bytes). The transport guarantees that packets are transmitted correctly or
-// not at all. That is, if data corruption is detected in a packet, the entire
-// packet is dropped.
+/// Abstraction for sending packets over an underlying medium.
+///
+/// Packets are up to `kMaxPacketSize` bytes. Implementations may use
+/// unreliable media where loss/corruption can occur.
 class PacketSender {
  public:
-  // Maximum size of the packet that can be sent.
+  /// Maximum packet size that can be sent.
   constexpr static int kMaxPacketSize = 250;
 
   virtual ~PacketSender() = default;
 
-  // Sends the specified data packet.
+  /// Sends one data packet.
   virtual void send(const roo::byte* buf, size_t len) = 0;
 
-  // Flushes out the output.
+  /// Flushes pending output.
   virtual void flush() {}
 };
 

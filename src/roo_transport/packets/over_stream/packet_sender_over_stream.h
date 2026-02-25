@@ -9,30 +9,29 @@
 
 namespace roo_transport {
 
-// Implements data integrity (ensures data correctness) over a potentially
-// unreliable underlying stream, such as UART/Serial.
-//
-// The underlying implementation uses 32-bit hashes to verify integrity, and
-// uses COBS encoding to make sure that the receiver can recognize packet
-// boundaries even in case of data loss or corruption.
+/// Sends packets via a potentially unreliable stream (for example UART/Serial)
+/// while adding transport framing/integrity metadata.
+///
+/// Uses 32-bit hashes for integrity and COBS framing so the receiver can
+/// recover packet boundaries under loss/corruption.
 class PacketSenderOverStream : public PacketSender {
  public:
-  // Maximum size of the packet that can be sent.
+  /// Maximum payload size of one packet.
   constexpr static int kMaxPacketSize = 250;
 
-  // Creates the sender that will write packets to the underlying output stream
-  // (which is assumed to be possibly unreliable, e.g. possibly dropping,
-  // confusing, or reordering data.)
+  /// Creates sender writing framed transport packets to `out`.
+  ///
+  /// Stream may be unreliable (drop/corrupt/reorder bytes).
   PacketSenderOverStream(roo_io::OutputStream& out);
 
-  // Sends the specified data packet.
+  /// Sends one packet payload.
   void send(const roo::byte* buf, size_t len) override;
 
   void flush() override { out_.flush(); }
 
  private:
   roo_io::OutputStream& out_;
-  // Work buffer, allocated in the constructor.
+  /// Work buffer allocated in constructor.
   std::unique_ptr<roo::byte[]> buf_;
 };
 

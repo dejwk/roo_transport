@@ -6,8 +6,7 @@
 
 namespace roo_transport {
 
-// Supports multiple independent messaging channels (up to 256) multiplexed over
-// a single messaging interface.
+/// Multiplexes up to 256 logical messaging channels over one `Messaging` link.
 class MuxMessaging {
  public:
   using ChannelId = uint8_t;
@@ -35,10 +34,10 @@ class MuxMessaging {
     MuxMessaging& mux_;
   };
 
-  // Called by Messaging::Channel constructor.
+  /// Called by `Channel` constructor.
   void registerChannel(Channel& channel);
 
-  // Called by Messaging::Channel destructor.
+  /// Called by `Channel` destructor.
   void unregisterChannel(Channel& channel);
 
   void received(Messaging::ConnectionId connection_id, ChannelId channel_id,

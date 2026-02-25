@@ -8,26 +8,24 @@
 
 namespace roo_transport {
 
-// Abstraction to receive packets sent by PacketSenter.
-//
-// The data arrives in packets up to 250 bytes in size. The transport guarantees
-// that receives packets have been transmitted correctly, although some packets
-// may have gotten lost. If data corruption is detected in a packet, the entire
-// packet is dropped.
+/// Abstraction for receiving packets produced by `PacketSender`.
+///
+/// Data arrives in packets up to 250 bytes. Corrupted packets are dropped;
+/// packet loss is possible.
 class PacketReceiver {
  public:
-  // Callback type to be called when a packet arrives.
+  /// Callback invoked for each received packet.
   using ReceiverFn = std::function<void(const roo::byte*, size_t)>;
 
-  // Attempts to receive as many packets as possible without blocking. Invokes
-  // receiver_fn callback on every packet received. Returns the number of
-  // packets delivered.
+  /// Receives currently available packets without indefinite blocking.
+  ///
+  /// @return Number of packets delivered.
   virtual size_t tryReceive(const ReceiverFn& receiver_fn) = 0;
 
-  // Attempts to receive at least one packet, blocking if necessary. Invokes
-  // receiver_fn callback on every packet received. Returns the number of
-  // packets delivered (at least one), or zero if no packets were received due
-  // to an error (including end-of-stream).
+  /// Receives packets, blocking as needed until at least one packet is
+  /// delivered, or until stream end/error.
+  ///
+  /// @return Number of delivered packets, or zero on error/end-of-stream.
   virtual size_t receive(const ReceiverFn& receiver_fn) = 0;
 };
 
