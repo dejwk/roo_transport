@@ -12,6 +12,7 @@
 #include "helpers/link_loopback.h"
 #include "helpers/rand.h"
 #include "roo_threads/atomic.h"
+#include "roo_threads/condition_variable.h"
 #include "roo_threads/mutex.h"
 #include "roo_threads/thread.h"
 #include "roo_time.h"
@@ -497,13 +498,32 @@ TEST(LinkTransport, DisconnectFnCalledWhenDisconnectDetected) {
     EXPECT_EQ(server.status(), LinkStatus::kConnected);
     server.out().close();
   });
+  roo::mutex mutex;
+  roo::condition_variable disconnected_cv;
   int disconnect_counter = 0;
-  Link client = loopback.client().connect([&]() { disconnect_counter++; });
+  Link client = loopback.client().connect([&]() {
+    roo::lock_guard<roo::mutex> guard(mutex);
+    ++disconnect_counter;
+    disconnected_cv.notify_all();
+  });
   client.out().close();
-  EXPECT_EQ(disconnect_counter, 1);
+  {
+    roo::unique_lock<roo::mutex> guard(mutex);
+    roo_time::Uptime deadline = roo_time::Uptime::Now() + roo_time::Millis(500);
+    while (disconnect_counter == 0) {
+      if (disconnected_cv.wait_until(guard, deadline) ==
+          roo::cv_status::timeout) {
+        break;
+      }
+    }
+    EXPECT_EQ(disconnect_counter, 1);
+  }
   EXPECT_EQ(client.status(), LinkStatus::kBroken);
   client = loopback.client().connect();
-  EXPECT_EQ(disconnect_counter, 1);
+  {
+    roo::lock_guard<roo::mutex> guard(mutex);
+    EXPECT_EQ(disconnect_counter, 1);
+  }
   EXPECT_EQ(client.status(), LinkStatus::kConnected);
   client.out().close();
 
