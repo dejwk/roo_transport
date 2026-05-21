@@ -38,6 +38,9 @@ bool LinkMessaging::send(const roo::byte* header, size_t header_size,
                          Messaging::ConnectionId* connection_id) {
   roo::unique_lock<roo::mutex> guard(mutex_);
   while (true) {
+    if (closed_) {
+      return false;
+    }
     LinkStatus status = link_.status();
     if (status == LinkStatus::kConnected || status == LinkStatus::kConnecting) {
       if (connection_id != nullptr) {
@@ -56,6 +59,9 @@ bool LinkMessaging::sendContinuation(ConnectionId connection_id,
                                      const roo::byte* payload,
                                      size_t payload_size) {
   roo::unique_lock<roo::mutex> guard(mutex_);
+  if (closed_) {
+    return false;
+  }
   if ((ConnectionId)link_.streamId() != connection_id) {
     // Connection ID does not match the current link stream ID; the connection
     // must have been reset.

@@ -66,41 +66,45 @@ Channel::~Channel() { end(); }
 size_t Channel::write(const roo::byte* buf, size_t count, uint32_t my_stream_id,
                       roo_io::Status& stream_status) {
   bool outgoing_data_ready = false;
-  return transmitter_.write(buf, count, my_stream_id, stream_status,
-                            outgoing_data_ready);
+  size_t written = transmitter_.write(buf, count, my_stream_id, stream_status,
+                                      outgoing_data_ready);
   if (outgoing_data_ready) {
     outgoing_data_ready_.notify();
   }
+  return written;
 }
 
 size_t Channel::tryWrite(const roo::byte* buf, size_t count,
                          uint32_t my_stream_id, roo_io::Status& stream_status) {
   bool outgoing_data_ready = false;
-  return transmitter_.tryWrite(buf, count, my_stream_id, stream_status,
-                               outgoing_data_ready);
+  size_t written = transmitter_.tryWrite(buf, count, my_stream_id,
+                                         stream_status, outgoing_data_ready);
   if (outgoing_data_ready) {
     outgoing_data_ready_.notify();
   }
+  return written;
 }
 
 size_t Channel::read(roo::byte* buf, size_t count, uint32_t my_stream_id,
                      roo_io::Status& stream_status) {
   bool outgoing_data_ready = false;
-  return receiver_.read(buf, count, my_stream_id, stream_status,
-                        outgoing_data_ready);
+  size_t read = receiver_.read(buf, count, my_stream_id, stream_status,
+                               outgoing_data_ready);
   if (outgoing_data_ready) {
     outgoing_data_ready_.notify();
   }
+  return read;
 }
 
 size_t Channel::tryRead(roo::byte* buf, size_t count, uint32_t my_stream_id,
                         roo_io::Status& stream_status) {
   bool outgoing_data_ready = false;
-  return receiver_.tryRead(buf, count, my_stream_id, stream_status,
-                           outgoing_data_ready);
+  size_t read = receiver_.tryRead(buf, count, my_stream_id, stream_status,
+                                  outgoing_data_ready);
   if (outgoing_data_ready) {
     outgoing_data_ready_.notify();
   }
+  return read;
 }
 
 int Channel::peek(uint32_t my_stream_id, roo_io::Status& stream_status) {
@@ -337,129 +341,133 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
                                     uint16_t peer_receive_buffer_size,
                                     bool& outgoing_data_ready) {
   std::function<void()> disconnect_fn;
-  roo::lock_guard<roo::mutex> guard(handshake_mutex_);
-  MLOG(roo_transport_reliable_channel_connection)
-      << getLogPrefix() << "Handshake packet received: "
-      << HandshakePacket{
-             .self_seq_num = peer_seq_num,
-             .self_stream_id = peer_stream_id,
-             .ack_stream_id = ack_stream_id,
-             .want_ack = want_ack,
-         };
-  if (peer_stream_id == my_stream_id_) {
-    // The peer is echoing our own stream ID. This is probably a cross-talk from
-    // our own packets.
-    if (peer_seq_num == transmitter_.front().raw()) {
-      MLOG(roo_transport_reliable_channel_connection)
-          << getLogPrefix()
-          << "Ignoring the handshake, since it's an echo of the last one we "
-             "sent.";
-      LOG(WARNING) << "Cross-talk detected. Please check the wiring.";
-      return;
-    }
-  }
-  switch (receiver_.state()) {
-    case internal::Receiver::kConnecting: {
-      if (ack_stream_id != 0 && ack_stream_id != my_stream_id_) {
-        // The peer is acknowledging a different stream than the one we're
-        // connecting on. Ignoring.
+  {
+    roo::lock_guard<roo::mutex> guard(handshake_mutex_);
+    MLOG(roo_transport_reliable_channel_connection)
+        << getLogPrefix() << "Handshake packet received: "
+        << HandshakePacket{
+               .self_seq_num = peer_seq_num,
+               .self_stream_id = peer_stream_id,
+               .ack_stream_id = ack_stream_id,
+               .want_ack = want_ack,
+           };
+    if (peer_stream_id == my_stream_id_) {
+      // The peer is echoing our own stream ID. This is probably a cross-talk
+      // from our own packets.
+      if (peer_seq_num == transmitter_.front().raw()) {
         MLOG(roo_transport_reliable_channel_connection)
             << getLogPrefix()
-            << "Ignoring the handshake, since the ack_stream_id doesn't match.";
-        break;
+            << "Ignoring the handshake, since it's an echo of the last one we "
+               "sent.";
+        LOG(WARNING) << "Cross-talk detected. Please check the wiring.";
+        return;
       }
-      if (peer_stream_id == my_stream_id_) {
-        // Since we ruled out the echo case above, we're going to assume that
-        // this is a freakish accident of two endpoints accidentally choosing
-        // the same stream ID. Bailing out, as if the peer has disconnected.
-        MLOG(roo_transport_reliable_channel_connection)
-            << getLogPrefix()
-            << "Aborting: peer is using the same stream ID as ours: "
-            << peer_stream_id;
-        disconnect_fn = std::move(disconnect_fn_);
-        disconnect_fn_ = nullptr;
-        receiver_.setBroken();
-        transmitter_.setBroken();
-        my_stream_id_ = 0;
-        connected_cv_.notify_all();
-        break;
-      }
-      peer_stream_id_ = peer_stream_id;
-      CHECK(receiver_.empty());
-      MLOG(roo_transport_reliable_channel_connection)
-          << getLogPrefix() << "Receiver is now connected.";
-      receiver_.setConnected(peer_seq_num, my_control_bit());
-      outgoing_data_ready = true;
-
-      if (ack_stream_id == my_stream_id_) {
-        MLOG(roo_transport_reliable_channel_connection)
-            << getLogPrefix() << "Transmitter is now connected.";
-        my_stream_id_acked_by_peer_ = true;
-        transmitter_.setConnected(peer_receive_buffer_size, my_control_bit());
-      }
-      needs_handshake_ack_ = want_ack;
-      connected_cv_.notify_all();
-      break;
     }
-    case internal::Receiver::kConnected: {
-      // Note: we only consider initial connection requests as 'breaking' -
-      // others might be latend acks.
-      if (want_ack && (peer_stream_id_ != peer_stream_id) &&
-          ack_stream_id == 0) {
-        // The peer opened a new stream.
-        disconnect_fn = std::move(disconnect_fn_);
-        disconnect_fn_ = nullptr;
-        if (!receiver_.done()) {
+    switch (receiver_.state()) {
+      case internal::Receiver::kConnecting: {
+        if (ack_stream_id != 0 && ack_stream_id != my_stream_id_) {
+          // The peer is acknowledging a different stream than the one we're
+          // connecting on. Ignoring.
           MLOG(roo_transport_reliable_channel_connection)
-              << getLogPrefix() << "Disconnection detected: " << peer_stream_id_
-              << ", " << peer_stream_id;
-          // Ignore until all in-flight packets have been delivered.
-          if (transmitter_.state() == internal::Transmitter::kConnected) {
-            MLOG(roo_transport_reliable_channel_connection)
-                << getLogPrefix() << "Transmitter is now broken.";
-            transmitter_.setBroken();
-          } else {
-            MLOG(roo_transport_reliable_channel_connection)
-                << getLogPrefix() << "Transmitter is now idle.";
-            transmitter_.reset();
-          }
-          my_stream_id_ = 0;
-          connected_cv_.notify_all();
-          MLOG(roo_transport_reliable_channel_connection)
-              << getLogPrefix() << "Receiver is now broken.";
-          receiver_.setBroken();
+              << getLogPrefix()
+              << "Ignoring the handshake, since the ack_stream_id doesn't "
+                 "match.";
           break;
         }
+        if (peer_stream_id == my_stream_id_) {
+          // Since we ruled out the echo case above, we're going to assume that
+          // this is a freakish accident of two endpoints accidentally choosing
+          // the same stream ID. Bailing out, as if the peer has disconnected.
+          MLOG(roo_transport_reliable_channel_connection)
+              << getLogPrefix()
+              << "Aborting: peer is using the same stream ID as ours: "
+              << peer_stream_id;
+          disconnect_fn = std::move(disconnect_fn_);
+          disconnect_fn_ = nullptr;
+          receiver_.setBroken();
+          transmitter_.setBroken();
+          my_stream_id_ = 0;
+          connected_cv_.notify_all();
+          break;
+        }
+        peer_stream_id_ = peer_stream_id;
+        CHECK(receiver_.empty());
         MLOG(roo_transport_reliable_channel_connection)
-            << getLogPrefix() << "Transmitter and receiver are now idle.";
-        transmitter_.reset();
-        my_stream_id_ = 0;
-        receiver_.reset();
+            << getLogPrefix() << "Receiver is now connected.";
+        receiver_.setConnected(peer_seq_num, my_control_bit());
+        outgoing_data_ready = true;
+
+        if (ack_stream_id == my_stream_id_) {
+          MLOG(roo_transport_reliable_channel_connection)
+              << getLogPrefix() << "Transmitter is now connected.";
+          my_stream_id_acked_by_peer_ = true;
+          transmitter_.setConnected(peer_receive_buffer_size, my_control_bit());
+        }
+        needs_handshake_ack_ = want_ack;
         connected_cv_.notify_all();
         break;
       }
-      if (ack_stream_id == my_stream_id_ && !my_stream_id_acked_by_peer_) {
-        CHECK(my_stream_id_ != 0);
-        MLOG(roo_transport_reliable_channel_connection)
-            << getLogPrefix() << "Transmitter is now connected.";
-        my_stream_id_acked_by_peer_ = true;
-        transmitter_.setConnected(peer_receive_buffer_size, my_control_bit());
-        outgoing_data_ready = true;
-        connected_cv_.notify_all();
+      case internal::Receiver::kConnected: {
+        // Note: we only consider initial connection requests as 'breaking' -
+        // others might be latent acks.
+        if (want_ack && (peer_stream_id_ != peer_stream_id) &&
+            ack_stream_id == 0) {
+          // The peer opened a new stream.
+          disconnect_fn = std::move(disconnect_fn_);
+          disconnect_fn_ = nullptr;
+          if (!receiver_.done()) {
+            MLOG(roo_transport_reliable_channel_connection)
+                << getLogPrefix()
+                << "Disconnection detected: " << peer_stream_id_ << ", "
+                << peer_stream_id;
+            // Ignore until all in-flight packets have been delivered.
+            if (transmitter_.state() == internal::Transmitter::kConnected) {
+              MLOG(roo_transport_reliable_channel_connection)
+                  << getLogPrefix() << "Transmitter is now broken.";
+              transmitter_.setBroken();
+            } else {
+              MLOG(roo_transport_reliable_channel_connection)
+                  << getLogPrefix() << "Transmitter is now idle.";
+              transmitter_.reset();
+            }
+            my_stream_id_ = 0;
+            connected_cv_.notify_all();
+            MLOG(roo_transport_reliable_channel_connection)
+                << getLogPrefix() << "Receiver is now broken.";
+            receiver_.setBroken();
+            break;
+          }
+          MLOG(roo_transport_reliable_channel_connection)
+              << getLogPrefix() << "Transmitter and receiver are now idle.";
+          transmitter_.reset();
+          my_stream_id_ = 0;
+          receiver_.reset();
+          connected_cv_.notify_all();
+          break;
+        }
+        if (ack_stream_id == my_stream_id_ && !my_stream_id_acked_by_peer_) {
+          CHECK(my_stream_id_ != 0);
+          MLOG(roo_transport_reliable_channel_connection)
+              << getLogPrefix() << "Transmitter is now connected.";
+          my_stream_id_acked_by_peer_ = true;
+          transmitter_.setConnected(peer_receive_buffer_size, my_control_bit());
+          outgoing_data_ready = true;
+          connected_cv_.notify_all();
+        }
+        needs_handshake_ack_ = want_ack;
+        break;
       }
-      needs_handshake_ack_ = want_ack;
-      break;
-    }
-    case internal::Receiver::kIdle:
-    case internal::Receiver::kBroken: {
-      // We're idle; ignoring handshake;
-      MLOG(roo_transport_reliable_channel_connection)
-          << getLogPrefix()
-          << "Ignoring the handshake, since the receiver is not connecting.";
-      break;
-    }
-    default: {
-      break;
+      case internal::Receiver::kIdle:
+      case internal::Receiver::kBroken: {
+        // We're idle; ignoring handshake.
+        MLOG(roo_transport_reliable_channel_connection)
+            << getLogPrefix()
+            << "Ignoring the handshake, since the receiver is not connecting.";
+        break;
+      }
+      default: {
+        break;
+      }
     }
   }
   if (disconnect_fn != nullptr) {

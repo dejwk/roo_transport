@@ -117,9 +117,14 @@ void ThreadSafeTransmitter::ack(bool control_bit, uint16_t seq_id,
                                 size_t ack_bitmap_len,
                                 bool& outgoing_data_ready) {
   roo::lock_guard<roo::mutex> guard(mutex_);
+  size_t writable_before = transmitter_.availableForWrite();
   if (transmitter_.ack(control_bit, seq_id, ack_bitmap, ack_bitmap_len)) {
     // We have a new packet ready to be sent.
     outgoing_data_ready = true;
+  }
+  size_t writable_after = transmitter_.availableForWrite();
+  if (writable_after > writable_before) {
+    has_space_.notify_all();
   }
   if (!transmitter_.hasPendingData()) {
     all_acked_.notify_all();
