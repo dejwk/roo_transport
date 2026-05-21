@@ -8,6 +8,7 @@
 namespace roo_transport {
 namespace internal {
 
+/// Incoming reliable-stream state machine and packet queue.
 class Receiver {
  public:
   enum State {
@@ -27,41 +28,83 @@ class Receiver {
     kBroken = 3,
   };
 
+  /// Creates a receiver with a buffer of size `1 << recvbuf_log2`.
   Receiver(unsigned int recvbuf_log2);
 
+  /// Returns the current receiver state.
   State state() const { return state_; }
+  /// Returns whether end-of-stream has been reached.
   bool eos() const { return end_of_stream_; }
 
+  /// Returns whether the stream has fully completed.
   bool done() const;
 
+  /// Marks the receiver connected to the peer.
+  ///
+  /// Resets the receive window so packets can be accepted starting at the
+  /// advertised peer sequence number.
   void setConnected(SeqNum peer_seq_num, bool control_bit);
+  /// Returns the receiver to the idle state.
   void setIdle();
+  /// Marks the receiver broken.
   void setBroken();
 
+  /// Reads up to `count` bytes without blocking.
+  ///
+  /// Consumes packets in order until a gap, EOF marker, or `count` limit is
+  /// reached.
   size_t tryRead(roo::byte* buf, size_t count, bool& outgoing_data_ready);
 
+  /// Peeks at the next byte without consuming it.
   int peek();
+  /// Returns bytes currently available for immediate reading.
+  ///
+  /// Returns `1` when an EOF marker is queued so callers can observe end of
+  /// stream without consuming payload bytes.
   size_t availableForRead() const;
 
+  /// Resets the receiver to the idle state.
   void reset();
+  /// Initializes a new incoming stream.
   void init(uint32_t my_stream_id);
 
+  /// Closes the local input side of the stream.
+  ///
+  /// Drops any unread buffered data and schedules a flow-control update so the
+  /// peer can stop treating that data as outstanding.
   void markInputClosed(bool& outgoing_data_ready);
 
+  /// Serializes an acknowledgment packet into `buf`.
+  ///
+  /// Includes a skip-ACK bitmap describing later packets that have already
+  /// arrived.
   size_t ack(roo::byte* buf);
+
+  /// Serializes a flow-control update into `buf`.
+  ///
+  /// Periodically re-advertises the receive high-water mark until new traffic
+  /// proves the update was observed by the peer.
   size_t updateRecvHimark(roo::byte* buf, long& next_send_micros);
 
+  /// Handles one received data packet.
+  ///
+  /// Accepts packets inside the receive window, tolerates retransmits of
+  /// already seen packets, tracks final-packet state, and requests an ACK when
+  /// appropriate.
   bool handleDataPacket(bool control_bit, uint16_t seq_id,
                         const roo::byte* payload, size_t len, bool is_final,
                         bool& has_new_data_to_read);
 
+  /// Returns whether there is no buffered input.
   bool empty() const { return in_ring_.empty(); }
 
+  /// Returns the number of packets received.
   uint32_t packets_received() const { return packets_received_; }
 
+  /// Returns the local stream id.
   uint32_t my_stream_id() const { return my_stream_id_; }
 
-  // Used to communicate maximum offset of the recv himark to the sender.
+  /// Returns receive buffer capacity as a log2 value.
   unsigned int buffer_size_log2() const { return in_ring_.capacity_log2(); }
 
  private:

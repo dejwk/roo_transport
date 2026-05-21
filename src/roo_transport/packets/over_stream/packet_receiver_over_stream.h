@@ -23,8 +23,10 @@ class PacketReceiverOverStream : public PacketReceiver {
   /// Creates a receiver reading framed bytes from `in`.
   PacketReceiverOverStream(roo_io::InputStream& in);
 
+  /// Receives currently available packets without indefinite blocking.
   size_t tryReceive(const ReceiverFn& receiver_fn) override;
 
+  /// Receives packets until at least one packet is delivered or input ends.
   size_t receive(const ReceiverFn& receiver_fn) override;
 
   /// Returns total raw bytes read from the underlying stream.

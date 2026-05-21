@@ -17,7 +17,8 @@ namespace roo_transport {
 using FunctionTable =
     roo_collections::FlatSmallHashMap<RpcFunctionId, RpcHandlerFn>;
 
-// Convenience wrapper for implementing synchronous unary RPC handlers.
+/// Convenience adapter from a typed synchronous unary handler to the raw RPC
+/// server interface.
 template <typename Request, typename Response,
           typename RequestDeserializer = Deserializer<Request>,
           typename ResponseSerializer = Serializer<Response>>
@@ -25,8 +26,10 @@ class UnaryHandler {
  public:
   using Fn = std::function<RpcStatus(const Request&, Response&)>;
 
+  /// Creates a handler that delegates to `fn`.
   UnaryHandler(Fn fn) : fn_(std::move(fn)) {}
 
+  /// Deserializes the request, runs the handler, and sends the response.
   void operator()(RequestHandle handle, const roo::byte* payload,
                   size_t payload_size, bool fin) const {
     RequestDeserializer deserializer;
@@ -51,7 +54,8 @@ class UnaryHandler {
   Fn fn_;
 };
 
-// Convenience wrapper for implementing asynchronous unary RPC handlers.
+/// Convenience adapter from a typed asynchronous unary handler to the raw RPC
+/// server interface.
 template <typename Request, typename Response,
           typename RequestDeserializer = Deserializer<Request>,
           typename ResponseSerializer = Serializer<Response>>
@@ -60,8 +64,10 @@ class AsyncUnaryHandler {
   using Fn = std::function<void(const Request&,
                                 std::function<void(RpcStatus, Response)>)>;
 
+  /// Creates a handler that delegates to `fn`.
   AsyncUnaryHandler(Fn fn) : fn_(std::move(fn)) {}
 
+  /// Deserializes the request, runs the handler, and sends the response.
   void operator()(RequestHandle handle, const roo::byte* payload,
                   size_t payload_size, bool fin) const {
     RequestDeserializer deserializer;
@@ -86,13 +92,18 @@ class AsyncUnaryHandler {
   Fn fn_;
 };
 
+/// Server-side dispatcher for RPC requests received over `Messaging`.
 class RpcServer {
  public:
+  /// Creates a server that routes requests through `function_table`.
   RpcServer(Messaging& messaging, const FunctionTable* function_table);
 
+  /// Registers the request dispatcher with the messaging transport.
   void begin();
+  /// Unregisters the request dispatcher from the messaging transport.
   void end();
 
+  /// Destroys the server and unregisters its receiver.
   ~RpcServer() { messaging_.unsetReceiver(); }
 
  private:

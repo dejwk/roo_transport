@@ -10,49 +10,57 @@
 
 namespace roo_transport {
 
-// Represents a reliable bidirectional peer-to-peer link over a packet-based
-// transport.
+/// Reliable bidirectional peer-to-peer link over a packet-based transport.
 class Link {
  public:
-  // Creates a dummy link in state kIdle.
-  // Use LinkTransport::connect() to create a proper connected link.
+  /// Creates a dummy detached link in state `kIdle`.
+  ///
+  /// Use `LinkTransport::connect()` or `connectAsync()` to obtain a connected
+  /// link backed by a live channel.
   Link();
 
   Link(const Link&) = delete;
   Link& operator=(const Link&) = delete;
 
-  // Support for move.
+  /// Moves link ownership from `other`.
   Link(Link&& other);
 
-  // Support for move.
+  /// Moves link ownership from `other`.
   Link& operator=(Link&& other);
 
-  // Obtains the input stream that can be used to read from the link.
+  /// Returns the input stream for reading from the link.
   LinkInputStream& in() { return in_; }
 
-  // Obtains the output stream that can be used to write to the link.
+  /// Returns the output stream for writing to the link.
   LinkOutputStream& out() { return out_; }
 
-  // Returns the current status of the link.
+  /// Returns the current link status.
+  ///
+  /// A detached link reports `kIdle`.
   LinkStatus status() const;
 
-  // If the link is in state kConnecting, blocks until it becomes either
-  // kConnected or kBroken. Otherwise, returns immediately.
+  /// Waits until a connecting link becomes connected or broken.
+  ///
+  /// If the link is idle, already connected, or already broken, this returns
+  /// immediately.
   void awaitConnected();
 
-  // If the link is kIdle, kConnected, or kBroken, does nothing and returns
-  // true immediately. Otherwise (when the link is in state kConnecting), blocks
-  // until it becomes either kConnected or kBroken, or until the specified
-  // timeout elapses, and returns true if the link has changed state, and false
-  // if the timeout has elapsed.
+  /// Waits for the link state to change or for `timeout` to elapse.
+  ///
+  /// If the link is idle, connected, or broken, returns `true` immediately.
+  /// While the link is in `kConnecting`, blocks until it becomes connected or
+  /// broken, or until the timeout expires.
   bool awaitConnected(roo_time::Duration timeout);
 
-  // Disconnects the link, immediately bringing it to the idle state. If the
-  // link is already idle, does nothing.
+  /// Disconnects the link and returns it to the idle state.
+  ///
+  /// If the link is already idle, this does nothing.
   void disconnect();
 
-  // Returns the ID that identifies this link. The link objects created by
-  // LinkTransport::connect() will have unique stream IDs.
+  /// Returns the local stream id assigned to this link.
+  ///
+  /// Links created by `LinkTransport::connect()` and `connectAsync()` receive
+  /// unique stream ids.
   uint32_t streamId() const { return my_stream_id_; }
 
  private:

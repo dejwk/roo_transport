@@ -13,7 +13,9 @@ class MuxMessaging {
 
   class Channel;
 
+  /// Creates a multiplexer over `messaging`.
   MuxMessaging(Messaging& messaging);
+  /// Destroys the multiplexer and unregisters its channels.
   ~MuxMessaging();
 
  private:
@@ -50,22 +52,27 @@ class MuxMessaging {
   roo_collections::FlatSmallHashMap<ChannelId, Channel*> receivers_;
 };
 
+/// Logical messaging channel hosted by `MuxMessaging`.
 class MuxMessaging::Channel : public Messaging {
  public:
   using Messaging::send;
   using Messaging::sendContinuation;
 
+  /// Creates a logical channel with id `id`.
   Channel(MuxMessaging& messaging, ChannelId id)
       : messaging_(messaging), id_(id) {
     messaging_.registerChannel(*this);
   }
 
+  /// Destroys the channel and unregisters it from the multiplexer.
   ~Channel() { messaging_.unregisterChannel(*this); }
 
+  /// Sends one multiplexed message on this channel.
   bool send(const roo::byte* header, size_t header_size,
             const roo::byte* payload, size_t payload_size,
             ConnectionId* connection_id) override;
 
+  /// Sends continuation data on an existing multiplexed connection.
   bool sendContinuation(ConnectionId connection_id, const roo::byte* header,
                         size_t header_size, const roo::byte* payload,
                         size_t payload_size) override;

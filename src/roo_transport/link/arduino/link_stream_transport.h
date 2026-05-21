@@ -14,52 +14,53 @@
 
 namespace roo_transport {
 
-// Generic implementation of the link stream transport, over an arbitrary
-// Arduino Stream. It uses default Arduino APIs to read from and to write to the
-// stream. The user needs to keep calling tryReceive() or receive() to process
-// incoming packets.
-//
-// The class does not provide a stream interface itself. Instead, use LinkStream
-// returned by connect() or connectAsync() methods to read and write data over
-// the reliable link.
+/// Reliable link transport over an arbitrary Arduino `Stream`.
+///
+/// Uses the default Arduino stream APIs to read and write framed packets. The
+/// caller must keep invoking `tryReceive()` or `receive()` so incoming packets
+/// are processed.
 class LinkStreamTransport {
  public:
+  /// Creates a transport that reads and writes framed packets on `stream`.
   LinkStreamTransport(Stream& stream, LinkBufferSize sendbuf = kBufferSize4KB,
                       LinkBufferSize recvbuf = kBufferSize4KB);
 
+  /// Starts the underlying `LinkTransport`.
   void begin();
 
-  // Establishes a new connection and returns the LinkStream object representing
-  // it. The optional function parameter will be called when the link gets
-  // disconnected.
+  /// Establishes a new connection and returns the resulting `LinkStream`.
+  ///
+  /// Blocks until the handshake finishes. If supplied, `disconnect_fn` is
+  /// called when that link later disconnects.
   LinkStream connect(std::function<void()> disconnect_fn = nullptr);
 
-  // Establishes a new connection asynchronously and returns the LinkStream
-  // object representing it. Until the connection is established, the link will
-  // be in the "connecting" state. The optional function parameter will be
-  // called when the link gets disconnected.
+  /// Establishes a new connection without waiting for completion.
+  ///
+  /// The returned stream remains in `kConnecting` until the handshake
+  /// completes. If supplied, `disconnect_fn` is called when that link later
+  /// disconnects.
   LinkStream connectAsync(std::function<void()> disconnect_fn = nullptr);
 
-  // Establishes a new connection and returns the LinkStream object representing
-  // it. If the peer attempts reconnection (e.g. after a reset), the program
-  // will terminate (usually to reconnect after reboot).
+  /// Establishes a new connection and terminates if the peer later resets.
   LinkStream connectOrDie();
 
+  /// Returns the underlying transport.
   LinkTransport& transport() { return transport_; }
 
-  // Allow implicit conversion to LinkTransport&, so that this Arduino wrapper
-  // can be used seamlessly in place of LinkTransport when a reference to the
-  // latter is needed (e.g., when constructing LinkMessaging).
+  /// Returns the underlying transport by implicit conversion.
   operator LinkTransport&() { return transport_; }
 
-  // Attempts to receive one or more packets without blocking. Returns the
-  // number of packets received.
+  /// Processes available packets without blocking.
+  ///
+  /// @return Number of packets received.
   size_t tryReceive();
 
-  // Attempts to receive one or more packets, blocking if necessary until at
-  // least one packet is received. Returns the number of packets received.
+  /// Processes packets until at least one packet is received.
+  ///
+  /// @return Number of packets received.
   size_t receive();
 
+  /// Returns a stats view for the underlying transport.
   LinkTransport::StatsMonitor statsMonitor() {
     return LinkTransport::StatsMonitor(transport_);
   }

@@ -27,6 +27,7 @@ class PacketSenderOverStream : public PacketSender {
   /// Sends one packet payload.
   void send(const roo::byte* buf, size_t len) override;
 
+  /// Flushes pending framed output.
   void flush() override { out_.flush(); }
 
  private:

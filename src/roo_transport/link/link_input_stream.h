@@ -8,11 +8,14 @@
 
 namespace roo_transport {
 
+/// Input stream view over the inbound side of a `Link`.
 class LinkInputStream : public roo_io::InputStream {
  public:
+  /// Creates a closed input stream.
   LinkInputStream()
       : channel_(nullptr), my_stream_id_(0), status_(roo_io::kClosed) {}
 
+  /// Creates an input stream bound to `my_stream_id` on `channel`.
   LinkInputStream(Channel& channel, uint32_t my_stream_id)
       : channel_(&channel),
         my_stream_id_(my_stream_id),
@@ -21,19 +24,28 @@ class LinkInputStream : public roo_io::InputStream {
   LinkInputStream(const LinkInputStream&) = delete;
   LinkInputStream& operator=(const LinkInputStream&) = delete;
 
+  /// Moves stream ownership from `other`.
   LinkInputStream(LinkInputStream&& other);
+  /// Moves stream ownership from `other`.
   LinkInputStream& operator=(LinkInputStream&& other);
 
+  /// Closes the stream.
   void close() override;
 
+  /// Reads up to `count` bytes, blocking if needed.
   size_t read(roo::byte* buf, size_t count) override;
 
+  /// Reads up to `count` bytes without blocking.
   size_t tryRead(roo::byte* buf, size_t count) override;
 
+  /// Returns the number of bytes currently available without blocking.
   size_t available();
+  /// Reads one byte from the stream.
   int read();
+  /// Peeks at the next byte without consuming it.
   int peek();
 
+  /// Returns the current stream status.
   roo_io::Status status() const override { return status_; }
 
  private:

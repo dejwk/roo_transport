@@ -8,6 +8,7 @@
 namespace roo_transport {
 namespace internal {
 
+/// Outgoing reliable-stream state machine and packet queue.
 class Transmitter {
  public:
   enum State {
@@ -29,28 +30,51 @@ class Transmitter {
     kBroken = 3,
   };
 
+  /// Creates a transmitter with a send buffer of size `1 << sendbuf_log2`.
   Transmitter(unsigned int sendbuf_log2);
 
-  // Sets the state to kIdle.
+  /// Resets the transmitter to the idle state.
   void reset();
 
-  // Sets the state to kConnecting.
+  /// Initializes a new outgoing stream.
   void init(uint32_t my_stream_id, SeqNum new_start);
 
+  /// Returns the number of sent packets, including retransmissions.
   uint32_t packets_sent() const { return packets_sent_; }
 
+  /// Returns the number of packets confirmed as delivered.
   uint32_t packets_delivered() const { return packets_delivered_; }
 
+  /// Writes up to `count` bytes into the pending packet queue.
+  ///
+  /// Stops when flow-control credit or free queue slots run out.
   size_t tryWrite(const roo::byte* buf, size_t count, bool& made_space);
+
+  /// Returns the guaranteed writable byte count.
+  ///
+  /// In the worst case, if the caller flushes after every write, only one byte
+  /// is guaranteed per free queue slot.
   size_t availableForWrite() const;
+
+  /// Flushes the current pending packet, if any.
+  ///
+  /// Marks the partially filled packet ready for transmission even if there is
+  /// still payload space left in it.
   bool flush();
 
-  // Returns true if there are some unacked buffers in the queue.
+  /// Returns whether there is still unacknowledged data pending.
+  ///
+  /// This reports whether there are any packets left in the send queue.
   bool hasPendingData() const;
 
-  // If connected, sets state to kClosed.
+  /// Closes the outgoing stream.
+  ///
+  /// Flushes the current packet and appends an end-of-stream packet when space
+  /// is available. If the queue is full, the final packet is deferred until an
+  /// ACK frees a slot.
   void close();
 
+  /// Marks the transmitter connected to the peer.
   void setConnected(uint16_t peer_receive_buffer_size, bool control_bit) {
     state_ = kConnected;
     peer_receive_buffer_size_ = peer_receive_buffer_size;
@@ -59,25 +83,38 @@ class Transmitter {
     recv_himark_ = out_ring_.begin() + peer_receive_buffer_size;
   }
 
+  /// Marks the transmitter broken.
   void setBroken();
 
+  /// Returns the current transmitter state.
   State state() const { return state_; }
 
+  /// Returns the local stream id.
   uint32_t my_stream_id() const { return my_stream_id_; }
 
+  /// Returns the next packet buffer to send, if any.
+  ///
+  /// Prefers in-order first sends before falling back to retransmission
+  /// candidates.
   const OutBuffer* getBufferToSend(long& next_send_micros);
+
+  /// Serializes the next outgoing packet into `buf`.
   size_t send(roo::byte* buf, long& next_send_micros);
 
+  /// Returns the first unacknowledged sequence number.
   SeqNum front() const { return out_ring_.begin(); }
 
-  // Called when an 'ack' package is received. Removes acked packages from the
-  // send queue. Returns true if there is a packet that should be immediately
-  // re-delivered, without waiting for its expiration.
+  /// Applies an acknowledgment bitmap from the peer.
+  ///
+  /// Removes fully ACKed packets from the queue and may rush retransmission of
+  /// packets that appear to have been skipped.
   bool ack(bool control_bit, uint16_t seq_id, const roo::byte* ack_bitmap,
            size_t ack_bitmap_len);
 
-  // Returns true if the recv himark has changed, making room for new data to
-  // send.
+  /// Updates the peer receive high-water mark.
+  ///
+  /// Returns `true` when the update increases the send window and therefore may
+  /// allow new payload to be queued or transmitted.
   bool updateRecvHimark(bool control_bit, uint16_t recv_himark);
 
  private:

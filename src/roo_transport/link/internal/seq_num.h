@@ -28,45 +28,59 @@ namespace internal {
 // the values are expected to be contained in a small range).
 class SeqNum {
  public:
+  /// Creates a wrapped sequence number from its raw representation.
   SeqNum(uint16_t seq) : seq_(seq) {}
 
+  /// Returns whether two sequence numbers are equal.
   bool operator==(SeqNum other) const { return seq_ == other.seq_; }
 
+  /// Returns whether two sequence numbers differ.
   bool operator!=(SeqNum other) const { return seq_ != other.seq_; }
 
+  /// Returns whether this sequence number precedes `other`.
   bool operator<(SeqNum other) const {
     return (int16_t)(seq_ - other.seq_) < 0;
   }
 
+  /// Returns whether this sequence number precedes or equals `other`.
   bool operator<=(SeqNum other) const {
     return (int16_t)(seq_ - other.seq_) <= 0;
   }
 
+  /// Returns whether this sequence number follows `other`.
   bool operator>(SeqNum other) const {
     return (int16_t)(seq_ - other.seq_) > 0;
   }
 
+  /// Returns whether this sequence number follows or equals `other`.
   bool operator>=(SeqNum other) const {
     return (int16_t)(seq_ - other.seq_) >= 0;
   }
 
+  /// Increments the sequence number.
   SeqNum& operator++() {
     ++seq_;
     return *this;
   }
 
+  /// Returns the previous value and then increments the sequence number.
   SeqNum operator++(int) { return SeqNum(seq_++); }
 
+  /// Advances the sequence number by `increment`.
   SeqNum& operator+=(int increment) {
     seq_ += increment;
     return *this;
   }
 
+  /// Returns wrapped distance from `other` to this value.
   int operator-(SeqNum other) const { return (int16_t)(seq_ - other.seq_); }
 
+  /// Returns sequence number advanced by `other`.
   SeqNum operator+(int other) const { return SeqNum(seq_ + other); }
+  /// Returns sequence number moved back by `other`.
   SeqNum operator-(int other) const { return SeqNum(seq_ - other); }
 
+  /// Returns the raw 16-bit representation.
   uint16_t raw() const { return seq_; }
 
  private:
@@ -84,4 +98,4 @@ inline roo_logging::Stream& operator<<(roo_logging::Stream& os,
   return os;
 }
 
-}
+}  // namespace roo_logging

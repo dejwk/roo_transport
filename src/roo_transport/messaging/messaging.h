@@ -21,6 +21,7 @@ class Messaging {
   class Receiver;
   class SimpleReceiver;
 
+  /// Destroys the messaging interface.
   virtual ~Messaging() = default;
 
   /// Registers message receiver. Call before channel initialization.
@@ -77,8 +78,10 @@ class Messaging {
   Receiver* receiver_ = nullptr;
 };
 
+/// Callback interface for receiving messages from a `Messaging` transport.
 class Messaging::Receiver {
  public:
+  /// Destroys the receiver.
   virtual ~Receiver() = default;
 
   /// Called when message is received.
@@ -94,11 +97,14 @@ class Messaging::Receiver {
   virtual void reset(ConnectionId connection_id) {}
 };
 
+/// Receiver adapter that forwards messages to a callable.
 class Messaging::SimpleReceiver : public Messaging::Receiver {
  public:
   using Fn = std::function<void(ConnectionId connection_id,
                                 const roo::byte* data, size_t len)>;
+  /// Creates a receiver that delegates to `fn`.
   explicit SimpleReceiver(Fn fn) : fn_(std::move(fn)) {}
+  /// Forwards the received message to the stored callback.
   void received(ConnectionId connection_id, const roo::byte* data,
                 size_t len) override {
     fn_(connection_id, data, len);

@@ -21,8 +21,10 @@ namespace roo_transport {
 namespace esp32 {
 
 template <typename SerialType>
+/// Common ESP32 serial transport scaffolding for a serial type.
 class Esp32SerialLinkTransportBase {
  public:
+  /// Creates stream adapters for `serial`.
   Esp32SerialLinkTransportBase(SerialType& serial, uart_port_t ignored)
       : serial_(serial), output_(serial_), input_(serial_) {}
 
@@ -35,8 +37,10 @@ class Esp32SerialLinkTransportBase {
 // Specialization for HardwareSerial that uses more efficient UART streams
 // (directly using esp-idf UART driver).
 template <>
+/// ESP32 serial transport scaffolding specialized for `HardwareSerial`.
 class Esp32SerialLinkTransportBase<HardwareSerial> {
  public:
+  /// Creates stream adapters for `serial` on UART `port`.
   Esp32SerialLinkTransportBase(HardwareSerial& serial, uart_port_t port)
       : serial_(serial), output_(port), input_(port) {}
 
@@ -46,15 +50,12 @@ class Esp32SerialLinkTransportBase<HardwareSerial> {
   roo_io::Esp32UartInputStream input_;
 };
 
-// Similar to LinkStreamTransport, but specialized for Serial types on ESP32.
-// The user still needs to initialize the underlying serial (by calling
-// begin()), but there is no need to call receive() or tryReceive() to process
-// incoming packets; this class takes care of that by registering the receive
-// handlers.
 template <typename SerialType>
+/// ESP32 serial link transport with receive callbacks wired to the UART.
 class Esp32SerialLinkTransport
     : public Esp32SerialLinkTransportBase<SerialType> {
  public:
+  /// Creates a transport over `serial` on UART `port`.
   Esp32SerialLinkTransport(SerialType& serial, uart_port_t port,
                            roo::string_view name,
                            LinkBufferSize sendbuf = kBufferSize4KB,
@@ -67,6 +68,7 @@ class Esp32SerialLinkTransport
           transport_.processIncomingPacket(buf, len);
         }) {}
 
+  /// Starts the transport and UART receive callbacks.
   void begin() {
     transport_.begin();
     this->serial_.onReceive([this]() { receiver_.tryReceive(process_fn_); });
@@ -74,41 +76,38 @@ class Esp32SerialLinkTransport
         [this](hardwareSerial_error_t) { receiver_.tryReceive(process_fn_); });
   }
 
+  /// Stops the transport and UART receive callbacks.
   void end() {
     this->serial_.onReceive(nullptr);
     this->serial_.onReceiveError(nullptr);
     transport_.end();
   }
 
-  // Establishes a new connection and returns the Link object representing it.
+  /// Establishes a new connection and waits for it to complete.
   LinkStream connect(std::function<void()> disconnect_fn = nullptr) {
     LinkStream link = connectAsync(std::move(disconnect_fn));
     link.awaitConnected();
     return LinkStream(std::move(link));
   }
 
-  // Establishes a new connection asynchronously and returns the Link object
-  // representing it. Until the connection is established, the link will be in
-  // the "connecting" state.
+  /// Establishes a new connection without waiting for completion.
   LinkStream connectAsync(std::function<void()> disconnect_fn = nullptr) {
     return LinkStream(transport_.connect(std::move(disconnect_fn)));
   }
 
-  // Establishes a new connection and returns the Link object representing it.
-  // If the peer attempts reconnection (e.g. after a reset), the program
-  // will terminate (usually to reconnect after reboot).
+  /// Establishes a new connection and terminates if the peer later resets.
   LinkStream connectOrDie() {
     return connect(
         []() { LOG(FATAL) << "LinkTransport: peer reset; rebooting"; });
   }
 
+  /// Returns the underlying transport.
   LinkTransport& transport() { return transport_; }
 
-  // Allow implicit conversion to LinkTransport&, so that this Arduino wrapper
-  // can be used seamlessly in place of LinkTransport when a reference to the
-  // latter is needed (e.g., when constructing LinkMessaging).
+  /// Returns the underlying transport by implicit conversion.
   operator LinkTransport&() { return transport_; }
 
+  /// Returns a stats view for the underlying transport.
   LinkTransport::StatsMonitor statsMonitor() {
     return LinkTransport::StatsMonitor(transport_);
   }
@@ -136,12 +135,15 @@ class Esp32SerialLinkTransport
 #define UART_NUM_2 2
 #endif
 
+/// Reliable link transport bound to Arduino `Serial` on ESP32.
 class ReliableSerial : public Esp32SerialLinkTransport<decltype(Serial)> {
  public:
+  /// Creates a transport named `serial`.
   ReliableSerial(LinkBufferSize sendbuf = kBufferSize4KB,
                  LinkBufferSize recvbuf = kBufferSize4KB)
       : ReliableSerial("serial", sendbuf, recvbuf) {}
 
+  /// Creates a transport with a custom diagnostic `name`.
   ReliableSerial(roo::string_view name, LinkBufferSize sendbuf = kBufferSize4KB,
                  LinkBufferSize recvbuf = kBufferSize4KB)
       : Esp32SerialLinkTransport<decltype(Serial)>(Serial, UART_NUM_0, name,
@@ -149,12 +151,15 @@ class ReliableSerial : public Esp32SerialLinkTransport<decltype(Serial)> {
 };
 
 #if SOC_UART_NUM > 1
+/// Reliable link transport bound to Arduino `Serial1` on ESP32.
 class ReliableSerial1 : public Esp32SerialLinkTransport<decltype(Serial1)> {
  public:
+  /// Creates a transport named `serial1`.
   ReliableSerial1(LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)
       : ReliableSerial1("serial1", sendbuf, recvbuf) {}
 
+  /// Creates a transport with a custom diagnostic `name`.
   ReliableSerial1(roo::string_view name,
                   LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)
@@ -163,12 +168,15 @@ class ReliableSerial1 : public Esp32SerialLinkTransport<decltype(Serial1)> {
 };
 #endif  // SOC_UART_NUM > 1
 #if SOC_UART_NUM > 2
+/// Reliable link transport bound to Arduino `Serial2` on ESP32.
 class ReliableSerial2 : public Esp32SerialLinkTransport<decltype(Serial2)> {
  public:
+  /// Creates a transport named `serial2`.
   ReliableSerial2(LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)
       : ReliableSerial2("serial2", sendbuf, recvbuf) {}
 
+  /// Creates a transport with a custom diagnostic `name`.
   ReliableSerial2(roo::string_view name,
                   LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)

@@ -10,10 +10,13 @@
 namespace roo_transport {
 namespace internal {
 
+/// Thread-safe notification primitive for waking the sender loop.
 class OutgoingDataReadyNotification {
  public:
+  /// Creates a notification object with no pending wakeup.
   OutgoingDataReadyNotification() : mutex_(), has_data_to_send_(false), cv_() {}
 
+  /// Signals that there is data ready to send.
   void notify() {
     roo::unique_lock<roo::mutex> guard(mutex_);
     if (has_data_to_send_) return;
@@ -22,6 +25,7 @@ class OutgoingDataReadyNotification {
     cv_.notify_one();
   }
 
+  /// Waits up to `micros` microseconds for a send notification.
   bool await(long micros) {
     roo::unique_lock<roo::mutex> guard(mutex_);
     bool result = cv_.wait_for(guard, roo_time::Micros(micros),

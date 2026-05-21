@@ -13,25 +13,30 @@
 
 namespace roo_transport {
 
-// Implementation of the Messaging interface over a LinkTransport.
+/// Messaging implementation backed by a reliable `LinkTransport`.
 class LinkMessaging : public Messaging {
  public:
   using Messaging::send;
   using Messaging::sendContinuation;
 
+  /// Creates a messaging adapter over `link_transport`.
   LinkMessaging(roo_transport::LinkTransport& link_transport,
                 size_t max_recv_packet_size,
                 uint16_t recv_thread_stack_size = 4096,
                 const char* recv_thread_name = "linkMsgRcv");
 
+  /// Starts the background receive loop.
   void begin();
 
+  /// Stops the background receive loop.
   void end();
 
+  /// Sends one message over the underlying link transport.
   bool send(const roo::byte* header, size_t header_size,
             const roo::byte* payload, size_t payload_size,
             ConnectionId* connection_id) override;
 
+  /// Sends continuation data on an existing link connection.
   bool sendContinuation(ConnectionId connection_id, const roo::byte* header,
                         size_t header_size, const roo::byte* payload,
                         size_t payload_size) override;

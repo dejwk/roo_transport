@@ -14,24 +14,58 @@
 
 namespace roo_transport {
 
+/// Client-side helper for issuing unary RPCs over a `Messaging` transport.
 class RpcClient {
  public:
+  /// Completion callback used for unary RPC responses.
+  ///
+  /// `data` and `data_size` describe the response payload after the RPC header
+  /// has been stripped. `status` is the transport or server status associated
+  /// with the completed call. When the underlying connection resets before a
+  /// pending call completes, the callback is invoked with `nullptr`, zero
+  /// length, and `kUnavailable`.
   using UnaryCompletionCb = std::function<void(
       const roo::byte* data, size_t data_size, RpcStatus status)>;
 
+  /// Creates a client that uses `messaging` for request and response traffic.
   explicit RpcClient(Messaging& messaging);
 
+  /// Sends a unary RPC request without a timeout.
+  ///
+  /// Allocates a new stream id, stores `cb` as the completion handler for that
+  /// stream, prepends a unary-request RPC header, and hands the message to the
+  /// underlying `Messaging` transport.
+  ///
+  /// @return `kOk` if the request was accepted for send, or `kUnavailable` if
+  /// the underlying messaging transport rejected it.
   RpcStatus sendUnaryRpc(RpcFunctionId function_id, const roo::byte* payload,
                          size_t payload_size, UnaryCompletionCb cb);
 
+  /// Sends a unary RPC request with a server-side timeout.
+  ///
+  /// Behaves like `sendUnaryRpc()`, but encodes `timeout_ms` into the RPC
+  /// request header so the server can fail the call after the specified
+  /// deadline.
+  ///
+  /// @return `kOk` if the request was accepted for send, or `kUnavailable` if
+  /// the underlying messaging transport rejected it.
   RpcStatus sendUnaryRpcWithTimeout(RpcFunctionId function_id,
                                     const roo::byte* payload,
                                     size_t payload_size, uint32_t timeout_ms,
                                     UnaryCompletionCb cb);
 
+  /// Destroys the client.
   ~RpcClient() = default;
 
+  /// Registers the response dispatcher with the underlying messaging layer.
+  ///
+  /// Call this before expecting incoming RPC responses.
   void begin();
+
+  /// Unregisters the response dispatcher from the messaging layer.
+  ///
+  /// After this returns, incoming transport messages are no longer routed to
+  /// this client.
   void end();
 
  private:
@@ -77,15 +111,21 @@ class RpcClient {
   OutgoingCalls outgoing_calls_;
 };
 
-// Convenience wrapper for implementing unary RPC stubs.
+/// Typed convenience wrapper for invoking one unary RPC function.
 template <typename Request, typename Response,
           typename RequestSerializer = Serializer<Request>,
           typename ResponseDeserializer = Deserializer<Response>>
 class UnaryStub {
  public:
+  /// Creates a stub bound to `function_id` on `client`.
   UnaryStub(RpcClient& client, RpcFunctionId function_id)
       : client_(client), function_id_(function_id) {}
 
+  /// Calls the RPC synchronously and waits for the response.
+  ///
+  /// Serializes `request`, submits it through the client, blocks on a latch
+  /// until the completion callback runs, and deserializes the response payload
+  /// into `response` when the RPC status is `kOk`.
   RpcStatus call(const Request& request, Response& response) {
     roo::latch completed(1);
     RequestSerializer serializer;
@@ -115,6 +155,12 @@ class UnaryStub {
     return status;
   }
 
+  /// Calls the RPC asynchronously and invokes `completion_cb` on completion.
+  ///
+  /// Serializes `request`, submits it through the client, and later
+  /// deserializes the response before invoking `completion_cb`. If request
+  /// serialization fails, the call returns that status immediately and no RPC
+  /// is sent.
   RpcStatus callAsync(const Request& request,
                       std::function<void(RpcStatus, Response)> completion_cb) {
     RequestSerializer serializer;

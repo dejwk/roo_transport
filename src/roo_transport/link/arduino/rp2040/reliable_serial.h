@@ -10,10 +10,10 @@
 namespace roo_transport {
 namespace rp2040 {
 
-// Implementation of the LinkStreamTransport that uses a newly created receiver
-// thread to read from the underlying serial.
+/// LinkStreamTransport variant that reads RP2040 UART data on a worker thread.
 class ReliableUartLinkTransport : public LinkStreamTransport {
  public:
+  /// Creates a transport over `serial` with receiver thread name `name`.
   ReliableUartLinkTransport(SerialUART &serial, roo::string_view name,
                             LinkBufferSize sendbuf = kBufferSize4KB,
                             LinkBufferSize recvbuf = kBufferSize4KB)
@@ -21,11 +21,13 @@ class ReliableUartLinkTransport : public LinkStreamTransport {
         serial_(serial),
         receiver_thread_name_(name) {}
 
+  /// Creates a transport with a default receiver thread name.
   ReliableUartLinkTransport(SerialUART &serial,
                             LinkBufferSize sendbuf = kBufferSize4KB,
                             LinkBufferSize recvbuf = kBufferSize4KB)
       : ReliableUartLinkTransport(serial, "serialRcv", sendbuf, recvbuf) {}
 
+  /// Starts the transport and the background receive thread.
   void begin() {
     LinkStreamTransport::begin();
     running_ = true;
@@ -51,6 +53,7 @@ class ReliableUartLinkTransport : public LinkStreamTransport {
     });
   }
 
+  /// Stops the background receive thread.
   void end() {
     running_ = false;
     receiver_thread_.join();
@@ -72,24 +75,30 @@ class ReliableUartLinkTransport : public LinkStreamTransport {
 //       {}
 // };
 
+/// Reliable link transport bound to Arduino `Serial1` on RP2040.
 class ReliableSerial1 : public ReliableUartLinkTransport {
  public:
+  /// Creates a transport named `serial1`.
   ReliableSerial1(LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)
       : ReliableSerial1("serial1", sendbuf, recvbuf) {}
 
+  /// Creates a transport with a custom diagnostic `name`.
   ReliableSerial1(roo::string_view name,
                   LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)
       : ReliableUartLinkTransport(Serial1, name, sendbuf, recvbuf) {}
 };
 
+/// Reliable link transport bound to Arduino `Serial2` on RP2040.
 class ReliableSerial2 : public ReliableUartLinkTransport {
  public:
+  /// Creates a transport named `serial2`.
   ReliableSerial2(LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)
       : ReliableSerial2("serial2", sendbuf, recvbuf) {}
 
+  /// Creates a transport with a custom diagnostic `name`.
   ReliableSerial2(roo::string_view name,
                   LinkBufferSize sendbuf = kBufferSize4KB,
                   LinkBufferSize recvbuf = kBufferSize4KB)

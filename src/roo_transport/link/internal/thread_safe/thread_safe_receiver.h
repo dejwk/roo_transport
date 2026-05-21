@@ -10,56 +10,75 @@
 namespace roo_transport {
 namespace internal {
 
+/// Thread-safe wrapper around `Receiver`.
 class ThreadSafeReceiver {
  public:
-  // Can be supplied to be notified when new data is available for read.
+  /// Callback invoked when new input data becomes available.
   using RecvCb = std::function<void()>;
 
+  /// Creates a receiver with a buffer of size `1 << recvbuf_log2`.
   ThreadSafeReceiver(unsigned int recvbuf_log2);
 
+  /// Returns the current receiver state.
   Receiver::State state() const;
 
+  /// Marks the receiver connected to the peer.
   void setConnected(SeqNum peer_seq_num, bool control_bit);
+  /// Marks the receiver broken.
   void setBroken();
 
+  /// Reads up to `count` bytes, blocking if needed.
   size_t read(roo::byte* buf, size_t count, uint32_t my_stream_id,
               roo_io::Status& stream_status, bool& outgoing_data_ready);
 
+  /// Reads up to `count` bytes without blocking.
   size_t tryRead(roo::byte* buf, size_t count, uint32_t my_stream_id,
                  roo_io::Status& stream_status, bool& outgoing_data_ready);
 
+  /// Peeks at the next byte without consuming it.
   int peek(uint32_t my_stream_id, roo_io::Status& stream_status);
 
+  /// Returns bytes currently available for immediate reading.
   size_t availableForRead(uint32_t my_stream_id,
                           roo_io::Status& stream_status) const;
 
+  /// Closes the local input side of the stream.
   void markInputClosed(uint32_t my_stream_id, roo_io::Status& stream_status,
                        bool& outgoing_data_ready);
 
+  /// Resets the receiver to the idle state.
   void reset();
+  /// Initializes a new incoming stream.
   void init(uint32_t my_stream_id);
 
+  /// Serializes an acknowledgment packet into `buf`.
   size_t ack(roo::byte* buf);
+  /// Serializes a flow-control update into `buf`.
   size_t updateRecvHimark(roo::byte* buf, long& next_send_micros);
 
+  /// Handles one received data packet.
   bool handleDataPacket(bool control_bit, uint16_t seq_id,
                         const roo::byte* payload, size_t len, bool is_final);
 
+  /// Returns whether there is no buffered input.
   bool empty() const {
     roo::lock_guard<roo::mutex> guard(mutex_);
     return receiver_.empty();
   }
 
+  /// Returns whether the stream has reached end-of-stream.
   bool done() const {
     roo::lock_guard<roo::mutex> guard(mutex_);
     return receiver_.done();
   }
 
+  /// Returns the number of packets received.
   uint32_t packets_received() const {
     roo::lock_guard<roo::mutex> guard(mutex_);
     return receiver_.packets_received();
   }
 
+  /// Returns receive buffer capacity as a log2 value.
   unsigned int buffer_size_log2() const;
 
  private:
