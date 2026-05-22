@@ -8,3 +8,6 @@ Additionally, the library provides a more foundational packet transport, which p
 Finally, the library supplies a functional RPC framework that works on top of this reliable messaging.
 
 See the included examples.
+
+For a guided walkthrough of the layers, usage patterns, and extension points,
+see [the programming guide](doc/programming_guide.md).
