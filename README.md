@@ -9,5 +9,15 @@ Finally, the library supplies a functional RPC framework that works on top of th
 
 See the included examples.
 
+For a use-case-driven introduction, start with
+[roo_transport by use case](doc/reliable_embedded_links.md).
+
+If you already know your problem shape, jump directly to:
+
+- [Stop Maintaining Your Own UART Protocol](doc/blog/reliable_uart_streams.md)
+- [Reset-Tolerant Command Channels Between Boards](doc/blog/reconnect_aware_messaging.md)
+- [Treat a Coprocessor Like a Service](doc/blog/rpc_for_coprocessors.md)
+- [When Losing a Sample Is Fine](doc/blog/packet_telemetry.md)
+
 For a guided walkthrough of the layers, usage patterns, and extension points,
 see [the programming guide](doc/programming_guide.md).
