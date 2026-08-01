@@ -63,8 +63,6 @@ roo::thread server_thread;
 // ReliableSerial1 serial1("server");
 // ReliableSerial2 serial2("client");
 
-
-
 #if MODE == MODE_LOOPBACK || MODE == MODE_SERVER
 
 void server() {

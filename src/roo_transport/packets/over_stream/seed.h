@@ -8,4 +8,4 @@ namespace roo_transport {
 // the stream. (Incidentally, this is a hash code of an empty packet.)
 static const uint32_t kPacketOverStreamSeed = 0xB45DF9DE;
 
-}
+}  // namespace roo_transport

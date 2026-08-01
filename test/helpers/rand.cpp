@@ -1,9 +1,9 @@
 #include "rand.h"
 
+#include "esp_random.h"
+#include "roo_logging.h"
 #include "roo_threads.h"
 #include "roo_threads/mutex.h"
-#include "roo_logging.h"
-#include "esp_random.h"
 
 namespace roo_transport {
 

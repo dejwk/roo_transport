@@ -14,7 +14,7 @@ namespace rp2040 {
 class ReliableUartLinkTransport : public LinkStreamTransport {
  public:
   /// Creates a transport over `serial` with receiver thread name `name`.
-  ReliableUartLinkTransport(SerialUART &serial, roo::string_view name,
+  ReliableUartLinkTransport(SerialUART& serial, roo::string_view name,
                             LinkBufferSize sendbuf = kBufferSize4KB,
                             LinkBufferSize recvbuf = kBufferSize4KB)
       : LinkStreamTransport(serial, sendbuf, recvbuf),
@@ -22,7 +22,7 @@ class ReliableUartLinkTransport : public LinkStreamTransport {
         receiver_thread_name_(name) {}
 
   /// Creates a transport with a default receiver thread name.
-  ReliableUartLinkTransport(SerialUART &serial,
+  ReliableUartLinkTransport(SerialUART& serial,
                             LinkBufferSize sendbuf = kBufferSize4KB,
                             LinkBufferSize recvbuf = kBufferSize4KB)
       : ReliableUartLinkTransport(serial, "serialRcv", sendbuf, recvbuf) {}
@@ -60,7 +60,7 @@ class ReliableUartLinkTransport : public LinkStreamTransport {
   }
 
  private:
-  SerialUART &serial_;
+  SerialUART& serial_;
   std::string receiver_thread_name_;
   roo::thread receiver_thread_;
   roo::atomic<bool> running_{false};

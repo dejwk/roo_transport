@@ -2,13 +2,13 @@
 #include <unordered_map>
 
 #include "gtest/gtest.h"
+#include "helpers/noisy_output_stream.h"
 #include "roo_io/ringpipe/ringpipe.h"
 #include "roo_io/ringpipe/ringpipe_input_stream.h"
 #include "roo_io/ringpipe/ringpipe_output_stream.h"
 #include "roo_threads/thread.h"
 #include "roo_transport/packets/over_stream/packet_receiver_over_stream.h"
 #include "roo_transport/packets/over_stream/packet_sender_over_stream.h"
-#include "helpers/noisy_output_stream.h"
 
 namespace roo_transport {
 
