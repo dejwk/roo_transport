@@ -79,7 +79,7 @@ void server() {
     // Send the packet.
     sender.send(buf, itr.ptr() - buf);
 
-    Serial.printf("Server sent reading #%d: %f\n", num_reading,
+    Serial.printf("Server sent reading #%zu: %f\n", num_reading,
                   ((float)temperature) / 100.0f);
     num_reading++;
     delay(1000);
@@ -95,10 +95,11 @@ void processPacket(const roo::byte* buf, size_t len) {
   uint32_t reading_num = roo_io::ReadBeU32(itr);
   int32_t temperature = roo_io::ReadBeS32(itr);
   if (itr.status() != roo_io::kOk) {
-    Serial.printf("Client: error reading packet: %d %d\n", itr.status(), len);
+    Serial.printf("Client: error reading packet: %d %zu\n", itr.status(), len);
     return;
   }
-  Serial.printf("Client received reading #%d: %f\n", reading_num,
+  Serial.printf("Client received reading #%u: %f\n",
+                static_cast<unsigned>(reading_num),
                 ((float)temperature) / 100.0f);
 }
 
@@ -114,7 +115,7 @@ void client() {
   PacketReceiverOverStream receiver(serial2_in);
   while (true) {
     size_t num_received = receiver.receive(processPacket);
-    CHECK_GT(num_received, 0);
+    CHECK_GT(num_received, size_t{0});
   }
 }
 
