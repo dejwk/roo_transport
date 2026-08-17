@@ -129,12 +129,6 @@ class Esp32SerialLinkTransport
 //
 // -D ARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=3072
 
-#if defined(ROO_TESTING)
-#define UART_NUM_0 0
-#define UART_NUM_1 1
-#define UART_NUM_2 2
-#endif
-
 /// Reliable link transport bound to Arduino `Serial` on ESP32.
 class ReliableSerial : public Esp32SerialLinkTransport<decltype(Serial)> {
  public:

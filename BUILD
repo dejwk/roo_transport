@@ -22,7 +22,14 @@ cc_library(
         "@roo_io",
         "@roo_logging",
         "@roo_threads",
-    ],
+    ] + select({
+        "@roo_testing//roo_testing/platforms:is_arduino": [
+            "@roo_io//:arduino_stream",
+            "@roo_io//:esp32_uart",
+            "@roo_testing//:arduino",
+        ],
+        "//conditions:default": [],
+    }),
 )
 
 cc_test(
@@ -34,6 +41,10 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     includes = ["src"],
     linkstatic = 1,
+    target_compatible_with = select({
+        "@roo_testing//roo_testing/platforms:is_arduino": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":roo_transport",
         "//test/helpers",
@@ -50,6 +61,10 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     includes = ["src"],
     linkstatic = 1,
+    target_compatible_with = select({
+        "@roo_testing//roo_testing/platforms:is_arduino": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":roo_transport",
         "//test/helpers",
@@ -66,6 +81,10 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     includes = ["src"],
     linkstatic = 1,
+    target_compatible_with = select({
+        "@roo_testing//roo_testing/platforms:is_arduino": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":roo_transport",
         "//test/helpers",
@@ -83,6 +102,10 @@ cc_test(
     copts = ["-Iexternal/gtest/include"],
     includes = ["src"],
     linkstatic = 1,
+    target_compatible_with = select({
+        "@roo_testing//roo_testing/platforms:is_arduino": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     deps = [
         ":roo_transport",
         "//test/helpers",
