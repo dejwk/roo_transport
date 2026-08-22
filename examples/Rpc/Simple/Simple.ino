@@ -3,83 +3,16 @@
 // This section is intended for testing the example on Linux. You can disregard
 // it when analyzing the example itself - just scroll down to the #endif.
 
-#include "roo_io/ringpipe/ringpipe.h"
 #include "roo_testing/buses/uart/fake_uart.h"
 #include "roo_testing/microcontrollers/esp32/fake_esp32.h"
 
-class FakeUartEndpoint : public FakeUartDevice {
- public:
-  FakeUartEndpoint() : tx_(256), rx_(256) {}
-
-  size_t write(const uint8_t* buf, uint16_t size) override {
-    return tx_.writeFully((const roo::byte*)buf, size);
-  }
-
-  size_t read(uint8_t* buf, uint16_t size) override {
-    return rx_.tryRead((roo::byte*)buf, size);
-  }
-
-  size_t availableForRead() override { return rx_.availableForRead(); }
-
-  size_t availableForWrite() override { return tx_.availableForWrite(); }
-
-  roo_io::RingPipe& tx() { return tx_; }
-  roo_io::RingPipe& rx() { return rx_; }
-
- private:
-  roo_io::RingPipe tx_;
-  roo_io::RingPipe rx_;
-};
-
-class UartForwarder {
- public:
-  UartForwarder(roo_io::RingPipe& from, roo_io::RingPipe& to,
-                FakeUartDevice& recv)
-      : from_(from), to_(to), recv_(recv) {}
-
-  void begin() {
-    roo::thread::attributes attrs;
-    attrs.set_name("uart forwarder");
-    forwarder_thread_ = roo::thread(attrs, [this]() {
-      roo::byte buffer[256];
-      while (true) {
-        size_t count = from_.read(buffer, sizeof(buffer));
-        if (count == 0) {
-          break;
-        }
-        do {
-          size_t written = to_.write(buffer, count);
-          recv_.notifyDataAvailable();
-          if (written == 0) {
-            break;
-          }
-          count -= written;
-        } while (count > 0);
-      }
-    });
-  }
-
- private:
-  roo_io::RingPipe& from_;
-  roo_io::RingPipe& to_;
-  FakeUartDevice& recv_;
-  roo::thread forwarder_thread_;
-};
-
 struct Emulator {
-  FakeUartEndpoint serial1_;
-  FakeUartEndpoint serial2_;
-  UartForwarder forwarder_1_to_2_;
-  UartForwarder forwarder_2_to_1_;
-  Emulator()
-      : forwarder_1_to_2_(serial1_.tx(), serial2_.rx(), serial2_),
-        forwarder_2_to_1_(serial2_.tx(), serial1_.rx(), serial1_) {
-    forwarder_1_to_2_.begin();
-    forwarder_2_to_1_.begin();
+  FakeUartCable cable;
 
+  Emulator() {
     auto& board = FakeEsp32();
-    board.attachUartDevice(serial1_, 27, 14);
-    board.attachUartDevice(serial2_, 25, 26);
+    board.attachUartDevice(cable.end_a(), 27, 14);
+    board.attachUartDevice(cable.end_b(), 25, 26);
   }
 } emulator;
 

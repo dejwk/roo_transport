@@ -8,5 +8,7 @@ roo_arduino_example(
         "@roo_io",
         "@roo_io//:arduino_stream",
         "@roo_threads",
+        "@roo_testing//roo_testing/buses/uart",
+        "@roo_testing//roo_testing/microcontrollers/esp32",
     ],
 )

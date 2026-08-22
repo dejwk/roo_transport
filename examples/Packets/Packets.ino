@@ -1,3 +1,23 @@
+#ifdef ROO_TESTING
+
+// This section is intended for testing the example on Linux. You can disregard
+// it when analyzing the example itself - just scroll down to the #endif.
+
+#include "roo_testing/buses/uart/fake_uart.h"
+#include "roo_testing/microcontrollers/esp32/fake_esp32.h"
+
+struct Emulator {
+  FakeUartCable cable;
+
+  Emulator() {
+    auto& board = FakeEsp32();
+    board.attachUartDevice(cable.end_a(), 27, 14);
+    board.attachUartDevice(cable.end_b(), 25, 26);
+  }
+} emulator;
+
+#endif
+
 // This example demonstrates how to use the packet transport.
 //
 // The transport guarantees integrity (i.e. no corrupted packets), but does not

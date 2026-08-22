@@ -4,5 +4,9 @@ roo_arduino_example(
     name = "Simple",
     sketch = "Simple.ino",
     visibility = ["//visibility:public"],
-    deps = ["//:roo_transport"],
+    deps = [
+        "//:roo_transport",
+        "@roo_testing//roo_testing/buses/uart",
+        "@roo_testing//roo_testing/microcontrollers/esp32",
+    ],
 )

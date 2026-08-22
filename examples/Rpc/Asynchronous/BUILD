@@ -7,5 +7,7 @@ roo_arduino_example(
     deps = [
         "//:roo_transport",
         "@roo_scheduler",
+        "@roo_testing//roo_testing/buses/uart",
+        "@roo_testing//roo_testing/microcontrollers/esp32",
     ],
 )
