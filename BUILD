@@ -28,6 +28,10 @@ cc_library(
             "@roo_io//:esp32_uart",
             "@roo_testing//:arduino",
         ],
+        "@roo_testing//roo_testing/platforms:is_idf": [
+            "@roo_io//:esp32_uart",
+            "@roo_testing//roo_testing/frameworks/esp-idf",
+        ],
         "//conditions:default": [],
     }),
 )
