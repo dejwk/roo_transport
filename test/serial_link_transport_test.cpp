@@ -104,7 +104,12 @@ struct Emulator {
     board.attachUartDevice(peer1, 13, 12);
     board.attachUartDevice(peer2, 15, 14);
   }
-} emulator;
+};
+
+// The FreeRTOS emulation tears down before C++ global destructors. Keep the
+// UART test harness alive until process exit so its RingPipe destructors don't
+// notify already-destroyed FreeRTOS tasks.
+Emulator& emulator = *new Emulator();
 
 namespace roo_transport {
 
@@ -126,6 +131,9 @@ class TransferTest : public ::testing::Test {
 
   ~TransferTest() {
     join();
+    // Stop the transport sender threads before tearing down their UARTs.
+    transport1.end();
+    transport2.end();
     Serial1.end();
     Serial2.end();
   }
