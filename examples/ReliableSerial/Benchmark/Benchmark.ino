@@ -128,7 +128,6 @@ void server() {
 
   roo_io::InputStreamReader in(link.in());
   roo_io::OutputStreamWriter out(link.out());
-  uint32_t i = 0;
 
   // For tracking packet loss.
   LinkTransport::StatsMonitor stats = reliable_serial1.statsMonitor();
@@ -193,7 +192,6 @@ void throughputTest(roo_io::InputStreamReader& in,
   std::unique_ptr<roo::byte[]> buf(new roo::byte[256]);
 
   const uint32_t kMessageSize = baud_rate / 5;
-  uint32_t total_time_us = 0;
   roo_time::Uptime start = roo_time::Uptime::Now();
   out.writeVarU64(kMessageSize);
   out.flush();
