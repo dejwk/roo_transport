@@ -516,7 +516,7 @@ constexpr RpcStatus DeserializeMember(const roo::byte*& data, size_t& len,
     return roo_transport::kInvalidArgument;
   }
   uint16_t member_len = roo_io::LoadBeU16(data);
-  if (len < 2 + member_len) {
+  if (len - 2 < member_len) {
     return roo_transport::kInvalidArgument;
   }
   data += 2;
