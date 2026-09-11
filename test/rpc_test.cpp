@@ -24,8 +24,34 @@ class TestMessaging : public Messaging {
     if (id) *id = 1;
     return on_send();
   }
-  bool sendContinuation(ConnectionId, const roo::byte*, size_t,
-                        const roo::byte*, size_t) override { return false; }
+  struct Response {
+    ConnectionId connection_id;
+    RpcHeader header;
+  };
+  bool sendContinuation(ConnectionId id, const roo::byte* header, size_t size,
+                        const roo::byte*, size_t) override {
+    RpcHeader parsed;
+    EXPECT_GT(parsed.deserialize(header, size), 0u);
+    roo::lock_guard<roo::mutex> lock(mutex);
+    responses.push_back({id, parsed});
+    changed.notify_all();
+    return true;
+  }
+  std::vector<Response> awaitResponses(size_t count) {
+    roo::unique_lock<roo::mutex> lock(mutex);
+    changed.wait_until(lock, roo_time::Uptime::Now() + roo_time::Seconds(2),
+                       [&] { return responses.size() >= count; });
+    return responses;
+  }
+  void request(ConnectionId id, const RpcHeader& header) {
+    roo::byte bytes[RpcHeader::kMaxSerializedSize];
+    size_t size = header.serialize(bytes, sizeof(bytes));
+    received(id, bytes, size);
+  }
+ private:
+  roo::mutex mutex;
+  roo::condition_variable changed;
+  std::vector<Response> responses;
 };
 
 TEST(RpcClient, FailedSendsReleaseCallbacksBeforeReturning) {
@@ -87,6 +113,21 @@ TEST(RpcClient, FailedSendWaitsForCallbackClaimedByReset) {
   sender.join();
   resetter.join();
   EXPECT_TRUE(returned);
+}
+TEST(RpcServer, UnknownFunctionReturnsUnimplementedAndReleasesRequest) {
+  TestMessaging messaging;
+  FunctionTable functions;
+  RpcServer server(messaging, &functions);
+  server.begin();
+  messaging.request(1, RpcHeader::NewUnaryRequest(99, 7));
+  auto responses = messaging.awaitResponses(1);
+  ASSERT_EQ(1u, responses.size());
+  EXPECT_EQ(1u, responses[0].connection_id);
+  EXPECT_EQ(7u, responses[0].header.streamId());
+  EXPECT_EQ(kUnimplemented, responses[0].header.responseStatus());
+  // Reusing the ID must not be rejected as a pending duplicate.
+  messaging.request(1, RpcHeader::NewUnaryRequest(99, 7));
+  EXPECT_EQ(2u, messaging.awaitResponses(2).size());
 }
 }  // namespace
 }  // namespace roo_transport

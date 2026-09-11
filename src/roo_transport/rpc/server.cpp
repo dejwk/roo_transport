@@ -36,15 +36,6 @@ void RpcServer::handleRequest(Messaging::ConnectionId connection_id,
   if (header.isFirstMessage()) {
     // New request.
     RpcFunctionId function_id = header.functionId();
-    auto handler_it = handlers_->find(function_id);
-    if (handler_it == handlers_->end()) {
-      sendFailureResponse(connection_id, header.streamId(),
-                          RpcStatus::kUnimplemented,
-                          roo::string_view("Unknown function ID"));
-      return;
-    }
-    const RpcHandlerFn& handler = handler_it->second;
-
     roo_time::Uptime deadline = roo_time::Uptime::Max();
     if (header.hasTimeout()) {
       deadline = roo_time::Uptime::Now() + roo_time::Millis(header.timeoutMs());
@@ -62,6 +53,15 @@ void RpcServer::handleRequest(Messaging::ConnectionId connection_id,
            RpcRequest(connection_id, function_id, header.streamId(), deadline,
                       header.isLastMessage())});
     }
+
+    auto handler_it = handlers_->find(function_id);
+    if (handler_it == handlers_->end()) {
+      sendFailureResponse(connection_id, header.streamId(),
+                          RpcStatus::kUnimplemented,
+                          roo::string_view("Unknown function ID"));
+      return;
+    }
+    const RpcHandlerFn& handler = handler_it->second;
 
     // Invoke the handler.
     handler(RequestHandle(*this, connection_id, header.streamId()), data, len,
