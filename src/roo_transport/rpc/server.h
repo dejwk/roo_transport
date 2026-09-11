@@ -138,7 +138,7 @@ class RpcServer {
   bool prepForResponse(Messaging::ConnectionId connection_id,
                        RpcStreamId stream_id);
 
-  void reconnected();
+  void reconnected(Messaging::ConnectionId connection_id);
 
   Messaging& messaging_;
   Dispatcher dispatcher_;

@@ -129,5 +129,24 @@ TEST(RpcServer, UnknownFunctionReturnsUnimplementedAndReleasesRequest) {
   messaging.request(1, RpcHeader::NewUnaryRequest(99, 7));
   EXPECT_EQ(2u, messaging.awaitResponses(2).size());
 }
+TEST(RpcServer, OldHandlerCannotEraseReusedStreamOnNewConnection) {
+  TestMessaging messaging;
+  std::vector<RequestHandle> handles;
+  FunctionTable functions = {{1, [&](RequestHandle handle, const roo::byte*,
+                                     size_t, bool) { handles.push_back(handle); }}};
+  RpcServer server(messaging, &functions);
+  server.begin();
+  messaging.request(1, RpcHeader::NewUnaryRequest(1, 7));
+  messaging.request(2, RpcHeader::NewUnaryRequest(1, 7));
+  ASSERT_EQ(2u, handles.size());
+  handles[0].sendSuccessResponse(nullptr, 0, true);
+  handles[0].sendFailureResponse(kUnknown, "late failure");
+  handles[1].sendSuccessResponse(nullptr, 0, true);
+  auto responses = messaging.awaitResponses(1);
+  ASSERT_EQ(1u, responses.size());
+  EXPECT_EQ(2u, responses[0].connection_id);
+  EXPECT_EQ(7u, responses[0].header.streamId());
+  EXPECT_EQ(kOk, responses[0].header.responseStatus());
+}
 }  // namespace
 }  // namespace roo_transport

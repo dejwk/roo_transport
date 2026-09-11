@@ -16,10 +16,7 @@ void RpcServer::end() { messaging_.unsetReceiver(); }
 
 void RpcServer::handleRequest(Messaging::ConnectionId connection_id,
                               const roo::byte* data, size_t len) {
-  if (connection_id != connection_id_) {
-    connection_id_ = connection_id;
-    reconnected();
-  }
+  reconnected(connection_id);
   RpcHeader header;
   size_t header_len = header.deserialize(data, len);
   if (header_len == 0) {
@@ -71,8 +68,10 @@ void RpcServer::handleRequest(Messaging::ConnectionId connection_id,
   }
 }
 
-void RpcServer::reconnected() {
+void RpcServer::reconnected(Messaging::ConnectionId connection_id) {
   roo::lock_guard<roo::mutex> guard(mutex_);
+  if (connection_id == connection_id_) return;
+  connection_id_ = connection_id;
   // Clear the info about pending requests, so that new requests don't clash
   // when they use the same stream IDs.
   pending_calls_.clear();
@@ -110,12 +109,15 @@ bool RpcServer::prepForResponse(Messaging::ConnectionId connection_id,
                                 RpcStreamId stream_id) {
   // Look up the request.
   roo::lock_guard<roo::mutex> guard(mutex_);
+  // A stale handler must not consume a new connection's reused stream ID.
+  if (connection_id != connection_id_) return false;
   auto it = pending_calls_.find(stream_id);
   if (it == pending_calls_.end()) {
     LOG(WARNING) << "RpcServer: no pending request for stream ID " << stream_id;
     return false;
   }
   RpcRequest& request = it->second;
+  if (request.connectionId() != connection_id) return false;
 
   bool ok = false;
   if (request.serverFin()) {
