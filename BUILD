@@ -137,3 +137,23 @@ cc_test(
         "@roo_testing//:arduino_gtest_main",
     ],
 )
+
+cc_test(
+    name = "link_protocol_test",
+    size = "small",
+    srcs = [
+        "test/link_protocol_test.cpp",
+    ],
+    copts = ["-Iexternal/gtest/include"],
+    includes = ["src"],
+    linkstatic = 1,
+    target_compatible_with = select({
+        "@roo_testing//roo_testing/platforms:is_arduino": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":roo_transport",
+        "//test/helpers",
+        "@roo_testing//:arduino_gtest_main",
+    ],
+)

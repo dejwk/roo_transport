@@ -476,6 +476,8 @@ void Channel::handleHandshakePacket(uint16_t peer_seq_num,
 }
 
 void Channel::packetReceived(const roo::byte* buf, size_t len) {
+  // Framing/checksum validation does not validate the link protocol payload.
+  if (len < 2 || len > PacketSender::kMaxPacketSize) return;
   bool outgoing_data_ready = false;
   uint16_t header = roo_io::LoadBeU16(buf);
   bool control_bit = internal::GetPacketControlBit(header);
@@ -487,6 +489,7 @@ void Channel::packetReceived(const roo::byte* buf, size_t len) {
       break;
     }
     case internal::kFlowControlPacket: {
+      if (len != 2) return;
       // Update to available slots received.
       transmitter_.updateRecvHimark(control_bit, header & 0x0FFF);
       break;
@@ -500,6 +503,7 @@ void Channel::packetReceived(const roo::byte* buf, size_t len) {
       uint32_t peer_stream_id = roo_io::LoadBeU32(buf + 2);
       uint32_t ack_stream_id = roo_io::LoadBeU32(buf + 6);
       uint8_t last_byte = roo_io::LoadU8(buf + 10);
+      if ((last_byte & 0x70) != 0) return;
       bool want_ack = ((last_byte & 0x80) != 0);
       uint8_t peer_receive_buffer_size_log2 = last_byte & 0x0F;
       if (peer_receive_buffer_size_log2 > 12) {
@@ -512,6 +516,7 @@ void Channel::packetReceived(const roo::byte* buf, size_t len) {
     }
     case internal::kDataPacket:
     case internal::kFinPacket: {
+      if (type == internal::kDataPacket && len == 2) return;
       if (receiver_.handleDataPacket(control_bit, header & 0x0FFF, buf + 2,
                                      len - 2, type == internal::kFinPacket)) {
         outgoing_data_ready = true;
