@@ -14,17 +14,20 @@ void RpcClient::end() { messaging_.unsetReceiver(); }
 RpcStatus RpcClient::sendUnaryRpc(RpcFunctionId function_id,
                                   const roo::byte* payload, size_t payload_size,
                                   RpcClient::UnaryCompletionCb cb) {
-  uint32_t stream_id = new_stream(std::move(cb));
+  auto call = std::make_shared<OutgoingCall>(std::move(cb));
+  uint32_t stream_id = new_stream(call);
   RpcHeader header = RpcHeader::NewUnaryRequest(function_id, stream_id);
   roo::byte header_bytes[RpcHeader::kMaxSerializedSize];
   size_t header_size =
       header.serialize(header_bytes, RpcHeader::kMaxSerializedSize);
   CHECK(header_size > 0);
   Messaging::ConnectionId connection_id;
-  return messaging_.send(header_bytes, header_size, payload, payload_size,
-                         &connection_id)
-             ? RpcStatus::kOk
-             : RpcStatus::kUnavailable;
+  if (messaging_.send(header_bytes, header_size, payload, payload_size,
+                      &connection_id)) {
+    return RpcStatus::kOk;
+  }
+  cancelSend(stream_id, call);
+  return RpcStatus::kUnavailable;
 }
 
 RpcStatus RpcClient::sendUnaryRpcWithTimeout(RpcFunctionId function_id,
@@ -32,7 +35,8 @@ RpcStatus RpcClient::sendUnaryRpcWithTimeout(RpcFunctionId function_id,
                                              size_t payload_size,
                                              uint32_t timeout_ms,
                                              RpcClient::UnaryCompletionCb cb) {
-  uint32_t stream_id = new_stream(std::move(cb));
+  auto call = std::make_shared<OutgoingCall>(std::move(cb));
+  uint32_t stream_id = new_stream(call);
   RpcHeader header =
       RpcHeader::NewUnaryRequest(function_id, stream_id, timeout_ms);
   roo::byte header_bytes[RpcHeader::kMaxSerializedSize];
@@ -40,20 +44,42 @@ RpcStatus RpcClient::sendUnaryRpcWithTimeout(RpcFunctionId function_id,
       header.serialize(header_bytes, RpcHeader::kMaxSerializedSize);
   CHECK(header_size > 0);
   Messaging::ConnectionId connection_id;
-  return messaging_.send(header_bytes, header_size, payload, payload_size,
-                         &connection_id)
-             ? RpcStatus::kOk
-             : RpcStatus::kUnavailable;
+  if (messaging_.send(header_bytes, header_size, payload, payload_size,
+                      &connection_id)) {
+    return RpcStatus::kOk;
+  }
+  cancelSend(stream_id, call);
+  return RpcStatus::kUnavailable;
 }
 
-RpcStreamId RpcClient::new_stream(RpcClient::UnaryCompletionCb cb) {
+RpcStreamId RpcClient::new_stream(const std::shared_ptr<OutgoingCall>& call) {
   roo::lock_guard<roo::mutex> guard(mutex_);
   RpcStreamId stream_id = next_stream_id_++;
   if (next_stream_id_ > 0x00FFFFFF) {
     next_stream_id_ = 1;
   }
-  outgoing_calls_.insert({stream_id, std::move(cb)});
+  outgoing_calls_.insert({stream_id, call});
   return stream_id;
+}
+
+void RpcClient::cancelSend(RpcStreamId stream_id,
+                           const std::shared_ptr<OutgoingCall>& call) {
+  {
+    roo::lock_guard<roo::mutex> guard(mutex_);
+    outgoing_calls_.erase(stream_id);
+  }
+  // Reset may have already removed the entry and claimed its callback.
+  roo::lock_guard<roo::mutex> guard(call->mutex);
+  call->cb = nullptr;
+}
+
+void RpcClient::complete(const std::shared_ptr<OutgoingCall>& call,
+                         const roo::byte* data, size_t len, RpcStatus status) {
+  // Never hold the registry mutex while running application code. Entries are
+  // removed before completion, so callbacks may submit calls or reset again.
+  roo::lock_guard<roo::mutex> guard(call->mutex);
+  auto cb = std::move(call->cb);
+  if (cb) cb(data, len, status);
 }
 
 void RpcClient::handleResponse(Messaging::ConnectionId connection_id,
@@ -72,7 +98,7 @@ void RpcClient::handleResponse(Messaging::ConnectionId connection_id,
     return;
   }
 
-  UnaryCompletionCb cb;
+  std::shared_ptr<OutgoingCall> call;
   {
     roo::lock_guard<roo::mutex> guard(mutex_);
     auto it = outgoing_calls_.find(header.streamId());
@@ -81,10 +107,8 @@ void RpcClient::handleResponse(Messaging::ConnectionId connection_id,
                    << header.streamId();
       return;
     }
-    cb = std::move(it->second);
-    if (header.isLastMessage()) {
-      outgoing_calls_.erase(it);
-    }
+    call = std::move(it->second);
+    outgoing_calls_.erase(it);
   }
 
   RpcStatus status = RpcStatus::kOk;
@@ -92,7 +116,7 @@ void RpcClient::handleResponse(Messaging::ConnectionId connection_id,
     status = header.responseStatus();
   }
   // Call the response callback.
-  cb(data, len, status);
+  complete(call, data, len, status);
 }
 
 void RpcClient::connectionReset(Messaging::ConnectionId connection_id) {
@@ -104,7 +128,7 @@ void RpcClient::connectionReset(Messaging::ConnectionId connection_id) {
   }
   for (auto it = calls_to_cancel.begin(); it != calls_to_cancel.end(); ++it) {
     // Call the response callback with cancelled status.
-    it->second(nullptr, 0, kUnavailable);
+    complete(it->second, nullptr, 0, kUnavailable);
   }
 }
 

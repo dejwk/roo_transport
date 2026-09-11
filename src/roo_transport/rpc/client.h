@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <memory>
 
 #include "roo_collections.h"
 #include "roo_collections/flat_small_hash_map.h"
@@ -86,8 +87,20 @@ class RpcClient {
     RpcClient& rpc_client_;
   };
 
-  using OutgoingCalls =
-      roo_collections::FlatSmallHashMap<RpcStreamId, UnaryCompletionCb>;
+  // A send failure must also synchronize with callbacks already claimed by
+  // a concurrent response/reset, before the caller can destroy its captures.
+  struct OutgoingCall {
+    explicit OutgoingCall(UnaryCompletionCb cb) : cb(std::move(cb)) {}
+    roo::mutex mutex;
+    UnaryCompletionCb cb;
+  };
+  using OutgoingCalls = roo_collections::FlatSmallHashMap<
+      RpcStreamId, std::shared_ptr<OutgoingCall>>;
+
+  void cancelSend(RpcStreamId stream_id,
+                  const std::shared_ptr<OutgoingCall>& call);
+  static void complete(const std::shared_ptr<OutgoingCall>& call,
+                       const roo::byte* data, size_t len, RpcStatus status);
 
   // Called when we receive a response from the server. This method dispatches
   // the response to the appropriate result callback.
@@ -98,7 +111,7 @@ class RpcClient {
   // pending RPCs will never complete (and should thus be failed).
   void connectionReset(Messaging::ConnectionId connection_id);
 
-  RpcStreamId new_stream(RpcClient::UnaryCompletionCb cb);
+  RpcStreamId new_stream(const std::shared_ptr<OutgoingCall>& call);
 
   Messaging& messaging_;
   Dispatcher dispatcher_;
