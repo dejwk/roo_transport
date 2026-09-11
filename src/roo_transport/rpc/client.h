@@ -46,7 +46,9 @@ class RpcClient {
   ///
   /// Behaves like `sendUnaryRpc()`, but encodes `timeout_ms` into the RPC
   /// request header so the server can fail the call after the specified
-  /// deadline.
+  /// deadline. The timeout starts when the server receives the request; it
+  /// does not bound connection setup or a blocked send. Expiry sends
+  /// `kDeadlineExceeded` but does not interrupt application handler code.
   ///
   /// @return `kOk` if the request was accepted for send, or `kUnavailable` if
   /// the underlying messaging transport rejected it.

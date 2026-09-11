@@ -42,7 +42,7 @@ RpcHeader RpcHeader::NewUnaryRequest(RpcFunctionId function_id,
   header.type_ = kRequest;
   header.first_message_ = true;
   header.last_message_ = true;
-  header.has_timeout_ = false;
+  header.has_timeout_ = true;
   header.stream_id_ = stream_id;
   header.new_request_.function_id_ = function_id;
   header.new_request_.timeout_ms_ = timeout_ms;

@@ -1,16 +1,12 @@
-#include "roo_transport/rpc/client.h"
-#include "roo_transport/rpc/server.h"
-#include "roo_transport/rpc/internal/header.h"
-
 #include <atomic>
-#include <chrono>
-#include <condition_variable>
-#include <mutex>
-#include "roo_threads/thread.h"
-#include "roo_threads/condition_variable.h"
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "roo_threads/condition_variable.h"
+#include "roo_threads/thread.h"
+#include "roo_transport/rpc/client.h"
+#include "roo_transport/rpc/internal/header.h"
+#include "roo_transport/rpc/server.h"
 
 namespace roo_transport {
 namespace {
@@ -48,6 +44,7 @@ class TestMessaging : public Messaging {
     size_t size = header.serialize(bytes, sizeof(bytes));
     received(id, bytes, size);
   }
+
  private:
   roo::mutex mutex;
   roo::condition_variable changed;
@@ -92,14 +89,16 @@ TEST(RpcClient, FailedSendWaitsForCallbackClaimedByReset) {
     return false;
   };
   roo::thread sender([&] {
-    EXPECT_EQ(kUnavailable, client.sendUnaryRpc(1, nullptr, 0,
-        [&](const roo::byte*, size_t, RpcStatus status) {
-          EXPECT_EQ(kUnavailable, status);
-          roo::unique_lock<roo::mutex> lock(mutex);
-          entered = true;
-          cv.notify_all();
-          cv.wait(lock, [&] { return release; });
-        }));
+    EXPECT_EQ(
+        kUnavailable,
+        client.sendUnaryRpc(1, nullptr, 0,
+                            [&](const roo::byte*, size_t, RpcStatus status) {
+                              EXPECT_EQ(kUnavailable, status);
+                              roo::unique_lock<roo::mutex> lock(mutex);
+                              entered = true;
+                              cv.notify_all();
+                              cv.wait(lock, [&] { return release; });
+                            }));
     returned = true;
   });
   while (!failing_send) roo::this_thread::yield();
@@ -132,8 +131,10 @@ TEST(RpcServer, UnknownFunctionReturnsUnimplementedAndReleasesRequest) {
 TEST(RpcServer, OldHandlerCannotEraseReusedStreamOnNewConnection) {
   TestMessaging messaging;
   std::vector<RequestHandle> handles;
-  FunctionTable functions = {{1, [&](RequestHandle handle, const roo::byte*,
-                                     size_t, bool) { handles.push_back(handle); }}};
+  FunctionTable functions = {
+      {1, [&](RequestHandle handle, const roo::byte*, size_t, bool) {
+         handles.push_back(handle);
+       }}};
   RpcServer server(messaging, &functions);
   server.begin();
   messaging.request(1, RpcHeader::NewUnaryRequest(1, 7));
@@ -147,6 +148,98 @@ TEST(RpcServer, OldHandlerCannotEraseReusedStreamOnNewConnection) {
   EXPECT_EQ(2u, responses[0].connection_id);
   EXPECT_EQ(7u, responses[0].header.streamId());
   EXPECT_EQ(kOk, responses[0].header.responseStatus());
+}
+TEST(RpcHeader, TimeoutRoundTripsIncludingZero) {
+  for (uint32_t timeout : {0u, 1u, 1000u, UINT32_MAX}) {
+    roo::byte bytes[RpcHeader::kMaxSerializedSize];
+    auto header = RpcHeader::NewUnaryRequest(123, 7, timeout);
+    size_t size = header.serialize(bytes, sizeof(bytes));
+    RpcHeader parsed;
+    ASSERT_EQ(size, parsed.deserialize(bytes, size));
+    ASSERT_TRUE(parsed.hasTimeout());
+    EXPECT_EQ(timeout, parsed.timeoutMs());
+    EXPECT_EQ(123u, parsed.functionId());
+  }
+  EXPECT_FALSE(RpcHeader::NewUnaryRequest(123, 7).hasTimeout());
+}
+
+TEST(RpcServer, UnansweredRequestExpiresWithoutFurtherTraffic) {
+  TestMessaging messaging;
+  std::vector<RequestHandle> handles;
+  FunctionTable functions = {{1, [&](RequestHandle h, const roo::byte*, size_t,
+                                     bool) { handles.push_back(h); }}};
+  RpcServer server(messaging, &functions);
+  server.begin();
+  messaging.request(1, RpcHeader::NewUnaryRequest(1, 7, 20));
+  auto responses = messaging.awaitResponses(1);
+  ASSERT_EQ(1u, responses.size());
+  EXPECT_EQ(7u, responses[0].header.streamId());
+  EXPECT_EQ(kDeadlineExceeded, responses[0].header.responseStatus());
+  ASSERT_EQ(1u, handles.size());
+  handles[0].sendSuccessResponse(nullptr, 0, true);
+  handles[0].sendFailureResponse(kUnknown, "too late");
+  server.end();
+  EXPECT_EQ(1u, messaging.awaitResponses(1).size());
+}
+
+TEST(RpcServer, EarlierDeadlineWakesTimerAndCompletedRequestsDoNotExpire) {
+  TestMessaging messaging;
+  std::vector<RequestHandle> handles;
+  FunctionTable functions = {{1, [&](RequestHandle h, const roo::byte*, size_t,
+                                     bool) { handles.push_back(h); }}};
+  RpcServer server(messaging, &functions);
+  server.begin();
+  messaging.request(1, RpcHeader::NewUnaryRequest(1, 1, 60000));
+  handles[0].sendSuccessResponse(nullptr, 0, true);
+  messaging.request(1, RpcHeader::NewUnaryRequest(1, 2, 60000));
+  messaging.request(1, RpcHeader::NewUnaryRequest(1, 3, 20));
+  auto responses = messaging.awaitResponses(2);
+  ASSERT_EQ(2u, responses.size());
+  EXPECT_EQ(1u, responses[0].header.streamId());
+  EXPECT_EQ(kOk, responses[0].header.responseStatus());
+  EXPECT_EQ(3u, responses[1].header.streamId());
+  EXPECT_EQ(kDeadlineExceeded, responses[1].header.responseStatus());
+  // Shutdown must wake the timer even though the next deadline is a minute
+  // away.
+  server.end();
+  EXPECT_EQ(2u, messaging.awaitResponses(2).size());
+}
+
+TEST(RpcServer, ZeroTimeoutSkipsHandlerAndResetDiscardsTimers) {
+  TestMessaging messaging;
+  int invoked = 0;
+  FunctionTable functions = {
+      {1, [&](RequestHandle, const roo::byte*, size_t, bool) { ++invoked; }}};
+  RpcServer server(messaging, &functions);
+  server.begin();
+  messaging.request(1, RpcHeader::NewUnaryRequest(1, 1, 0));
+  auto responses = messaging.awaitResponses(1);
+  ASSERT_EQ(1u, responses.size());
+  EXPECT_EQ(kDeadlineExceeded, responses[0].header.responseStatus());
+  EXPECT_EQ(0, invoked);
+  messaging.request(1, RpcHeader::NewUnaryRequest(1, 2, 40));
+  messaging.reset(1);
+  messaging.request(2, RpcHeader::NewUnaryRequest(1, 2, 80));
+  responses = messaging.awaitResponses(2);
+  ASSERT_EQ(2u, responses.size());
+  EXPECT_EQ(2u, responses[1].connection_id);
+  EXPECT_EQ(kDeadlineExceeded, responses[1].header.responseStatus());
+}
+TEST(RpcServer, SlowSynchronousHandlerCannotSendSuccessAfterDeadline) {
+  TestMessaging messaging;
+  FunctionTable functions = {
+      {1, [](RequestHandle h, const roo::byte*, size_t, bool) {
+         roo::this_thread::sleep_for(roo_time::Millis(40));
+         h.sendSuccessResponse(nullptr, 0, true);
+       }}};
+  RpcServer server(messaging, &functions);
+  server.begin();
+  messaging.request(1, RpcHeader::NewUnaryRequest(1, 7, 10));
+  auto responses = messaging.awaitResponses(1);
+  server.end();
+  ASSERT_EQ(1u, responses.size());
+  EXPECT_EQ(kDeadlineExceeded, responses[0].header.responseStatus());
+  EXPECT_EQ(1u, messaging.awaitResponses(1).size());
 }
 }  // namespace
 }  // namespace roo_transport

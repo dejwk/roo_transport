@@ -6,6 +6,8 @@
 #include "roo_collections/flat_small_hash_map.h"
 #include "roo_threads.h"
 #include "roo_threads/mutex.h"
+#include "roo_threads/thread.h"
+#include "roo_threads/condition_variable.h"
 #include "roo_time.h"
 #include "roo_transport/messaging/messaging.h"
 #include "roo_transport/rpc/internal/server/handler.h"
@@ -100,11 +102,12 @@ class RpcServer {
 
   /// Registers the request dispatcher with the messaging transport.
   void begin();
-  /// Unregisters the request dispatcher from the messaging transport.
+  /// Unregisters the dispatcher, clears pending calls, and joins the timer.
+  /// Quiesce incoming dispatch and application handlers before destruction.
   void end();
 
   /// Destroys the server and unregisters its receiver.
-  ~RpcServer() { messaging_.unsetReceiver(); }
+  ~RpcServer() { end(); }
 
  private:
   friend class RequestHandle;
@@ -116,6 +119,10 @@ class RpcServer {
     void received(Messaging::ConnectionId connection_id, const roo::byte* data,
                   size_t len) override {
       rpc_server_.handleRequest(connection_id, data, len);
+    }
+
+    void reset(Messaging::ConnectionId connection_id) override {
+      rpc_server_.connectionReset(connection_id);
     }
 
    private:
@@ -133,12 +140,16 @@ class RpcServer {
                            RpcStreamId stream_id, RpcStatus status,
                            roo::string_view msg);
 
-  // Returns true if the response should be sent; false otherwise. Destroys the
-  // request it it has been finished.
+  // Claims the request once, overriding status if its deadline has expired.
   bool prepForResponse(Messaging::ConnectionId connection_id,
-                       RpcStreamId stream_id);
+                       RpcStreamId stream_id, RpcStatus& status);
 
   void reconnected(Messaging::ConnectionId connection_id);
+
+  void connectionReset(Messaging::ConnectionId connection_id);
+  void deadlineLoop();
+  void sendResponse(Messaging::ConnectionId connection_id, RpcStreamId stream_id,
+                    RpcStatus status, const roo::byte* data, size_t len);
 
   Messaging& messaging_;
   Dispatcher dispatcher_;
@@ -148,6 +159,10 @@ class RpcServer {
   Messaging::ConnectionId connection_id_;
 
   roo::mutex mutex_;
+  roo::condition_variable deadlines_changed_;
+  // Started lazily on the first timed request; uses a 4096-byte task stack.
+  roo::thread deadline_thread_;
+  bool active_ = false;  // Guarded by mutex_.
 
   // Guarded by mutex_.
   roo_collections::FlatSmallHashMap<RpcStreamId, RpcRequest> pending_calls_;

@@ -859,3 +859,16 @@ For application work, the examples under `examples/` are still the best next
 step. For integration work, the main public entry points live under `src/`:
 start with [roo_transport.h](../src/roo_transport.h), then move to the specific
 headers for packets, links, messaging, or RPC as needed.
+
+### RPC deadlines
+
+`sendUnaryRpcWithTimeout()` sends a server-side timeout in milliseconds. The
+server returns `kDeadlineExceeded` when an unanswered request expires, including
+when no further messages arrive. The timeout starts on server receipt and does
+not bound client connection setup, blocked sends, or response delivery. Expiry
+does not interrupt application handler code or undo its side effects; subsequent
+responses from that handler are ignored. A zero timeout skips handler execution.
+
+The server starts one timer task lazily on its first timed request, with a
+4096-byte stack. `end()` clears pending requests and joins that task. Quiesce
+incoming dispatch and application handlers before destroying the server.
