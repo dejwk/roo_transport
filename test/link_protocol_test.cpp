@@ -1,6 +1,6 @@
-#include "roo_transport/link/internal/thread_safe/channel.h"
-#include "roo_transport/link/internal/protocol.h"
 #include "gtest/gtest.h"
+#include "roo_transport/link/internal/protocol.h"
+#include "roo_transport/link/internal/thread_safe/channel.h"
 
 namespace roo_transport {
 namespace {
@@ -21,8 +21,9 @@ class LinkProtocolTest : public testing::Test {
     uint32_t peer_id = id == 1 ? 2 : 1;
     peer_control = peer_id > id;
     roo::byte handshake[11];
-    roo_io::StoreBeU16(internal::FormatPacketHeader(
-        100, internal::kHandshakePacket, false), handshake);
+    roo_io::StoreBeU16(
+        internal::FormatPacketHeader(100, internal::kHandshakePacket, false),
+        handshake);
     roo_io::StoreBeU32(peer_id, handshake + 2);
     roo_io::StoreBeU32(id, handshake + 6);
     handshake[10] = roo::byte{4};
@@ -70,6 +71,49 @@ TEST_F(LinkProtocolTest, EmptyFinalPacketStillClosesStream) {
   // Stream status is updated on the read following consumption of FIN.
   EXPECT_EQ(0u, channel.tryRead(result, 1, id, status));
   EXPECT_EQ(roo_io::kEndOfStream, status);
+}
+TEST(LinkBufferSize, EveryAdvertisedSizeConstructsSuccessfully) {
+  DiscardSender sender;
+  for (auto size :
+       {kBufferSize256B, kBufferSize512B, kBufferSize1KB, kBufferSize2KB,
+        kBufferSize4KB, kBufferSize8KB, kBufferSize16KB, kBufferSize32KB,
+        kBufferSize64KB, kBufferSize128KB, kBufferSize256KB}) {
+    Channel channel(sender, size, size);
+  }
+}
+
+TEST(LinkBufferSize, MaximumWindowRestoresSequenceNumbersAcrossWrap) {
+  for (uint16_t start : {0u, 3500u, 65000u}) {
+    internal::RingBuffer ring(kMaxLinkBufferSizeLog2, start);
+    EXPECT_EQ(1024, ring.capacity());
+    for (int i = 0; i < 1024; ++i) ring.push();
+    for (int i = -1024; i < 2048; ++i) {
+      internal::SeqNum expected = internal::SeqNum(start) + i;
+      EXPECT_EQ(expected, ring.restorePosHighBits(expected.raw() & 0xFFF, 12));
+    }
+    for (int i = 0; i < 1024; ++i) ring.pop();
+    EXPECT_TRUE(ring.empty());
+  }
+}
+
+TEST(LinkBufferSize, RejectsUnsupportedPeerWindowsBeforeConnecting) {
+  DiscardSender sender;
+  Channel channel(sender, kBufferSize4KB, kBufferSize4KB);
+  uint32_t id = channel.connect();
+  roo::byte handshake[11] = {};
+  roo_io::StoreBeU16(
+      internal::FormatPacketHeader(100, internal::kHandshakePacket, false),
+      handshake);
+  roo_io::StoreBeU32(id == 1 ? 2 : 1, handshake + 2);
+  roo_io::StoreBeU32(id, handshake + 6);
+  for (int size = 11; size < 16; ++size) {
+    handshake[10] = static_cast<roo::byte>(size);
+    channel.packetReceived(handshake, sizeof(handshake));
+    EXPECT_EQ(LinkStatus::kConnecting, channel.getLinkStatus(id));
+  }
+  handshake[10] = static_cast<roo::byte>(kMaxLinkBufferSizeLog2);
+  channel.packetReceived(handshake, sizeof(handshake));
+  EXPECT_EQ(LinkStatus::kConnected, channel.getLinkStatus(id));
 }
 }  // namespace
 }  // namespace roo_transport

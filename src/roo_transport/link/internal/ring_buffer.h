@@ -2,6 +2,7 @@
 
 #include "roo_logging.h"
 #include "roo_transport/link/internal/seq_num.h"
+#include "roo_transport/link/link_buffer_size.h"
 
 namespace roo_transport {
 namespace internal {
@@ -15,7 +16,8 @@ class RingBuffer {
   /// Creates a ring buffer window starting at `initial_seq`.
   RingBuffer(int capacity_log2, uint16_t initial_seq = 0)
       : capacity_log2_(capacity_log2), begin_(initial_seq), end_(initial_seq) {
-    CHECK_LE(capacity_log2, 10);
+    CHECK_GE(capacity_log2, 0);
+    CHECK_LE(static_cast<unsigned int>(capacity_log2), kMaxLinkBufferSizeLog2);
   }
 
   /// Returns the number of occupied slots.

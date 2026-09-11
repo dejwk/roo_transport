@@ -827,6 +827,10 @@ makes failures harder to reason about.
 The current important limits and constraints are:
 
 - Packet payloads are capped at 250 bytes.
+- Reliable link buffers range from 256 B to 256 KB (1-1024 packet slots), plus
+  bookkeeping. The former 512 KB and 1 MB enum options were unsupported and
+  have been removed; their window sizes exceed the sequence reconstruction
+  limit. Peers advertising larger windows are rejected.
 - RPC is unary only; streaming RPC is not part of the current public API.
 - Reconnects are real session boundaries. In-flight stream, message, and RPC
   state is not preserved across a reset.

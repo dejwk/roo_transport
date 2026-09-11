@@ -74,8 +74,8 @@ namespace internal {
 //   last byte, the most significant bit indicates whether the sender expects an
 //   acknowledgement of the handshake (1 indicates that the ack is requested),
 //   and the 4 least significant bits communicate the peer's receive buffer
-//   size, as a power of 2 (valid values are 0-12, indicating buffer sizes of
-//   1-4096 packets). Remaining bits are reserved and must be zero.
+//   size, as a power of 2 (valid values are 0-10, indicating buffer sizes of
+//   1-1024 packets). Remaining bits are reserved and must be zero.
 //
 // * 'data' packet:
 //   the payload is all application data. Must not be empty.

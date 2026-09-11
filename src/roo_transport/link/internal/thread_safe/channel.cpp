@@ -23,6 +23,15 @@ namespace roo_transport {
 
 namespace {
 
+unsigned int ValidateBufferSizes(LinkBufferSize sendbuf, LinkBufferSize recvbuf) {
+  // Validate both sizes before either buffer array is allocated. Casting also
+  // rejects negative values supplied through an explicit enum cast.
+  CHECK_LE(static_cast<unsigned int>(sendbuf), kMaxLinkBufferSizeLog2);
+  CHECK_LE(static_cast<unsigned int>(recvbuf), kMaxLinkBufferSizeLog2);
+  CHECK_LE(static_cast<unsigned int>(sendbuf), static_cast<unsigned int>(recvbuf));
+  return static_cast<unsigned int>(sendbuf);
+}
+
 roo_time::Duration Backoff(int retry_count) {
   float min_delay_us = 1000.0f;     // 1ms
   float max_delay_us = 1000000.0f;  // 1s
@@ -41,7 +50,7 @@ Channel::Channel(PacketSender& sender, LinkBufferSize sendbuf,
                  LinkBufferSize recvbuf, roo::string_view name)
     : packet_sender_(sender),
       outgoing_data_ready_(),
-      transmitter_((unsigned int)sendbuf),
+      transmitter_(ValidateBufferSizes(sendbuf, recvbuf)),
       receiver_((unsigned int)recvbuf),
       my_stream_id_(0),
       my_stream_id_acked_by_peer_(false),
@@ -55,11 +64,7 @@ Channel::Channel(PacketSender& sender, LinkBufferSize sendbuf,
       log_prefix_(name.empty() ? std::string("")
                                : (std::string("(").append(name).append(") "))),
       send_thread_name_(name.empty() ? "send_loop"
-                                     : std::string(name) + "-send") {
-  CHECK_LE(static_cast<unsigned int>(sendbuf), 12u);
-  CHECK_LE(static_cast<unsigned int>(sendbuf),
-           static_cast<unsigned int>(recvbuf));
-}
+                                     : std::string(name) + "-send") {}
 
 Channel::~Channel() { end(); }
 
@@ -506,9 +511,7 @@ void Channel::packetReceived(const roo::byte* buf, size_t len) {
       if ((last_byte & 0x70) != 0) return;
       bool want_ack = ((last_byte & 0x80) != 0);
       uint8_t peer_receive_buffer_size_log2 = last_byte & 0x0F;
-      if (peer_receive_buffer_size_log2 > 12) {
-        peer_receive_buffer_size_log2 = 12;
-      }
+      if (peer_receive_buffer_size_log2 > kMaxLinkBufferSizeLog2) return;
       handleHandshakePacket(peer_seq_num, peer_stream_id, ack_stream_id,
                             want_ack, (1 << peer_receive_buffer_size_log2),
                             outgoing_data_ready);

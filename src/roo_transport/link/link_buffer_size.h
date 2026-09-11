@@ -2,6 +2,11 @@
 
 namespace roo_transport {
 
+// Twelve-bit wire sequence numbers require windows no larger than 1024
+// packets to reconstruct positions unambiguously near the current window.
+constexpr unsigned int kMaxLinkBufferSizeLog2 = 10;
+
+// Approximate payload capacities; bookkeeping consumes additional memory.
 enum LinkBufferSize {
   kBufferSize256B = 0,
   kBufferSize512B = 1,
@@ -13,9 +18,7 @@ enum LinkBufferSize {
   kBufferSize32KB = 7,
   kBufferSize64KB = 8,
   kBufferSize128KB = 9,
-  kBufferSize256KB = 10,
-  kBufferSize512KB = 11,
-  kBufferSize1MB = 12,
+  kBufferSize256KB = kMaxLinkBufferSizeLog2,
 };
 
 }  // namespace roo_transport
