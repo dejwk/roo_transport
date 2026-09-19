@@ -1,3 +1,16 @@
+# roo_transport 1.2.0
+
+- Enforced server-side unary RPC deadlines, returning `kDeadlineExceeded` for expired requests and ignoring late responses.
+- Fixed RPC callback lifetime issues after failed submissions and prevented stale handlers from consuming new requests after reconnection.
+- Fixed unknown RPC function IDs to return `kUnimplemented`.
+- Hardened link packet validation before decoding.
+- **Breaking change:** Removed unsupported `kBufferSize512KB` and `kBufferSize1MB` options. Link buffers now support up to 256 KB (1,024 packet slots); larger peer windows are rejected.
+- Added regression tests for RPC handling and link protocol validation.
+- Updated dependencies: `roo_collections` 1.4.7, `roo_io` 2.3.0, `roo_logging` 1.5.10, `roo_scheduler` 2.2.0, and `roo_threads` 1.2.8. Added `roo_scheduler` to Arduino and PlatformIO dependency declarations.
+- Updated Bazel tooling, GoogleTest, and CI dependencies, including `roo_testing` 2.1.2.
+
+---
+
 # [roo_transport 1.1.5](https://github.com/dejwk/roo_transport/releases/tag/1.1.5)
 
 Published 2026-08-29.
