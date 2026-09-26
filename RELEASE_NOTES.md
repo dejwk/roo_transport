@@ -1,3 +1,12 @@
+# roo_transport 1.2.1
+
+- Upgrade dependencies: `roo_collections` to 1.4.8, `roo_io` to 2.4.0, `roo_logging` to 1.5.11, `roo_scheduler` to 2.2.1, `roo_threads` to 1.2.9, and `roo_testing` to 2.3.0.
+- Mark `roo_testing` as a Bazel development dependency so it no longer propagates to consumers.
+- Add `roo_scheduler` to Arduino and PlatformIO dependency declarations.
+- Refresh repository development guidance and formatting configuration.
+
+---
+
 # roo_transport 1.2.0
 
 - Enforced server-side unary RPC deadlines, returning `kDeadlineExceeded` for expired requests and ignoring late responses.
