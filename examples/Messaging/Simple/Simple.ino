@@ -96,7 +96,11 @@ Messaging::SimpleReceiver server_receiver(
     [](Messaging::ConnectionId connection_id, const roo::byte* data,
        size_t len) {
       roo_io::MemoryIterator in(data, data + len);
-      roo::string_view msg = roo_io::ReadStringView(in, 24);
+      roo::string_view msg;
+      if (!roo_io::ReadStringView(in, &msg, 24)) {
+        LOG(WARNING) << "Ignoring invalid string message";
+        return;
+      }
       LOG(INFO) << "Server: received message: " << msg;
     });
 
@@ -143,7 +147,11 @@ Messaging::SimpleReceiver client_receiver(
     [](Messaging::ConnectionId connection_id, const roo::byte* data,
        size_t len) {
       roo_io::MemoryIterator in(data, data + len);
-      roo::string_view msg = roo_io::ReadStringView(in, 24);
+      roo::string_view msg;
+      if (!roo_io::ReadStringView(in, &msg, 24)) {
+        LOG(WARNING) << "Ignoring invalid string message";
+        return;
+      }
       LOG(INFO) << "Client: received message: " << msg;
     });
 
