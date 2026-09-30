@@ -120,7 +120,7 @@ static const int kMaxPayloadSize = 128;
 #if MODE == MODE_LOOPBACK || MODE == MODE_SERVER
 
 // Helper to implement the 'timer' logic.
-roo_scheduler::Scheduler scheduler;
+roo_scheduler::SchedulingService scheduler;
 
 constexpr uint32_t kMaxConcurrentRequests = 200;
 
