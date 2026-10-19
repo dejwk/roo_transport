@@ -93,9 +93,9 @@ size_t RpcHeader::deserialize(const roo::byte* buffer, size_t buffer_size) {
   has_timeout_ = (mask & 0x08) != 0;
   stream_id_ = roo_io::ReadBeU24(it);
   if (type_ == kRequest && first_message_) {
-    new_request_.function_id_ = roo_io::ReadVarU64(it);
+    if (!roo_io::ReadVarU32(it, new_request_.function_id_)) return 0;
     if (has_timeout_) {
-      new_request_.timeout_ms_ = roo_io::ReadVarU64(it);
+      if (!roo_io::ReadVarU32(it, new_request_.timeout_ms_)) return 0;
     } else {
       new_request_.timeout_ms_ = 0;
     }

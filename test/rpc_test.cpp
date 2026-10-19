@@ -163,6 +163,42 @@ TEST(RpcHeader, TimeoutRoundTripsIncludingZero) {
   EXPECT_FALSE(RpcHeader::NewUnaryRequest(123, 7).hasTimeout());
 }
 
+// Verifies the full function-id range survives checked varint decoding.
+TEST(RpcHeader, FunctionIdRoundTrips) {
+  for (uint32_t function_id : {0u, 127u, 128u, UINT32_MAX}) {
+    roo::byte bytes[RpcHeader::kMaxSerializedSize];
+    RpcHeader header = RpcHeader::NewUnaryRequest(function_id, 7);
+    size_t size = header.serialize(bytes, sizeof(bytes));
+    RpcHeader parsed;
+    ASSERT_EQ(size, parsed.deserialize(bytes, size));
+    EXPECT_EQ(function_id, parsed.functionId());
+    EXPECT_EQ(7u, parsed.streamId());
+    EXPECT_FALSE(parsed.hasTimeout());
+  }
+}
+
+// Verifies both request fields reject truncated, overflowing, and malformed
+// varints instead of accepting an incomplete or narrowed value.
+TEST(RpcHeader, RejectsInvalidRequestVarints) {
+  const std::vector<std::vector<uint8_t>> invalid_varints = {
+      {},
+      {0x80},
+      {0x80, 0x80, 0x80, 0x80, 0x10},
+      {0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x02},
+      {0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80}};
+  for (bool timeout : {false, true}) {
+    for (const std::vector<uint8_t>& varint : invalid_varints) {
+      std::vector<roo::byte> bytes = {
+          roo::byte{static_cast<uint8_t>(timeout ? 0x0F : 0x07)}, roo::byte{0},
+          roo::byte{0}, roo::byte{7}};
+      if (timeout) bytes.push_back(roo::byte{123});
+      for (uint8_t byte : varint) bytes.push_back(roo::byte{byte});
+      RpcHeader parsed;
+      EXPECT_EQ(0u, parsed.deserialize(bytes.data(), bytes.size()));
+    }
+  }
+}
+
 TEST(RpcServer, UnansweredRequestExpiresWithoutFurtherTraffic) {
   TestMessaging messaging;
   std::vector<RequestHandle> handles;
