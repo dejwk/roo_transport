@@ -23,12 +23,14 @@ namespace roo_transport {
 
 namespace {
 
-unsigned int ValidateBufferSizes(LinkBufferSize sendbuf, LinkBufferSize recvbuf) {
+unsigned int ValidateBufferSizes(LinkBufferSize sendbuf,
+                                 LinkBufferSize recvbuf) {
   // Validate both sizes before either buffer array is allocated. Casting also
   // rejects negative values supplied through an explicit enum cast.
   CHECK_LE(static_cast<unsigned int>(sendbuf), kMaxLinkBufferSizeLog2);
   CHECK_LE(static_cast<unsigned int>(recvbuf), kMaxLinkBufferSizeLog2);
-  CHECK_LE(static_cast<unsigned int>(sendbuf), static_cast<unsigned int>(recvbuf));
+  CHECK_LE(static_cast<unsigned int>(sendbuf),
+           static_cast<unsigned int>(recvbuf));
   return static_cast<unsigned int>(sendbuf);
 }
 
@@ -262,8 +264,13 @@ long Channel::trySend() {
   if (len > 0) {
     packet_sender_.send(buf, len);
   }
-  len = transmitter_.send(buf, next_send_micros);
-  if (len > 0) {
+  // Amortize handshake, ACK, flow-control checks and scheduler work across a
+  // small burst. Keep it bounded so both directions get regular control updates
+  // and application threads can refill/drain their windows between bursts.
+  constexpr int kMaxDataPacketsPerBurst = 8;
+  for (int burst = 0; burst < kMaxDataPacketsPerBurst; ++burst) {
+    len = transmitter_.send(buf, next_send_micros);
+    if (len == 0) break;
     packet_sender_.send(buf, len);
   }
   return next_send_micros;

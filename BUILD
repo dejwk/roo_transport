@@ -157,3 +157,19 @@ cc_test(
         "@roo_testing//:arduino_gtest_main",
     ],
 )
+
+cc_test(
+    name = "channel_send_burst_test",
+    size = "small",
+    srcs = ["test/channel_send_burst_test.cpp"],
+    linkstatic = 1,
+    target_compatible_with = select({
+        "@roo_testing//roo_testing/platforms:is_arduino": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":roo_transport",
+        "@roo_testing//:arduino_gtest_main",
+    ],
+)
+
