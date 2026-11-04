@@ -29,13 +29,24 @@ class ReliableUartLinkTransport : public LinkStreamTransport {
 
   /// Starts the transport and the background receive thread.
   void begin() {
+#if configNUMBER_OF_CORES > 1 && configUSE_CORE_AFFINITY
+    const UBaseType_t receiver_core = get_core_num();
+#endif
     LinkStreamTransport::begin();
     running_ = true;
     roo::thread::attributes attrs;
     attrs.set_name(receiver_thread_name_.c_str());
     // Run at high priority to ensure timely processing of incoming packets.
     attrs.set_priority(configMAX_PRIORITIES - 1);
+#if configNUMBER_OF_CORES > 1 && configUSE_CORE_AFFINITY
+    // SerialUART masks a core-local UART IRQ while pumping its FIFO. Keep this
+    // worker on begin()'s core so a migration cannot restore IRQ state on a
+    // different core. Initialize SerialUART on the same core before begin().
+    receiver_thread_ = roo::thread(attrs, [this, receiver_core]() {
+      vTaskCoreAffinitySet(nullptr, UBaseType_t{1} << receiver_core);
+#else
     receiver_thread_ = roo::thread(attrs, [this]() {
+#endif
       while (running_) {
         int avail = serial_.available();
         if (avail == 0) {
