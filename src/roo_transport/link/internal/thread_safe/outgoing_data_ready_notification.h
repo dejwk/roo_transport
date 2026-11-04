@@ -4,6 +4,7 @@
 #ifdef ROO_USE_THREADS
 
 #include "roo_threads.h"
+#include "roo_threads/atomic.h"
 #include "roo_threads/condition_variable.h"
 #include "roo_threads/mutex.h"
 
@@ -18,9 +19,11 @@ class OutgoingDataReadyNotification {
 
   /// Signals that there is data ready to send.
   void notify() {
+    // Already-pending notifications are coalesced without entering the kernel.
+    // Take the mutex before notifying so registration in await() cannot race
+    // with the transition from checking its predicate to sleeping.
+    if (has_data_to_send_.exchange(true)) return;
     roo::unique_lock<roo::mutex> guard(mutex_);
-    if (has_data_to_send_) return;
-    has_data_to_send_ = true;
     // There is only one sender thread.
     cv_.notify_one();
   }
@@ -29,14 +32,14 @@ class OutgoingDataReadyNotification {
   bool await(long micros) {
     roo::unique_lock<roo::mutex> guard(mutex_);
     bool result = cv_.wait_for(guard, roo_time::Micros(micros),
-                               [this]() { return has_data_to_send_; });
+                               [this]() { return has_data_to_send_.load(); });
     has_data_to_send_ = false;
     return result;
   }
 
  private:
   roo::mutex mutex_;
-  bool has_data_to_send_;
+  roo::atomic<bool> has_data_to_send_;
   roo::condition_variable cv_;
 };
 

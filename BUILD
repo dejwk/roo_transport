@@ -173,3 +173,17 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "outgoing_data_ready_notification_test",
+    size = "small",
+    srcs = ["test/outgoing_data_ready_notification_test.cpp"],
+    linkstatic = 1,
+    target_compatible_with = select({
+        "@roo_testing//roo_testing/platforms:is_arduino": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":roo_transport",
+        "@roo_testing//:arduino_gtest_main",
+    ],
+)
