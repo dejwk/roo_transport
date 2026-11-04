@@ -1,0 +1,4 @@
+READY reset=1
+CONFIG baud=5000000 actual=3000000 cpu=133000000 peri=48000000 fifo=1024 window=4 mode=2 bytes=262144 repeats=1 cores=2 tick=1000
+RESULT kind=driver bytes=25600 us=606681 mbps=0.337574 bad=0
+DONE

@@ -1,0 +1,28 @@
+READY reset=1
+CONFIG baud=8312500 actual=8312500 cpu=133000000 peri=133000000 fifo=8192 window=6 mode=10 bytes=1048576 repeats=10 cores=2 tick=1000 app_prio=6 fault_us=0
+OWNER uart0_init_core=0 server_task_core=1
+CONNECTED
+LATENCY min=2119 p50=2786 p90=3059 p99=4211 max=4211
+REQUEST len=1048576
+RESULT kind=link sample=0 bytes=1048576 us=2168232 mbps=3.868870 bad=0 sent=4234 delivered=4229 overflow_server=0 overflow_client=0
+REQUEST len=1048576
+RESULT kind=link sample=1 bytes=1048576 us=2170362 mbps=3.865073 bad=0 sent=4243 delivered=4229 overflow_server=0 overflow_client=0
+REQUEST len=1048576
+RESULT kind=link sample=2 bytes=1048576 us=2170251 mbps=3.865271 bad=0 sent=4229 delivered=4229 overflow_server=0 overflow_client=0
+REQUEST len=1048576
+RESULT kind=link sample=3 bytes=1048576 us=2139774 mbps=3.920324 bad=0 sent=4238 delivered=4229 overflow_server=0 overflow_client=0
+REQUEST len=1048576
+RESULT kind=link sample=4 bytes=1048576 us=2169468 mbps=3.866666 bad=0 sent=4229 delivered=4229 overflow_server=0 overflow_client=0
+REQUEST len=1048576
+RESULT kind=link sample=5 bytes=1048576 us=2170073 mbps=3.865588 bad=0 sent=4230 delivered=4229 overflow_server=0 overflow_client=0
+REQUEST len=1048576
+RESULT kind=link sample=6 bytes=1048576 us=2177612 mbps=3.852205 bad=0 sent=4230 delivered=4229 overflow_server=0 overflow_client=0
+REQUEST len=1048576
+RESULT kind=link sample=7 bytes=1048576 us=2141850 mbps=3.916524 bad=0 sent=4247 delivered=4229 overflow_server=0 overflow_client=0
+REQUEST len=1048576
+RESULT kind=link sample=8 bytes=1048576 us=2184334 mbps=3.840350 bad=0 sent=4233 delivered=4229 overflow_server=0 overflow_client=0
+REQUEST len=1048576
+RESULT kind=link sample=9 bytes=1048576 us=2180429 mbps=3.847228 bad=0 sent=4230 delivered=4230 overflow_server=0 overflow_client=0
+DMA overruns1=0 overruns2=0 errors1=0 errors2=0
+LIFECYCLE idle_stop_and_reuse=PASS
+DONE

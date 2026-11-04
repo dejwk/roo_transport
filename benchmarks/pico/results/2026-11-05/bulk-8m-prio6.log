@@ -1,0 +1,42 @@
+READY reset=1
+CONFIG baud=8000000 actual=7940298 cpu=133000000 peri=133000000 fifo=8192 window=6 mode=6 bytes=524288 repeats=3 cores=2 tick=1000
+OWNER uart0_init_core=0 server_task_core=1
+CONNECTED
+LATENCY min=2658 p50=3084 p90=3669 p99=4347 max=4347
+REQUEST len=524288
+PROGRESS bytes=120320 request=524288 enqueued=136036 elapsed_ms=999
+STATS ss=589 sd=587 sr=101 cs=101 cd=101 cr=588
+PROGRESS bytes=308736 request=524288 enqueued=323940 elapsed_ms=2001
+STATS ss=1347 sd=1345 sr=101 cs=101 cd=101 cr=1346
+PROGRESS bytes=494080 request=524288 enqueued=510052 elapsed_ms=3003
+STATS ss=2095 sd=2093 sr=101 cs=101 cd=101 cr=2094
+RESULT kind=link sample=0 bytes=524288 us=2795437 mbps=1.500411 bad=0 sent=2115 delivered=2115 overflow_server=0 overflow_client=0
+REQUEST len=524288
+PROGRESS bytes=674816 request=524288 enqueued=690788 elapsed_ms=4004
+STATS ss=2824 sd=2822 sr=102 cs=102 cd=102 cr=2823
+TASK name=monitor state=0 priority=7 runtime=989711
+TASK name=USB state=1 priority=6 runtime=61055103
+TASK name=bulk-serv state=0 priority=6 runtime=308148158
+TASK name=bulk-clie state=1 priority=6 runtime=182241219
+TASK name=IDLE1 state=1 priority=0 runtime=153663238
+TASK name=IDLE0 state=1 priority=0 runtime=161940004
+TASK name=bulk-recv state=2 priority=7 runtime=79048475
+TASK name=bulk-recv state=2 priority=7 runtime=167594112
+TASK name=IdleCore1 state=2 priority=7 runtime=40215
+TASK name=IdleCore0 state=2 priority=7 runtime=23297
+TASK name=Tmr Svc state=2 priority=2 runtime=29975
+TASK name=bench-ser state=2 priority=6 runtime=92185717
+TASK name=CORE0 state=2 priority=6 runtime=120739189
+PROGRESS bytes=861952 request=524288 enqueued=877412 elapsed_ms=5014
+STATS ss=3577 sd=3577 sr=102 cs=102 cd=102 cr=3577
+RESULT kind=link sample=1 bytes=524288 us=2788789 mbps=1.503988 bad=0 sent=2115 delivered=2115 overflow_server=0 overflow_client=0
+PROGRESS bytes=1048576 request=524288 enqueued=1048676 elapsed_ms=6016
+STATS ss=4330 sd=4330 sr=102 cs=102 cd=102 cr=4330
+REQUEST len=524288
+PROGRESS bytes=1230080 request=524288 enqueued=1245284 elapsed_ms=7017
+STATS ss=5063 sd=5061 sr=103 cs=103 cd=103 cr=5063
+PROGRESS bytes=1418496 request=524288 enqueued=1433444 elapsed_ms=8019
+STATS ss=5823 sd=5822 sr=103 cs=103 cd=103 cr=5822
+RESULT kind=link sample=2 bytes=524288 us=2794691 mbps=1.500811 bad=0 sent=2115 delivered=2115 overflow_server=0 overflow_client=0
+DMA overruns1=0 overruns2=0
+DONE

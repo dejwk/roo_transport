@@ -30,3 +30,5 @@ with Ctrl-C):
 
 The files under .roo_testing are vendored from roo_testing; follow their
 canonical-source headers when refreshing them.
+
+For RP2040 with Arduino-Pico FreeRTOS, the opt-in native DMA transport reaches about 3.9 Mbit/s on a single-board UART loopback. See the [Pico hardware benchmark](benchmarks/pico/README.md) for the backend API, exact configuration, diagnosis, validation and reproducible results.

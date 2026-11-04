@@ -1,0 +1,1491 @@
+{
+  "dates": "2026-11-04/05",
+  "hardware": "RP2040-Zero, RP2040 B2, 133 MHz CPU, crossed UARTs GP12-GP5 / GP4-GP13",
+  "framework": "Arduino-Pico 5.4.3 / PlatformIO framework package1.50403.0",
+  "parameter_order": [
+    "baud",
+    "fifo",
+    "window_log",
+    "mode",
+    "bytes",
+    "samples",
+    "sys_peri",
+    "application_priority",
+    "fault_us_or_preliminary_tx_dma"
+  ],
+  "measurements": [
+    {
+      "label": "baseline-115k",
+      "parameters": [
+        115200,
+        1024,
+        4,
+        0,
+        16384,
+        2
+      ],
+      "completed": true,
+      "rows": [
+        {
+          "baud": 115200,
+          "actual": 115176,
+          "cpu": 133000000,
+          "peri": 48000000,
+          "fifo": 1024,
+          "window": 4,
+          "mode": 0,
+          "bytes": 16384,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "min": 5154,
+          "p50": 6626,
+          "p90": 7664,
+          "p99": 8068,
+          "max": 8068
+        },
+        {
+          "kind": "link",
+          "sample": 0,
+          "bytes": 16384,
+          "us": 1495060,
+          "mbps": 0.08767,
+          "bad": 0,
+          "sent": 68,
+          "delivered": 67,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 1,
+          "bytes": 16384,
+          "us": 1495994,
+          "mbps": 0.087615,
+          "bad": 0,
+          "sent": 68,
+          "delivered": 67,
+          "overflow_server": 0,
+          "overflow_client": 0
+        }
+      ],
+      "transcript": "2026-11-05/baseline-115k.log",
+      "lifecycle_pass": false,
+      "summary_mbps": {
+        "min": 0.087615,
+        "mean": 0.0876425,
+        "max": 0.08767
+      }
+    },
+    {
+      "label": "driver-48mhz",
+      "parameters": [
+        5000000,
+        1024,
+        4,
+        2,
+        262144,
+        1,
+        0
+      ],
+      "completed": true,
+      "rows": [
+        {
+          "baud": 5000000,
+          "actual": 3000000,
+          "cpu": 133000000,
+          "peri": 48000000,
+          "fifo": 1024,
+          "window": 4,
+          "mode": 2,
+          "bytes": 262144,
+          "repeats": 1,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "kind": "driver",
+          "bytes": 25600,
+          "us": 606681,
+          "mbps": 0.337574,
+          "bad": 0
+        }
+      ],
+      "transcript": "2026-11-05/driver-48mhz.log",
+      "lifecycle_pass": false
+    },
+    {
+      "label": "bulk-8m-prio6",
+      "parameters": [
+        8000000,
+        8192,
+        6,
+        6,
+        524288,
+        3,
+        1,
+        6
+      ],
+      "completed": true,
+      "rows": [
+        {
+          "baud": 8000000,
+          "actual": 7940298,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 6,
+          "bytes": 524288,
+          "repeats": 3,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "min": 2658,
+          "p50": 3084,
+          "p90": 3669,
+          "p99": 4347,
+          "max": 4347
+        },
+        {
+          "kind": "link",
+          "sample": 0,
+          "bytes": 524288,
+          "us": 2795437,
+          "mbps": 1.500411,
+          "bad": 0,
+          "sent": 2115,
+          "delivered": 2115,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 1,
+          "bytes": 524288,
+          "us": 2788789,
+          "mbps": 1.503988,
+          "bad": 0,
+          "sent": 2115,
+          "delivered": 2115,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 2,
+          "bytes": 524288,
+          "us": 2794691,
+          "mbps": 1.500811,
+          "bad": 0,
+          "sent": 2115,
+          "delivered": 2115,
+          "overflow_server": 0,
+          "overflow_client": 0
+        }
+      ],
+      "transcript": "2026-11-05/bulk-8m-prio6.log",
+      "lifecycle_pass": false,
+      "dma": {
+        "overruns1": 0,
+        "overruns2": 0
+      },
+      "summary_mbps": {
+        "min": 1.500411,
+        "mean": 1.5017366666666667,
+        "max": 1.503988
+      }
+    },
+    {
+      "label": "bulk-txdma-8m",
+      "parameters": [
+        8000000,
+        8192,
+        6,
+        6,
+        1048576,
+        3,
+        1,
+        6,
+        1
+      ],
+      "completed": true,
+      "rows": [
+        {
+          "baud": 8000000,
+          "actual": 7940298,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 6,
+          "bytes": 1048576,
+          "repeats": 3,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "min": 2457,
+          "p50": 2995,
+          "p90": 3138,
+          "p99": 4686,
+          "max": 4686
+        },
+        {
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 4670420,
+          "mbps": 1.796114,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 4686577,
+          "mbps": 1.789922,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 4718652,
+          "mbps": 1.777755,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        }
+      ],
+      "transcript": "2026-11-05/bulk-txdma-8m.log",
+      "lifecycle_pass": false,
+      "dma": {
+        "overruns1": 0,
+        "overruns2": 0
+      },
+      "summary_mbps": {
+        "min": 1.777755,
+        "mean": 1.7879303333333334,
+        "max": 1.796114
+      }
+    },
+    {
+      "label": "bulk-burst8-txdma-8m",
+      "parameters": [
+        8000000,
+        8192,
+        6,
+        6,
+        1048576,
+        3,
+        1,
+        6,
+        1
+      ],
+      "completed": true,
+      "rows": [
+        {
+          "baud": 8000000,
+          "actual": 7940298,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 6,
+          "bytes": 1048576,
+          "repeats": 3,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "min": 2725,
+          "p50": 3003,
+          "p90": 3169,
+          "p99": 4328,
+          "max": 4328
+        },
+        {
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2442821,
+          "mbps": 3.433984,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2461332,
+          "mbps": 3.408158,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2474295,
+          "mbps": 3.390302,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        }
+      ],
+      "transcript": "2026-11-05/bulk-burst8-txdma-8m.log",
+      "lifecycle_pass": false,
+      "dma": {
+        "overruns1": 0,
+        "overruns2": 0
+      },
+      "summary_mbps": {
+        "min": 3.390302,
+        "mean": 3.4108146666666666,
+        "max": 3.433984
+      }
+    },
+    {
+      "firmware": {
+        "created": "2026-11-04T22:53:01.762836+00:00",
+        "burst": "1",
+        "optimization": "-Os",
+        "firmware_sha256": "36cf7e9163c18dfe4b33a92085a3f996b0544370bc4f0018f461b47a9d5a6fc1",
+        "repos": {
+          "roo_transport": "dc2a98b93dcfdd8d0d79bb50b1ccde0075103700",
+          "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+          "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+          "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+          "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+          "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+          "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+          "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+        },
+        "source_snapshot_sha256": {
+          "roo_backport": "85ab828f08a5fb85c3b3d653ad8d8a56b8102858431ed7c58e473c982bb42305",
+          "roo_collections": "2a04f8c755ecf547580d17745412a5128e6f56ed9722244f19b11777974ca7dc",
+          "roo_flags": "bd910669ab2902dbe7b23d2143d2be0716b18b6ac9334d47d88795c4b16b0866",
+          "roo_io": "5340f2b35c0934d7c039d779769fec271da948f122c0bc8619a5724261ae33bc",
+          "roo_logging": "3b2bb04514551ff388a48005a6c5f3b2b1652789ff66b3c1437ad647c4ff77b3",
+          "roo_threads": "20653b6f373675c6669c5e18b18cc57ce11c8b94bdb7347c5bf7782e6e30866c",
+          "roo_time": "9801635b87fcf0eb582b221b941b124865319fc5ee1e64606e01c9204b3763e2",
+          "roo_transport": "11a926f4702b9a7a2019891ccbee67f10789ba3b374216df8083534ca2886891",
+          "benchmark": "cafcc77f87fe708ede676d39f3f9a75b58ea6cf7a839296d048c3750c4afd2f8"
+        },
+        "snapshot_hash_method": "SHA256 of sorted compact JSON mapping relative paths to file SHA256"
+      },
+      "label": "bulk-atomic-notify-8m",
+      "parameters": [
+        8000000,
+        8192,
+        6,
+        6,
+        1048576,
+        3,
+        1,
+        6,
+        1
+      ],
+      "completed": true,
+      "rows": [
+        {
+          "baud": 8000000,
+          "actual": 7940298,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 6,
+          "bytes": 1048576,
+          "repeats": 3,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 6,
+          "tx_dma": 1
+        },
+        {
+          "min": 2203,
+          "p50": 2921,
+          "p90": 3306,
+          "p99": 3986,
+          "max": 3986
+        },
+        {
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2371697,
+          "mbps": 3.536964,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2388782,
+          "mbps": 3.511667,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2412651,
+          "mbps": 3.476926,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        }
+      ],
+      "transcript": "2026-11-05/bulk-atomic-notify-8m.log",
+      "lifecycle_pass": false,
+      "dma": {
+        "overruns1": 0,
+        "overruns2": 0
+      },
+      "summary_mbps": {
+        "min": 3.476926,
+        "mean": 3.508519,
+        "max": 3.536964
+      }
+    },
+    {
+      "firmware": {
+        "created": "2026-11-04T23:06:55.997276+00:00",
+        "burst": "1",
+        "optimization": "-Os",
+        "firmware_sha256": "08b952ce0f45b1b708b99645f313df0e46467d52b56e6f549b013211d17a1843",
+        "repos": {
+          "roo_transport": "dc2a98b93dcfdd8d0d79bb50b1ccde0075103700",
+          "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+          "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+          "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+          "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+          "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+          "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+          "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+        },
+        "source_snapshot_sha256": {
+          "roo_backport": "85ab828f08a5fb85c3b3d653ad8d8a56b8102858431ed7c58e473c982bb42305",
+          "roo_collections": "2a04f8c755ecf547580d17745412a5128e6f56ed9722244f19b11777974ca7dc",
+          "roo_flags": "bd910669ab2902dbe7b23d2143d2be0716b18b6ac9334d47d88795c4b16b0866",
+          "roo_io": "5340f2b35c0934d7c039d779769fec271da948f122c0bc8619a5724261ae33bc",
+          "roo_logging": "3b2bb04514551ff388a48005a6c5f3b2b1652789ff66b3c1437ad647c4ff77b3",
+          "roo_threads": "20653b6f373675c6669c5e18b18cc57ce11c8b94bdb7347c5bf7782e6e30866c",
+          "roo_time": "9801635b87fcf0eb582b221b941b124865319fc5ee1e64606e01c9204b3763e2",
+          "roo_transport": "385d23fa3424c07ecdd98140985a06d986636b36391f02c1ebd3d5b55fd5bbaa",
+          "benchmark": "7f99d938c727c787b35d3d6db245674fa23c6c5e1f177e14749ac91b6edb8b5b"
+        },
+        "snapshot_hash_method": "SHA256 of sorted compact JSON mapping relative paths to file SHA256"
+      },
+      "label": "verified-raw-default-clock",
+      "parameters": [
+        5000000,
+        8192,
+        4,
+        7,
+        1048576,
+        3,
+        0,
+        6,
+        0
+      ],
+      "completed": true,
+      "rows": [
+        {
+          "baud": 5000000,
+          "actual": 3000000,
+          "cpu": 133000000,
+          "peri": 48000000,
+          "fifo": 8192,
+          "window": 4,
+          "mode": 7,
+          "bytes": 1048576,
+          "repeats": 3,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 6,
+          "fault_us": 0
+        },
+        {
+          "kind": "raw",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 3495444,
+          "mbps": 2.399869,
+          "bad": 0,
+          "overflow": 0
+        },
+        {
+          "kind": "raw",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 3495347,
+          "mbps": 2.399936,
+          "bad": 0,
+          "overflow": 0
+        },
+        {
+          "kind": "raw",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 3495334,
+          "mbps": 2.399945,
+          "bad": 0,
+          "overflow": 0
+        }
+      ],
+      "transcript": "2026-11-05/verified-raw-default-clock.log",
+      "lifecycle_pass": false,
+      "dma": {
+        "overruns1": 0,
+        "overruns2": 0
+      },
+      "summary_mbps": {
+        "min": 2.399869,
+        "mean": 2.3999166666666665,
+        "max": 2.399945
+      }
+    },
+    {
+      "firmware": {
+        "created": "2026-11-04T23:06:55.997276+00:00",
+        "burst": "1",
+        "optimization": "-Os",
+        "firmware_sha256": "08b952ce0f45b1b708b99645f313df0e46467d52b56e6f549b013211d17a1843",
+        "repos": {
+          "roo_transport": "dc2a98b93dcfdd8d0d79bb50b1ccde0075103700",
+          "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+          "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+          "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+          "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+          "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+          "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+          "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+        },
+        "source_snapshot_sha256": {
+          "roo_backport": "85ab828f08a5fb85c3b3d653ad8d8a56b8102858431ed7c58e473c982bb42305",
+          "roo_collections": "2a04f8c755ecf547580d17745412a5128e6f56ed9722244f19b11777974ca7dc",
+          "roo_flags": "bd910669ab2902dbe7b23d2143d2be0716b18b6ac9334d47d88795c4b16b0866",
+          "roo_io": "5340f2b35c0934d7c039d779769fec271da948f122c0bc8619a5724261ae33bc",
+          "roo_logging": "3b2bb04514551ff388a48005a6c5f3b2b1652789ff66b3c1437ad647c4ff77b3",
+          "roo_threads": "20653b6f373675c6669c5e18b18cc57ce11c8b94bdb7347c5bf7782e6e30866c",
+          "roo_time": "9801635b87fcf0eb582b221b941b124865319fc5ee1e64606e01c9204b3763e2",
+          "roo_transport": "385d23fa3424c07ecdd98140985a06d986636b36391f02c1ebd3d5b55fd5bbaa",
+          "benchmark": "7f99d938c727c787b35d3d6db245674fa23c6c5e1f177e14749ac91b6edb8b5b"
+        },
+        "snapshot_hash_method": "SHA256 of sorted compact JSON mapping relative paths to file SHA256"
+      },
+      "label": "verified-uart-limit-8k",
+      "parameters": [
+        8312500,
+        8192,
+        5,
+        10,
+        1048576,
+        5,
+        1,
+        6,
+        0
+      ],
+      "completed": true,
+      "rows": [
+        {
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 5,
+          "mode": 10,
+          "bytes": 1048576,
+          "repeats": 5,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 6,
+          "fault_us": 0
+        },
+        {
+          "min": 2060,
+          "p50": 2977,
+          "p90": 3170,
+          "p99": 3797,
+          "max": 3797
+        },
+        {
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2317484,
+          "mbps": 3.619705,
+          "bad": 0,
+          "sent": 4230,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2278796,
+          "mbps": 3.681158,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2335745,
+          "mbps": 3.591406,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 3,
+          "bytes": 1048576,
+          "us": 2352286,
+          "mbps": 3.566151,
+          "bad": 0,
+          "sent": 4254,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 4,
+          "bytes": 1048576,
+          "us": 2355410,
+          "mbps": 3.561422,
+          "bad": 0,
+          "sent": 4245,
+          "delivered": 4230,
+          "overflow_server": 0,
+          "overflow_client": 0
+        }
+      ],
+      "transcript": "2026-11-05/verified-uart-limit-8k.log",
+      "lifecycle_pass": true,
+      "dma": {
+        "overruns1": 0,
+        "overruns2": 0,
+        "errors1": 0,
+        "errors2": 0
+      },
+      "summary_mbps": {
+        "min": 3.561422,
+        "mean": 3.6039684,
+        "max": 3.681158
+      }
+    },
+    {
+      "firmware": {
+        "repositories": {
+          "roo_transport": "dc8fb73c90e2898b7260a58cbd9c1449c07ea365",
+          "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+          "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+          "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+          "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+          "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+          "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+          "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+        },
+        "board": "waveshare_rp2040_zero",
+        "platform": "/home/dawidk/.platformio/platforms/raspberrypi@src-ff76a3915224135aafad379817f41edd",
+        "test_rx_count": null,
+        "firmware_sha256": "b84c590ab64b7d158a2b86028e5f13cad95bd189479ecc32854e8815e140492a",
+        "source_snapshot_sha256": {
+          "benchmark": "f89ebd05a28eb783f68fdb5fe0b989b0277088e94f314bb815681b3f8a76c111",
+          "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f",
+          "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+          "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+          "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+          "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+          "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+          "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+          "roo_transport": "39f87a355b0224dd3eeae70690d2f0d53ea1a67f7d5a291f6db129bbf7622918"
+        },
+        "snapshot_hash_method": "SHA256 of sorted compact JSON mapping relative paths to file SHA256"
+      },
+      "label": "release-max-10mib",
+      "parameters": [
+        8312500,
+        8192,
+        6,
+        10,
+        1048576,
+        10,
+        1,
+        6,
+        0
+      ],
+      "completed": true,
+      "rows": [
+        {
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 1048576,
+          "repeats": 10,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 6,
+          "fault_us": 0
+        },
+        {
+          "min": 2119,
+          "p50": 2786,
+          "p90": 3059,
+          "p99": 4211,
+          "max": 4211
+        },
+        {
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2168232,
+          "mbps": 3.86887,
+          "bad": 0,
+          "sent": 4234,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2170362,
+          "mbps": 3.865073,
+          "bad": 0,
+          "sent": 4243,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2170251,
+          "mbps": 3.865271,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 3,
+          "bytes": 1048576,
+          "us": 2139774,
+          "mbps": 3.920324,
+          "bad": 0,
+          "sent": 4238,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 4,
+          "bytes": 1048576,
+          "us": 2169468,
+          "mbps": 3.866666,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 5,
+          "bytes": 1048576,
+          "us": 2170073,
+          "mbps": 3.865588,
+          "bad": 0,
+          "sent": 4230,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 6,
+          "bytes": 1048576,
+          "us": 2177612,
+          "mbps": 3.852205,
+          "bad": 0,
+          "sent": 4230,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 7,
+          "bytes": 1048576,
+          "us": 2141850,
+          "mbps": 3.916524,
+          "bad": 0,
+          "sent": 4247,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 8,
+          "bytes": 1048576,
+          "us": 2184334,
+          "mbps": 3.84035,
+          "bad": 0,
+          "sent": 4233,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 9,
+          "bytes": 1048576,
+          "us": 2180429,
+          "mbps": 3.847228,
+          "bad": 0,
+          "sent": 4230,
+          "delivered": 4230,
+          "overflow_server": 0,
+          "overflow_client": 0
+        }
+      ],
+      "transcript": "2026-11-05/release-max-10mib.log",
+      "lifecycle_pass": true,
+      "dma": {
+        "overruns1": 0,
+        "overruns2": 0,
+        "errors1": 0,
+        "errors2": 0
+      },
+      "summary_mbps": {
+        "min": 3.84035,
+        "mean": 3.8708099,
+        "max": 3.920324
+      }
+    },
+    {
+      "firmware": {
+        "repositories": {
+          "roo_transport": "dc8fb73c90e2898b7260a58cbd9c1449c07ea365",
+          "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+          "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+          "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+          "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+          "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+          "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+          "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+        },
+        "board": "waveshare_rp2040_zero",
+        "platform": "/home/dawidk/.platformio/platforms/raspberrypi@src-ff76a3915224135aafad379817f41edd",
+        "test_rx_count": null,
+        "firmware_sha256": "b84c590ab64b7d158a2b86028e5f13cad95bd189479ecc32854e8815e140492a",
+        "source_snapshot_sha256": {
+          "benchmark": "f89ebd05a28eb783f68fdb5fe0b989b0277088e94f314bb815681b3f8a76c111",
+          "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f",
+          "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+          "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+          "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+          "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+          "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+          "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+          "roo_transport": "39f87a355b0224dd3eeae70690d2f0d53ea1a67f7d5a291f6db129bbf7622918"
+        },
+        "snapshot_hash_method": "SHA256 of sorted compact JSON mapping relative paths to file SHA256"
+      },
+      "label": "release-5mbaud",
+      "parameters": [
+        5000000,
+        8192,
+        6,
+        10,
+        1048576,
+        3,
+        1,
+        6,
+        0
+      ],
+      "completed": true,
+      "rows": [
+        {
+          "baud": 5000000,
+          "actual": 5018867,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 1048576,
+          "repeats": 3,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 6,
+          "fault_us": 0
+        },
+        {
+          "min": 2152,
+          "p50": 2763,
+          "p90": 3146,
+          "p99": 4102,
+          "max": 4102
+        },
+        {
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2599330,
+          "mbps": 3.227219,
+          "bad": 0,
+          "sent": 4787,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2594243,
+          "mbps": 3.233548,
+          "bad": 0,
+          "sent": 4657,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2620415,
+          "mbps": 3.201252,
+          "bad": 0,
+          "sent": 4777,
+          "delivered": 4230,
+          "overflow_server": 0,
+          "overflow_client": 0
+        }
+      ],
+      "transcript": "2026-11-05/release-5mbaud.log",
+      "lifecycle_pass": true,
+      "dma": {
+        "overruns1": 0,
+        "overruns2": 0,
+        "errors1": 0,
+        "errors2": 0
+      },
+      "summary_mbps": {
+        "min": 3.201252,
+        "mean": 3.220673,
+        "max": 3.233548
+      }
+    },
+    {
+      "firmware": {
+        "repositories": {
+          "roo_transport": "dc8fb73c90e2898b7260a58cbd9c1449c07ea365",
+          "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+          "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+          "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+          "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+          "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+          "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+          "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+        },
+        "board": "waveshare_rp2040_zero",
+        "platform": "/home/dawidk/.platformio/platforms/raspberrypi@src-ff76a3915224135aafad379817f41edd",
+        "test_rx_count": null,
+        "firmware_sha256": "b84c590ab64b7d158a2b86028e5f13cad95bd189479ecc32854e8815e140492a",
+        "source_snapshot_sha256": {
+          "benchmark": "f89ebd05a28eb783f68fdb5fe0b989b0277088e94f314bb815681b3f8a76c111",
+          "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f",
+          "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+          "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+          "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+          "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+          "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+          "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+          "roo_transport": "39f87a355b0224dd3eeae70690d2f0d53ea1a67f7d5a291f6db129bbf7622918"
+        },
+        "snapshot_hash_method": "SHA256 of sorted compact JSON mapping relative paths to file SHA256"
+      },
+      "label": "release-recovery",
+      "parameters": [
+        8312500,
+        8192,
+        6,
+        10,
+        1048576,
+        2,
+        1,
+        6,
+        50000
+      ],
+      "completed": true,
+      "rows": [
+        {
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 1048576,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 6,
+          "fault_us": 50000
+        },
+        {
+          "min": 2118,
+          "p50": 2721,
+          "p90": 3018,
+          "p99": 4192,
+          "max": 4192
+        },
+        {
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2242277,
+          "mbps": 3.741111,
+          "bad": 0,
+          "sent": 4388,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2170786,
+          "mbps": 3.864318,
+          "bad": 0,
+          "sent": 4230,
+          "delivered": 4230,
+          "overflow_server": 0,
+          "overflow_client": 0
+        }
+      ],
+      "transcript": "2026-11-05/release-recovery.log",
+      "lifecycle_pass": true,
+      "dma": {
+        "overruns1": 0,
+        "overruns2": 0,
+        "errors1": 0,
+        "errors2": 1
+      },
+      "summary_mbps": {
+        "min": 3.741111,
+        "mean": 3.8027145,
+        "max": 3.864318
+      }
+    },
+    {
+      "firmware": {
+        "repositories": {
+          "roo_transport": "dc8fb73c90e2898b7260a58cbd9c1449c07ea365",
+          "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+          "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+          "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+          "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+          "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+          "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+          "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+        },
+        "board": "waveshare_rp2040_zero",
+        "platform": "/home/dawidk/.platformio/platforms/raspberrypi@src-ff76a3915224135aafad379817f41edd",
+        "test_rx_count": 65536,
+        "firmware_sha256": "222313018c91111ce77d96a88773665880b939ae198eb071f89f183eeff3a71e",
+        "source_snapshot_sha256": {
+          "benchmark": "f89ebd05a28eb783f68fdb5fe0b989b0277088e94f314bb815681b3f8a76c111",
+          "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f",
+          "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+          "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+          "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+          "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+          "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+          "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+          "roo_transport": "39f87a355b0224dd3eeae70690d2f0d53ea1a67f7d5a291f6db129bbf7622918"
+        },
+        "snapshot_hash_method": "SHA256 of sorted compact JSON mapping relative paths to file SHA256"
+      },
+      "label": "corrected-rearm-max",
+      "parameters": [
+        8312500,
+        8192,
+        6,
+        10,
+        1048576,
+        5,
+        1,
+        6,
+        0
+      ],
+      "completed": true,
+      "rows": [
+        {
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 1048576,
+          "repeats": 5,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 6,
+          "fault_us": 0
+        },
+        {
+          "min": 2073,
+          "p50": 2774,
+          "p90": 3011,
+          "p99": 4042,
+          "max": 4042
+        },
+        {
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2217130,
+          "mbps": 3.783544,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2192485,
+          "mbps": 3.826073,
+          "bad": 0,
+          "sent": 4255,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2186431,
+          "mbps": 3.836667,
+          "bad": 0,
+          "sent": 4230,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 3,
+          "bytes": 1048576,
+          "us": 2178208,
+          "mbps": 3.851151,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 4,
+          "bytes": 1048576,
+          "us": 2197356,
+          "mbps": 3.817592,
+          "bad": 0,
+          "sent": 4234,
+          "delivered": 4230,
+          "overflow_server": 0,
+          "overflow_client": 0
+        }
+      ],
+      "transcript": "2026-11-05/corrected-rearm-max.log",
+      "lifecycle_pass": true,
+      "dma": {
+        "overruns1": 0,
+        "overruns2": 0,
+        "errors1": 0,
+        "errors2": 0
+      },
+      "summary_mbps": {
+        "min": 3.783544,
+        "mean": 3.8230054,
+        "max": 3.851151
+      }
+    },
+    {
+      "firmware": {
+        "repositories": {
+          "roo_transport": "dc8fb73c90e2898b7260a58cbd9c1449c07ea365",
+          "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+          "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+          "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+          "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+          "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+          "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+          "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+        },
+        "board": "waveshare_rp2040_zero",
+        "platform": "/home/dawidk/.platformio/platforms/raspberrypi@src-ff76a3915224135aafad379817f41edd",
+        "test_rx_count": 65536,
+        "firmware_sha256": "222313018c91111ce77d96a88773665880b939ae198eb071f89f183eeff3a71e",
+        "source_snapshot_sha256": {
+          "benchmark": "f89ebd05a28eb783f68fdb5fe0b989b0277088e94f314bb815681b3f8a76c111",
+          "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f",
+          "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+          "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+          "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+          "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+          "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+          "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+          "roo_transport": "39f87a355b0224dd3eeae70690d2f0d53ea1a67f7d5a291f6db129bbf7622918"
+        },
+        "snapshot_hash_method": "SHA256 of sorted compact JSON mapping relative paths to file SHA256"
+      },
+      "label": "corrected-raw-max",
+      "parameters": [
+        8312500,
+        8192,
+        4,
+        7,
+        1048576,
+        3,
+        1,
+        6,
+        0
+      ],
+      "completed": true,
+      "rows": [
+        {
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 4,
+          "mode": 7,
+          "bytes": 1048576,
+          "repeats": 3,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 6,
+          "fault_us": 0
+        },
+        {
+          "kind": "raw",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 1261534,
+          "mbps": 6.64953,
+          "bad": 0,
+          "overflow": 0
+        },
+        {
+          "kind": "raw",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 1261546,
+          "mbps": 6.649467,
+          "bad": 0,
+          "overflow": 0
+        },
+        {
+          "kind": "raw",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 1261545,
+          "mbps": 6.649472,
+          "bad": 0,
+          "overflow": 0
+        }
+      ],
+      "transcript": "2026-11-05/corrected-raw-max.log",
+      "lifecycle_pass": false,
+      "dma": {
+        "overruns1": 0,
+        "overruns2": 0
+      },
+      "summary_mbps": {
+        "min": 6.649467,
+        "mean": 6.649489666666667,
+        "max": 6.64953
+      }
+    },
+    {
+      "firmware": {
+        "repositories": {
+          "roo_transport": "dc8fb73c90e2898b7260a58cbd9c1449c07ea365",
+          "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+          "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+          "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+          "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+          "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+          "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+          "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+        },
+        "board": "waveshare_rp2040_zero",
+        "platform": "/home/dawidk/.platformio/platforms/raspberrypi@src-ff76a3915224135aafad379817f41edd",
+        "test_rx_count": 65536,
+        "firmware_sha256": "222313018c91111ce77d96a88773665880b939ae198eb071f89f183eeff3a71e",
+        "source_snapshot_sha256": {
+          "benchmark": "f89ebd05a28eb783f68fdb5fe0b989b0277088e94f314bb815681b3f8a76c111",
+          "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f",
+          "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+          "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+          "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+          "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+          "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+          "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+          "roo_transport": "39f87a355b0224dd3eeae70690d2f0d53ea1a67f7d5a291f6db129bbf7622918"
+        },
+        "snapshot_hash_method": "SHA256 of sorted compact JSON mapping relative paths to file SHA256"
+      },
+      "label": "corrected-arduino-affinity",
+      "parameters": [
+        3000000,
+        1024,
+        4,
+        5,
+        65536,
+        3,
+        0,
+        0,
+        0
+      ],
+      "completed": true,
+      "rows": [
+        {
+          "baud": 3000000,
+          "actual": 3000000,
+          "cpu": 133000000,
+          "peri": 48000000,
+          "fifo": 1024,
+          "window": 4,
+          "mode": 5,
+          "bytes": 65536,
+          "repeats": 3,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 0,
+          "fault_us": 0
+        },
+        {
+          "min": 5778,
+          "p50": 7036,
+          "p90": 8059,
+          "p99": 11943,
+          "max": 11943
+        },
+        {
+          "kind": "link",
+          "sample": 0,
+          "bytes": 65536,
+          "us": 6041243,
+          "mbps": 0.086785,
+          "bad": 0,
+          "sent": 266,
+          "delivered": 265,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 1,
+          "bytes": 65536,
+          "us": 6040774,
+          "mbps": 0.086792,
+          "bad": 0,
+          "sent": 266,
+          "delivered": 265,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "kind": "link",
+          "sample": 2,
+          "bytes": 65536,
+          "us": 6056116,
+          "mbps": 0.086572,
+          "bad": 0,
+          "sent": 267,
+          "delivered": 266,
+          "overflow_server": 0,
+          "overflow_client": 0
+        }
+      ],
+      "transcript": "2026-11-05/corrected-arduino-affinity.log",
+      "lifecycle_pass": false,
+      "summary_mbps": {
+        "min": 0.086572,
+        "mean": 0.08671633333333333,
+        "max": 0.086792
+      }
+    }
+  ]
+}
