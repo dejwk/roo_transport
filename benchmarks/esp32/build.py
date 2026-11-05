@@ -19,6 +19,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--platform", default="espressif32",
                         help="Arduino-ESP32-capable PlatformIO platform or installed path")
+    parser.add_argument("--sketch", type=Path,
+                        help="Build an example sketch instead of the measurement harness")
     parser.add_argument("--board", default="esp32dev")
     parser.add_argument("--pio", default="pio")
     parser.add_argument("--jobs", type=int, default=2)
@@ -31,6 +33,9 @@ def main():
     parser.add_argument("--extra-flag", action="append", default=[])
     args = parser.parse_args()
     source = Path(__file__).resolve().parent
+    sketch = args.sketch.expanduser().resolve() if args.sketch else source / "main.cpp"
+    if not sketch.is_file():
+        parser.error(f"Sketch does not exist: {sketch}")
     repositories = source.parents[1].parent
     output = args.output.expanduser().resolve()
     (output / "src").mkdir(parents=True, exist_ok=True)
@@ -61,8 +66,8 @@ def main():
         (destination / "library.json").write_text(json.dumps(library, indent=2) + "\n")
         manifest["repositories"][name] = subprocess.check_output(
             ["git", "rev-parse", revision], cwd=checkout, text=True).strip()
-    for name in ("main.cpp",):
-        shutil.copy2(source / name, output / "src" / name)
+    shutil.copy2(sketch, output / "src/main.cpp")
+    manifest["sketch"] = str(sketch)
     flags = ["-fno-exceptions", "-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096"]
     if args.uart_event_core is not None:
         flags.append(f"-DARDUINO_SERIAL_EVENT_TASK_RUNNING_CORE={args.uart_event_core}")
