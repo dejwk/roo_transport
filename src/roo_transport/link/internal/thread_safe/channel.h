@@ -43,8 +43,19 @@ class Channel {
   /// Stops the sender thread and releases channel resources.
   ~Channel();
 
-  /// Starts the sender thread.
+  /// Starts the sender with the transport's default stack, priority and name.
   void begin();
+
+#if defined(ROO_THREADS_ATTRIBUTES_SUPPORT_PRIORITY) && \
+    ROO_THREADS_ATTRIBUTES_SUPPORT_PRIORITY
+  /// Starts the sender using the complete @p sender_attributes configuration.
+  ///
+  /// Attributes are copied before returning. This does not merge attributes
+  /// with the transport defaults: specify a 4096-byte stack explicitly to keep
+  /// the default stack budget while changing priority or name.
+  void begin(const roo::thread::attributes& sender_attributes);
+#endif
+
   /// Stops the sender thread.
   void end();
 

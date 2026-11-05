@@ -201,3 +201,19 @@ cc_test(
         "@roo_testing//:arduino_gtest_main",
     ],
 )
+
+cc_test(
+    name = "sender_thread_attributes_test",
+    size = "small",
+    srcs = ["test/sender_thread_attributes_test.cpp"],
+    linkstatic = 1,
+    target_compatible_with = [
+        "@roo_testing//roo_testing/platforms:arduino",
+        "@roo_testing//roo_testing/platforms:esp32",
+    ],
+    deps = [
+        ":roo_transport",
+        "@roo_testing//:arduino_gtest_main",
+        "@roo_threads",
+    ],
+)

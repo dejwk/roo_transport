@@ -564,8 +564,15 @@ void Channel::begin() {
 
 #endif
   attrs.set_name(send_thread_name_.c_str());
-  sender_thread_ = roo::thread(attrs, [this]() { sendLoop(); });
+  begin(attrs);
 }
+
+#if defined(ROO_THREADS_ATTRIBUTES_SUPPORT_PRIORITY) && \
+    ROO_THREADS_ATTRIBUTES_SUPPORT_PRIORITY
+void Channel::begin(const roo::thread::attributes& sender_attributes) {
+  sender_thread_ = roo::thread(sender_attributes, [this]() { sendLoop(); });
+}
+#endif
 
 void Channel::end() {
   active_ = false;

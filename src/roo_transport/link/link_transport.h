@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "roo_io/core/output_stream.h"
+#include "roo_threads/thread.h"
 #include "roo_transport/link/internal/thread_safe/channel.h"
 #include "roo_transport/link/link.h"
 #include "roo_transport/link/link_buffer_size.h"
@@ -28,8 +29,20 @@ class LinkTransport {
                 LinkBufferSize sendbuf = kBufferSize4KB,
                 LinkBufferSize recvbuf = kBufferSize4KB);
 
-  /// Starts the transport send thread.
+  /// Starts the sender with the transport's default stack, priority and name.
   void begin() { channel_.begin(); }
+
+#if defined(ROO_THREADS_ATTRIBUTES_SUPPORT_PRIORITY) && \
+    ROO_THREADS_ATTRIBUTES_SUPPORT_PRIORITY
+  /// Starts the sender using the complete @p sender_attributes configuration.
+  ///
+  /// Attributes are copied before returning and are not merged with defaults.
+  /// Specify a 4096-byte stack explicitly to retain the default stack budget
+  /// while changing priority or name. Receiver scheduling is unaffected.
+  void begin(const roo::thread::attributes& sender_attributes) {
+    channel_.begin(sender_attributes);
+  }
+#endif
 
   /// Stops the transport send thread.
   void end() { channel_.end(); }

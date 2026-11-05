@@ -68,13 +68,25 @@ class Esp32SerialLinkTransport
           transport_.processIncomingPacket(buf, len);
         }) {}
 
-  /// Starts the transport and UART receive callbacks.
+  /// Starts the transport and UART callbacks with the default sender
+  /// attributes.
   void begin() {
     transport_.begin();
-    this->serial_.onReceive([this]() { receiveAvailable(); });
-    this->serial_.onReceiveError(
-        [this](hardwareSerial_error_t) { receiveAvailable(); });
+    registerReceiveCallbacks();
   }
+
+#if defined(ROO_THREADS_ATTRIBUTES_SUPPORT_PRIORITY) && \
+    ROO_THREADS_ATTRIBUTES_SUPPORT_PRIORITY
+  /// Starts the transport with the complete @p sender_attributes configuration.
+  ///
+  /// Attributes are copied before returning and are not merged with defaults.
+  /// Specify a 4096-byte stack explicitly to retain the default stack budget
+  /// while changing priority or name. UART event-task scheduling is unaffected.
+  void begin(const roo::thread::attributes& sender_attributes) {
+    transport_.begin(sender_attributes);
+    registerReceiveCallbacks();
+  }
+#endif
 
   /// Stops the transport and UART receive callbacks.
   void end() {
@@ -113,6 +125,13 @@ class Esp32SerialLinkTransport
   }
 
  private:
+  // Both begin() overloads use the same bounded receive-event processing.
+  void registerReceiveCallbacks() {
+    this->serial_.onReceive([this]() { receiveAvailable(); });
+    this->serial_.onReceiveError(
+        [this](hardwareSerial_error_t) { receiveAvailable(); });
+  }
+
   // Drain the entry backlog even if UART events coalesce or a chunk contains no
   // valid packet. A snapshot bounds each callback so fresh traffic cannot keep
   // the high-priority receive task running indefinitely.

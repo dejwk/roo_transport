@@ -123,11 +123,15 @@ struct ReliableUartDma::Impl {
 
   ~Impl() { end(); }
 
-  void begin() {
+  void begin(const roo::thread::attributes* sender_attributes = nullptr) {
     CHECK(!started && !closed);
     started = true;
     running = true;
-    link.begin();
+    if (sender_attributes == nullptr) {
+      link.begin();
+    } else {
+      link.begin(*sender_attributes);
+    }
     roo::thread::attributes attrs;
     attrs.set_name("dma-recv");
     attrs.set_priority(configMAX_PRIORITIES - 1);
@@ -321,6 +325,10 @@ ReliableUartDma::ReliableUartDma(uart_inst_t* uart, uint8_t* rx_buffer,
 ReliableUartDma::~ReliableUartDma() = default;
 
 void ReliableUartDma::begin() { impl_->begin(); }
+
+void ReliableUartDma::begin(const roo::thread::attributes& sender_attributes) {
+  impl_->begin(&sender_attributes);
+}
 
 void ReliableUartDma::end() { impl_->end(); }
 

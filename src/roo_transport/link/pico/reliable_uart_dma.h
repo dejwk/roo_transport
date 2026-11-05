@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <memory>
 
+#include "roo_threads/thread.h"
 #include "roo_transport/link/link_transport.h"
 
 namespace roo_transport {
@@ -46,8 +47,17 @@ class ReliableUartDma {
   ReliableUartDma(const ReliableUartDma&) = delete;
   ReliableUartDma& operator=(const ReliableUartDma&) = delete;
 
-  /// Starts the sender and receive workers; call once before connecting.
+  /// Starts both workers with default attributes; call once before connecting.
   void begin();
+
+  /// Starts both workers with a complete @p sender_attributes configuration.
+  ///
+  /// Only the sender uses these copied attributes; the receive worker retains
+  /// its existing priority of configMAX_PRIORITIES - 1. Attributes are not
+  /// merged with defaults: specify a 4096-byte stack explicitly to retain the
+  /// default sender stack budget while changing its priority or name.
+  /// Call once before connecting.
+  void begin(const roo::thread::attributes& sender_attributes);
 
   /// Stops workers, drains TX and releases DMA; this instance cannot restart.
   /// Must run on the construction core after application I/O has stopped.
