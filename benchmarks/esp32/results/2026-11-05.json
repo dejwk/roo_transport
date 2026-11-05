@@ -1,0 +1,3457 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-05",
+  "board": {
+    "chip": "ESP32-D0WD-V3",
+    "revision": "3.1",
+    "flash_bytes": 4194304,
+    "cpu_mhz": 240,
+    "apb_mhz": 80,
+    "uart1_tx_gpio": 4,
+    "uart2_rx_gpio": 16,
+    "uart2_tx_gpio": 17,
+    "uart1_rx_gpio": 2,
+    "console_baud": 115200,
+    "uart_format": "8N1",
+    "arduino_esp32": "3.3.7",
+    "esp_idf": "v5.5.2-729-g87912cd291"
+  },
+  "limits": {
+    "supported_baud": 5000000,
+    "raw_byte_mbit_s": 4.0,
+    "full_frame_wire_bytes": 256,
+    "full_frame_payload_bytes": 248,
+    "ideal_payload_mbit_s": 3.875
+  },
+  "notes": [
+    "Both reliable endpoints run on one board; this is not a two-board benchmark.",
+    "Rates count useful bytes. Only passed runs have accepted throughput summaries.",
+    "Reliable mode does not observe UART error callbacks; complete payloads and lifecycle are checked.",
+    "Raw mode observes UART error callbacks and requires zero measured errors.",
+    "Startup errors are recorded separately before timed work.",
+    "Counters can straddle sample boundaries and are not an exact wire-loss estimate.",
+    "Compact source snapshot digests hash a sorted JSON path-to-SHA256 mapping, UTF-8 encoded with separators comma and colon and no whitespace.",
+    "The original full flash was restored and the complete on-device digest matched the backup."
+  ],
+  "firmwares": {
+    "2cc17fb7aaf590234762e0c9a709d6dc8e266ea388f97613f010018bdeca74a6": {
+      "repositories": {
+        "roo_transport": "74564eac1cb76b5f463622462d146a8714119921",
+        "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+        "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+        "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+        "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+        "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+        "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+        "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+      },
+      "board": "esp32dev",
+      "cpu_mhz": 240,
+      "uart_event_core": null,
+      "uart_event_priority": null,
+      "transport_ref": "worktree",
+      "build_flags": [
+        "-fno-exceptions",
+        "-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096"
+      ],
+      "firmware_sha256": "2cc17fb7aaf590234762e0c9a709d6dc8e266ea388f97613f010018bdeca74a6",
+      "artifacts_sha256": {
+        "partitions.bin": "148b959cbff1c38aa8e1d5c0ba9d612c54997b945e56a63f41223eef650653a1",
+        "firmware.bin": "2cc17fb7aaf590234762e0c9a709d6dc8e266ea388f97613f010018bdeca74a6",
+        "bootloader.bin": "f6e34bca19e4929acc1d5561b03cbd8941613c3247a4d4b41ba05b8972fc1f1c"
+      },
+      "platform": "pioarduino espressif32 55.03.37 (installed local platform)",
+      "main_cpp_sha256": "a9b6872cdb037df901efad9360f1819ba8394444d7af10a91f111c7791eb979c",
+      "source_snapshot_sha256": "190357bcdf18207dc50b76ac9709ab1c3e6b9a74b79d75ccb2a907ba400b76fc",
+      "per_library_source_snapshot_sha256": {
+        "roo_transport": "a26eb14a1ce8d2104e5b0073ff7ec9309a0d5a3a4759e9c3fbd6894cf5438eb9",
+        "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+        "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+        "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+        "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+        "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+        "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+        "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f"
+      },
+      "tested_transport_source_commit": "7ce82fbdfd8652143a8cf7cc65944f7db7a25e5e",
+      "commit_note": "The build HEAD predates the fix commit; all roo_transport src file hashes were verified against the committed tree."
+    },
+    "98d6de00754a95631d74fb136f4b134de4bec825b223a2fd67b8084ec88e2acb": {
+      "repositories": {
+        "roo_transport": "74564eac1cb76b5f463622462d146a8714119921",
+        "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+        "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+        "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+        "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+        "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+        "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+        "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+      },
+      "board": "esp32dev",
+      "cpu_mhz": 240,
+      "uart_event_core": null,
+      "uart_event_priority": null,
+      "transport_ref": "74564ea",
+      "build_flags": [
+        "-fno-exceptions",
+        "-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096"
+      ],
+      "firmware_sha256": "98d6de00754a95631d74fb136f4b134de4bec825b223a2fd67b8084ec88e2acb",
+      "artifacts_sha256": {
+        "partitions.bin": "148b959cbff1c38aa8e1d5c0ba9d612c54997b945e56a63f41223eef650653a1",
+        "firmware.bin": "98d6de00754a95631d74fb136f4b134de4bec825b223a2fd67b8084ec88e2acb",
+        "bootloader.bin": "f6e34bca19e4929acc1d5561b03cbd8941613c3247a4d4b41ba05b8972fc1f1c"
+      },
+      "platform": "pioarduino espressif32 55.03.37 (installed local platform)",
+      "main_cpp_sha256": "a9b6872cdb037df901efad9360f1819ba8394444d7af10a91f111c7791eb979c",
+      "source_snapshot_sha256": "209858b30638c7b7d1c096242f24ebbb5a4cb731d74f365262d59bf5d116fd7a",
+      "per_library_source_snapshot_sha256": {
+        "roo_transport": "39f87a355b0224dd3eeae70690d2f0d53ea1a67f7d5a291f6db129bbf7622918",
+        "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+        "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+        "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+        "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+        "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+        "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+        "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f"
+      }
+    },
+    "c3d1fd7446b09d2ccd2f1b147c607a22c3b4e819ab8a5da68df7b1f43b65c469": {
+      "repositories": {
+        "roo_transport": "74564eac1cb76b5f463622462d146a8714119921",
+        "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+        "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+        "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+        "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+        "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+        "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+        "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+      },
+      "board": "esp32dev",
+      "cpu_mhz": 240,
+      "uart_event_core": null,
+      "uart_event_priority": null,
+      "build_flags": [
+        "-fno-exceptions",
+        "-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096"
+      ],
+      "firmware_sha256": "c3d1fd7446b09d2ccd2f1b147c607a22c3b4e819ab8a5da68df7b1f43b65c469",
+      "artifacts_sha256": {
+        "partitions.bin": "148b959cbff1c38aa8e1d5c0ba9d612c54997b945e56a63f41223eef650653a1",
+        "firmware.bin": "c3d1fd7446b09d2ccd2f1b147c607a22c3b4e819ab8a5da68df7b1f43b65c469",
+        "bootloader.bin": "f6e34bca19e4929acc1d5561b03cbd8941613c3247a4d4b41ba05b8972fc1f1c"
+      },
+      "platform": "pioarduino espressif32 55.03.37 (installed local platform)",
+      "main_cpp_sha256": "f2eb566f546acaecd636bdd27a67e9e51d845c06b6578f1cf43dea3542a533cb",
+      "source_snapshot_sha256": "bc02afcf143980f805d0da840df81684f1f9fad817bb2c2590924efb7fa3e809",
+      "per_library_source_snapshot_sha256": {
+        "roo_transport": "a26eb14a1ce8d2104e5b0073ff7ec9309a0d5a3a4759e9c3fbd6894cf5438eb9",
+        "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+        "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+        "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+        "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+        "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+        "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+        "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f"
+      }
+    }
+  },
+  "runs": [
+    {
+      "id": "final-sustained-10mib",
+      "parameters": {
+        "mode": "reliable",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 1024,
+        "window_log": 6,
+        "bytes": 1048576,
+        "samples": 10,
+        "application_priority": 23,
+        "rx_fifo": 64,
+        "rx_timeout": 1,
+        "chunk": 256,
+        "split_irq": false,
+        "fault_us": 0,
+        "timeout": 120,
+        "reset": true
+      },
+      "firmware_sha256": "2cc17fb7aaf590234762e0c9a709d6dc8e266ea388f97613f010018bdeca74a6",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 1024,
+          "window": 6,
+          "mode": 0,
+          "bytes": 1048576,
+          "repeats": 10,
+          "app_prio": 23,
+          "rx_fifo": 64,
+          "rx_timeout": 1,
+          "chunk": 256,
+          "split_irq": 0,
+          "fault_us": 0,
+          "irq1_core": 1,
+          "irq2_core": 1,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 639,
+          "p50": 879,
+          "p90": 926,
+          "p99": 1505,
+          "max": 1505
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2174664,
+          "mbps": 3.857427,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2175604,
+          "mbps": 3.855761,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2175454,
+          "mbps": 3.856026,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 3,
+          "bytes": 1048576,
+          "us": 2175873,
+          "mbps": 3.855284,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 4,
+          "bytes": 1048576,
+          "us": 2175345,
+          "mbps": 3.85622,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 5,
+          "bytes": 1048576,
+          "us": 2176131,
+          "mbps": 3.854827,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 6,
+          "bytes": 1048576,
+          "us": 2175313,
+          "mbps": 3.856276,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 7,
+          "bytes": 1048576,
+          "us": 2174621,
+          "mbps": 3.857503,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 8,
+          "bytes": 1048576,
+          "us": 2174877,
+          "mbps": 3.857049,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 9,
+          "bytes": 1048576,
+          "us": 2175569,
+          "mbps": 3.855823,
+          "bad": 0,
+          "sent": 4230,
+          "delivered": 4230
+        },
+        {
+          "record": "LIFECYCLE",
+          "stream_eof_and_stop": "PASS"
+        },
+        {
+          "record": "ERRORS",
+          "observed": 0,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "FAULT",
+          "requested_us": 0,
+          "fired": 0,
+          "restored": 0
+        }
+      ],
+      "transcript": "2026-11-05/final-sustained-10mib.log",
+      "transcript_sha256": "5dcfdfaa51676f61e59c6773eb437a8f217f117b0e4b5781e5ab7f9e788f9149",
+      "accepted_payload_mbit_s": {
+        "min": 3.854827,
+        "mean": 3.8562196,
+        "max": 3.857503
+      }
+    },
+    {
+      "id": "final-repeat-0",
+      "parameters": {
+        "mode": "reliable",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 1024,
+        "window_log": 6,
+        "bytes": 1048576,
+        "samples": 3,
+        "application_priority": 23,
+        "rx_fifo": 64,
+        "rx_timeout": 1,
+        "chunk": 256,
+        "split_irq": false,
+        "fault_us": 0,
+        "timeout": 120,
+        "reset": true
+      },
+      "firmware_sha256": "2cc17fb7aaf590234762e0c9a709d6dc8e266ea388f97613f010018bdeca74a6",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 1024,
+          "window": 6,
+          "mode": 0,
+          "bytes": 1048576,
+          "repeats": 3,
+          "app_prio": 23,
+          "rx_fifo": 64,
+          "rx_timeout": 1,
+          "chunk": 256,
+          "split_irq": 0,
+          "fault_us": 0,
+          "irq1_core": 1,
+          "irq2_core": 1,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 805,
+          "p50": 877,
+          "p90": 925,
+          "p99": 1929,
+          "max": 1929
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2175134,
+          "mbps": 3.856594,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2175467,
+          "mbps": 3.856003,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2175462,
+          "mbps": 3.856012,
+          "bad": 0,
+          "sent": 4230,
+          "delivered": 4230
+        },
+        {
+          "record": "LIFECYCLE",
+          "stream_eof_and_stop": "PASS"
+        },
+        {
+          "record": "ERRORS",
+          "observed": 0,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "FAULT",
+          "requested_us": 0,
+          "fired": 0,
+          "restored": 0
+        }
+      ],
+      "transcript": "2026-11-05/final-repeat-0.log",
+      "transcript_sha256": "d6a82785258fc0be485ebce78f8fd75728cdc40d60f1bb191e79c196dcdbac45",
+      "accepted_payload_mbit_s": {
+        "min": 3.856003,
+        "mean": 3.856203,
+        "max": 3.856594
+      }
+    },
+    {
+      "id": "final-repeat-1",
+      "parameters": {
+        "mode": "reliable",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 1024,
+        "window_log": 6,
+        "bytes": 1048576,
+        "samples": 3,
+        "application_priority": 23,
+        "rx_fifo": 64,
+        "rx_timeout": 1,
+        "chunk": 256,
+        "split_irq": false,
+        "fault_us": 0,
+        "timeout": 120,
+        "reset": true
+      },
+      "firmware_sha256": "2cc17fb7aaf590234762e0c9a709d6dc8e266ea388f97613f010018bdeca74a6",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 1024,
+          "window": 6,
+          "mode": 0,
+          "bytes": 1048576,
+          "repeats": 3,
+          "app_prio": 23,
+          "rx_fifo": 64,
+          "rx_timeout": 1,
+          "chunk": 256,
+          "split_irq": 0,
+          "fault_us": 0,
+          "irq1_core": 1,
+          "irq2_core": 1,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 638,
+          "p50": 881,
+          "p90": 927,
+          "p99": 1506,
+          "max": 1506
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2174905,
+          "mbps": 3.857,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2176302,
+          "mbps": 3.854524,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2174935,
+          "mbps": 3.856947,
+          "bad": 0,
+          "sent": 4230,
+          "delivered": 4230
+        },
+        {
+          "record": "LIFECYCLE",
+          "stream_eof_and_stop": "PASS"
+        },
+        {
+          "record": "ERRORS",
+          "observed": 0,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "FAULT",
+          "requested_us": 0,
+          "fired": 0,
+          "restored": 0
+        }
+      ],
+      "transcript": "2026-11-05/final-repeat-1.log",
+      "transcript_sha256": "46ab387b7b9cabb1aa69f4106098274c48a89f0a4788bef418b5a919b72a9f78",
+      "accepted_payload_mbit_s": {
+        "min": 3.854524,
+        "mean": 3.856157,
+        "max": 3.857
+      }
+    },
+    {
+      "id": "final-repeat-2",
+      "parameters": {
+        "mode": "reliable",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 1024,
+        "window_log": 6,
+        "bytes": 1048576,
+        "samples": 3,
+        "application_priority": 23,
+        "rx_fifo": 64,
+        "rx_timeout": 1,
+        "chunk": 256,
+        "split_irq": false,
+        "fault_us": 0,
+        "timeout": 120,
+        "reset": true
+      },
+      "firmware_sha256": "2cc17fb7aaf590234762e0c9a709d6dc8e266ea388f97613f010018bdeca74a6",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 1024,
+          "window": 6,
+          "mode": 0,
+          "bytes": 1048576,
+          "repeats": 3,
+          "app_prio": 23,
+          "rx_fifo": 64,
+          "rx_timeout": 1,
+          "chunk": 256,
+          "split_irq": 0,
+          "fault_us": 0,
+          "irq1_core": 1,
+          "irq2_core": 1,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 808,
+          "p50": 876,
+          "p90": 926,
+          "p99": 1505,
+          "max": 1505
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2175173,
+          "mbps": 3.856525,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2174944,
+          "mbps": 3.856931,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2175453,
+          "mbps": 3.856028,
+          "bad": 0,
+          "sent": 4230,
+          "delivered": 4230
+        },
+        {
+          "record": "LIFECYCLE",
+          "stream_eof_and_stop": "PASS"
+        },
+        {
+          "record": "ERRORS",
+          "observed": 0,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "FAULT",
+          "requested_us": 0,
+          "fired": 0,
+          "restored": 0
+        }
+      ],
+      "transcript": "2026-11-05/final-repeat-2.log",
+      "transcript_sha256": "47e286128c8117657b3fa3d80ccd81ca1014799a804ae26234b8e69db0e00117",
+      "accepted_payload_mbit_s": {
+        "min": 3.856028,
+        "mean": 3.8564946666666664,
+        "max": 3.856931
+      }
+    },
+    {
+      "id": "final-raw-forward",
+      "parameters": {
+        "mode": "raw-idf",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 1024,
+        "window_log": 6,
+        "bytes": 1048576,
+        "samples": 5,
+        "application_priority": 23,
+        "rx_fifo": 64,
+        "rx_timeout": 1,
+        "chunk": 4096,
+        "split_irq": false,
+        "fault_us": 0,
+        "timeout": 120,
+        "reset": true
+      },
+      "firmware_sha256": "2cc17fb7aaf590234762e0c9a709d6dc8e266ea388f97613f010018bdeca74a6",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 1024,
+          "window": 6,
+          "mode": 2,
+          "bytes": 1048576,
+          "repeats": 5,
+          "app_prio": 23,
+          "rx_fifo": 64,
+          "rx_timeout": 1,
+          "chunk": 4096,
+          "split_irq": 0,
+          "fault_us": 0,
+          "irq1_core": 1,
+          "irq2_core": 1,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 1,
+          "uart": 1,
+          "total": 1,
+          "break": 1,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 1,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "raw",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2099801,
+          "mbps": 3.994954,
+          "bad": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "raw",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2101029,
+          "mbps": 3.992619,
+          "bad": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "raw",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2101019,
+          "mbps": 3.992638,
+          "bad": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "raw",
+          "sample": 3,
+          "bytes": 1048576,
+          "us": 2101014,
+          "mbps": 3.992647,
+          "bad": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "raw",
+          "sample": 4,
+          "bytes": 1048576,
+          "us": 2101026,
+          "mbps": 3.992625,
+          "bad": 0
+        },
+        {
+          "record": "ERRORS",
+          "observed": 1,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 1,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 1,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "FAULT",
+          "requested_us": 0,
+          "fired": 0,
+          "restored": 0
+        }
+      ],
+      "transcript": "2026-11-05/final-raw-forward.log",
+      "transcript_sha256": "1b361d5490d340d93bb48922123fef88135a802388e78068a3197bf8751fc07c",
+      "accepted_payload_mbit_s": {
+        "min": 3.992619,
+        "mean": 3.9930966,
+        "max": 3.994954
+      }
+    },
+    {
+      "id": "final-raw-reverse",
+      "parameters": {
+        "mode": "raw-idf-reverse",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 1024,
+        "window_log": 6,
+        "bytes": 1048576,
+        "samples": 5,
+        "application_priority": 23,
+        "rx_fifo": 64,
+        "rx_timeout": 1,
+        "chunk": 4096,
+        "split_irq": false,
+        "fault_us": 0,
+        "timeout": 120,
+        "reset": true
+      },
+      "firmware_sha256": "2cc17fb7aaf590234762e0c9a709d6dc8e266ea388f97613f010018bdeca74a6",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 1024,
+          "window": 6,
+          "mode": 3,
+          "bytes": 1048576,
+          "repeats": 5,
+          "app_prio": 23,
+          "rx_fifo": 64,
+          "rx_timeout": 1,
+          "chunk": 4096,
+          "split_irq": 0,
+          "fault_us": 0,
+          "irq1_core": 1,
+          "irq2_core": 1,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 1,
+          "uart": 1,
+          "total": 1,
+          "break": 1,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 1,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "raw",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2098299,
+          "mbps": 3.997813,
+          "bad": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "raw",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2098061,
+          "mbps": 3.998267,
+          "bad": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "raw",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2098053,
+          "mbps": 3.998282,
+          "bad": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "raw",
+          "sample": 3,
+          "bytes": 1048576,
+          "us": 2098049,
+          "mbps": 3.99829,
+          "bad": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "raw",
+          "sample": 4,
+          "bytes": 1048576,
+          "us": 2097383,
+          "mbps": 3.999559,
+          "bad": 0
+        },
+        {
+          "record": "ERRORS",
+          "observed": 1,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 1,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 1,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "FAULT",
+          "requested_us": 0,
+          "fired": 0,
+          "restored": 0
+        }
+      ],
+      "transcript": "2026-11-05/final-raw-reverse.log",
+      "transcript_sha256": "00c3481317ee83c584be60eb0fa22cf58dbd18d04c49d05d0d8089f386108a17",
+      "accepted_payload_mbit_s": {
+        "min": 3.997813,
+        "mean": 3.9984422,
+        "max": 3.999559
+      }
+    },
+    {
+      "id": "final-receive-break",
+      "parameters": {
+        "mode": "reliable",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 1024,
+        "window_log": 6,
+        "bytes": 1048576,
+        "samples": 3,
+        "application_priority": 23,
+        "rx_fifo": 64,
+        "rx_timeout": 1,
+        "chunk": 256,
+        "split_irq": false,
+        "fault_us": 50000,
+        "timeout": 120,
+        "reset": true
+      },
+      "firmware_sha256": "2cc17fb7aaf590234762e0c9a709d6dc8e266ea388f97613f010018bdeca74a6",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 1024,
+          "window": 6,
+          "mode": 0,
+          "bytes": 1048576,
+          "repeats": 3,
+          "app_prio": 23,
+          "rx_fifo": 64,
+          "rx_timeout": 1,
+          "chunk": 256,
+          "split_irq": 0,
+          "fault_us": 50000,
+          "irq1_core": 1,
+          "irq2_core": 1,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 672,
+          "p50": 880,
+          "p90": 930,
+          "p99": 1942,
+          "max": 1942
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2228461,
+          "mbps": 3.764306,
+          "bad": 0,
+          "sent": 4327,
+          "delivered": 4229
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2175708,
+          "mbps": 3.855576,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2176210,
+          "mbps": 3.854687,
+          "bad": 0,
+          "sent": 4230,
+          "delivered": 4230
+        },
+        {
+          "record": "LIFECYCLE",
+          "stream_eof_and_stop": "PASS"
+        },
+        {
+          "record": "ERRORS",
+          "observed": 0,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "FAULT",
+          "requested_us": 50000,
+          "fired": 1,
+          "restored": 1
+        }
+      ],
+      "transcript": "2026-11-05/final-receive-break.log",
+      "transcript_sha256": "34091a06847fc8eb6c6afaa4d93e9056f18ecc2645103e759437f6d2bad883d3",
+      "accepted_payload_mbit_s": {
+        "min": 3.764306,
+        "mean": 3.8248563333333334,
+        "max": 3.855576
+      }
+    },
+    {
+      "id": "controlled-before-example",
+      "parameters": {
+        "mode": "reliable",
+        "baud": 5000000,
+        "rx_buffer": 4096,
+        "tx_buffer": 0,
+        "window_log": 4,
+        "bytes": 524288,
+        "samples": 2,
+        "application_priority": 0,
+        "rx_fifo": 120,
+        "rx_timeout": 1,
+        "chunk": 256,
+        "split_irq": true,
+        "fault_us": 0,
+        "timeout": 40.0,
+        "reset": true
+      },
+      "firmware_sha256": "98d6de00754a95631d74fb136f4b134de4bec825b223a2fd67b8084ec88e2acb",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 4096,
+          "txbuf": 0,
+          "window": 4,
+          "mode": 0,
+          "bytes": 524288,
+          "repeats": 2,
+          "app_prio": 0,
+          "rx_fifo": 120,
+          "rx_timeout": 1,
+          "chunk": 256,
+          "split_irq": 1,
+          "fault_us": 0,
+          "irq1_core": 0,
+          "irq2_core": 1,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 838,
+          "p50": 1002,
+          "p90": 1140,
+          "p99": 1589,
+          "max": 1589
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 524288,
+          "us": 1238238,
+          "mbps": 3.387316,
+          "bad": 0,
+          "sent": 2115,
+          "delivered": 2115
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 524288,
+          "us": 1235339,
+          "mbps": 3.395266,
+          "bad": 0,
+          "sent": 2116,
+          "delivered": 2116
+        },
+        {
+          "record": "LIFECYCLE",
+          "stream_eof_and_stop": "PASS"
+        },
+        {
+          "record": "ERRORS",
+          "observed": 0,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "FAULT",
+          "requested_us": 0,
+          "fired": 0,
+          "restored": 0
+        }
+      ],
+      "transcript": "2026-11-05/controlled-before-example.log",
+      "transcript_sha256": "28d2ce12c04d1915748c2f395e10bc2559d52cead5e61e7856eb370032e7a6ff",
+      "accepted_payload_mbit_s": {
+        "min": 3.387316,
+        "mean": 3.391291,
+        "max": 3.395266
+      }
+    },
+    {
+      "id": "controlled-before-tx1024-fifo64",
+      "parameters": {
+        "mode": "reliable",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 1024,
+        "window_log": 6,
+        "bytes": 524288,
+        "samples": 2,
+        "application_priority": 23,
+        "rx_fifo": 64,
+        "rx_timeout": 1,
+        "chunk": 256,
+        "split_irq": false,
+        "fault_us": 0,
+        "timeout": 40.0,
+        "reset": true
+      },
+      "firmware_sha256": "98d6de00754a95631d74fb136f4b134de4bec825b223a2fd67b8084ec88e2acb",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 1024,
+          "window": 6,
+          "mode": 0,
+          "bytes": 524288,
+          "repeats": 2,
+          "app_prio": 23,
+          "rx_fifo": 64,
+          "rx_timeout": 1,
+          "chunk": 256,
+          "split_irq": 0,
+          "fault_us": 0,
+          "irq1_core": 1,
+          "irq2_core": 1,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 706,
+          "p50": 823,
+          "p90": 883,
+          "p99": 1566,
+          "max": 1566
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 524288,
+          "us": 1386902,
+          "mbps": 3.024225,
+          "bad": 0,
+          "sent": 2115,
+          "delivered": 2115
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 524288,
+          "us": 1387112,
+          "mbps": 3.023767,
+          "bad": 0,
+          "sent": 2116,
+          "delivered": 2116
+        },
+        {
+          "record": "LIFECYCLE",
+          "stream_eof_and_stop": "PASS"
+        },
+        {
+          "record": "ERRORS",
+          "observed": 0,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "FAULT",
+          "requested_us": 0,
+          "fired": 0,
+          "restored": 0
+        }
+      ],
+      "transcript": "2026-11-05/controlled-before-tx1024-fifo64.log",
+      "transcript_sha256": "300822646de21253354807142c3a51103c8a9d58b3f65f168504409641f2ae4c",
+      "accepted_payload_mbit_s": {
+        "min": 3.023767,
+        "mean": 3.023996,
+        "max": 3.024225
+      }
+    },
+    {
+      "id": "controlled-before-tx2048-fifo64",
+      "parameters": {
+        "mode": "reliable",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 2048,
+        "window_log": 6,
+        "bytes": 524288,
+        "samples": 2,
+        "application_priority": 23,
+        "rx_fifo": 64,
+        "rx_timeout": 1,
+        "chunk": 256,
+        "split_irq": false,
+        "fault_us": 0,
+        "timeout": 40.0,
+        "reset": true
+      },
+      "firmware_sha256": "98d6de00754a95631d74fb136f4b134de4bec825b223a2fd67b8084ec88e2acb",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 2048,
+          "window": 6,
+          "mode": 0,
+          "bytes": 524288,
+          "repeats": 2,
+          "app_prio": 23,
+          "rx_fifo": 64,
+          "rx_timeout": 1,
+          "chunk": 256,
+          "split_irq": 0,
+          "fault_us": 0,
+          "irq1_core": 1,
+          "irq2_core": 1,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 590,
+          "p50": 870,
+          "p90": 920,
+          "p99": 1526,
+          "max": 1526
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 524288,
+          "us": 1087986,
+          "mbps": 3.855108,
+          "bad": 0,
+          "sent": 2115,
+          "delivered": 2115
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 524288,
+          "us": 1088603,
+          "mbps": 3.852923,
+          "bad": 0,
+          "sent": 2116,
+          "delivered": 2116
+        },
+        {
+          "record": "LIFECYCLE",
+          "stream_eof_and_stop": "PASS"
+        },
+        {
+          "record": "ERRORS",
+          "observed": 0,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "FAULT",
+          "requested_us": 0,
+          "fired": 0,
+          "restored": 0
+        }
+      ],
+      "transcript": "2026-11-05/controlled-before-tx2048-fifo64.log",
+      "transcript_sha256": "34ed6878fa473a9c7ee20e5fbf8856acabe1bb587c8683aab5fff5a2d6d4e306",
+      "accepted_payload_mbit_s": {
+        "min": 3.852923,
+        "mean": 3.8540155,
+        "max": 3.855108
+      }
+    },
+    {
+      "id": "controlled-before-tx2048-fifo96",
+      "parameters": {
+        "mode": "reliable",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 2048,
+        "window_log": 6,
+        "bytes": 524288,
+        "samples": 2,
+        "application_priority": 23,
+        "rx_fifo": 96,
+        "rx_timeout": 1,
+        "chunk": 256,
+        "split_irq": false,
+        "fault_us": 0,
+        "timeout": 40.0,
+        "reset": true
+      },
+      "firmware_sha256": "98d6de00754a95631d74fb136f4b134de4bec825b223a2fd67b8084ec88e2acb",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 2048,
+          "window": 6,
+          "mode": 0,
+          "bytes": 524288,
+          "repeats": 2,
+          "app_prio": 23,
+          "rx_fifo": 96,
+          "rx_timeout": 1,
+          "chunk": 256,
+          "split_irq": 0,
+          "fault_us": 0,
+          "irq1_core": 1,
+          "irq2_core": 1,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 587,
+          "p50": 867,
+          "p90": 961,
+          "p99": 1526,
+          "max": 1526
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 524288,
+          "us": 1089480,
+          "mbps": 3.849822,
+          "bad": 0,
+          "sent": 2116,
+          "delivered": 2115
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 524288,
+          "us": 1089638,
+          "mbps": 3.849264,
+          "bad": 0,
+          "sent": 2116,
+          "delivered": 2116
+        },
+        {
+          "record": "LIFECYCLE",
+          "stream_eof_and_stop": "PASS"
+        },
+        {
+          "record": "ERRORS",
+          "observed": 0,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "FAULT",
+          "requested_us": 0,
+          "fired": 0,
+          "restored": 0
+        }
+      ],
+      "transcript": "2026-11-05/controlled-before-tx2048-fifo96.log",
+      "transcript_sha256": "082b5179282d2d3c3ded718daec805936e833a72cfc4285c2ab23063e899a5f1",
+      "accepted_payload_mbit_s": {
+        "min": 3.849264,
+        "mean": 3.8495429999999997,
+        "max": 3.849822
+      }
+    },
+    {
+      "id": "controlled-before-tx4096-fifo64",
+      "parameters": {
+        "mode": "reliable",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 4096,
+        "window_log": 6,
+        "bytes": 524288,
+        "samples": 2,
+        "application_priority": 23,
+        "rx_fifo": 64,
+        "rx_timeout": 1,
+        "chunk": 256,
+        "split_irq": false,
+        "fault_us": 0,
+        "timeout": 40.0,
+        "reset": true
+      },
+      "firmware_sha256": "98d6de00754a95631d74fb136f4b134de4bec825b223a2fd67b8084ec88e2acb",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 4096,
+          "window": 6,
+          "mode": 0,
+          "bytes": 524288,
+          "repeats": 2,
+          "app_prio": 23,
+          "rx_fifo": 64,
+          "rx_timeout": 1,
+          "chunk": 256,
+          "split_irq": 0,
+          "fault_us": 0,
+          "irq1_core": 1,
+          "irq2_core": 1,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 588,
+          "p50": 851,
+          "p90": 1048,
+          "p99": 1580,
+          "max": 1580
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 524288,
+          "us": 1089217,
+          "mbps": 3.850752,
+          "bad": 0,
+          "sent": 2121,
+          "delivered": 2115
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 524288,
+          "us": 1089112,
+          "mbps": 3.851123,
+          "bad": 0,
+          "sent": 2125,
+          "delivered": 2116
+        },
+        {
+          "record": "LIFECYCLE",
+          "stream_eof_and_stop": "PASS"
+        },
+        {
+          "record": "ERRORS",
+          "observed": 0,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "FAULT",
+          "requested_us": 0,
+          "fired": 0,
+          "restored": 0
+        }
+      ],
+      "transcript": "2026-11-05/controlled-before-tx4096-fifo64.log",
+      "transcript_sha256": "30a2d9c09282700d9b58fbe3fa68a3c4eb66c1c22164f19f696826d2e1f068fa",
+      "accepted_payload_mbit_s": {
+        "min": 3.850752,
+        "mean": 3.8509374999999997,
+        "max": 3.851123
+      }
+    },
+    {
+      "id": "controlled-after-example",
+      "parameters": {
+        "mode": "reliable",
+        "baud": 5000000,
+        "rx_buffer": 4096,
+        "tx_buffer": 0,
+        "window_log": 4,
+        "bytes": 524288,
+        "samples": 2,
+        "application_priority": 0,
+        "rx_fifo": 120,
+        "rx_timeout": 1,
+        "chunk": 256,
+        "split_irq": true,
+        "fault_us": 0,
+        "timeout": 40.0,
+        "reset": true
+      },
+      "firmware_sha256": "2cc17fb7aaf590234762e0c9a709d6dc8e266ea388f97613f010018bdeca74a6",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 4096,
+          "txbuf": 0,
+          "window": 4,
+          "mode": 0,
+          "bytes": 524288,
+          "repeats": 2,
+          "app_prio": 0,
+          "rx_fifo": 120,
+          "rx_timeout": 1,
+          "chunk": 256,
+          "split_irq": 1,
+          "fault_us": 0,
+          "irq1_core": 0,
+          "irq2_core": 1,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 891,
+          "p50": 1122,
+          "p90": 1247,
+          "p99": 1792,
+          "max": 1792
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 524288,
+          "us": 1660757,
+          "mbps": 2.525537,
+          "bad": 0,
+          "sent": 2115,
+          "delivered": 2115
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 524288,
+          "us": 1654959,
+          "mbps": 2.534385,
+          "bad": 0,
+          "sent": 2118,
+          "delivered": 2116
+        },
+        {
+          "record": "LIFECYCLE",
+          "stream_eof_and_stop": "PASS"
+        },
+        {
+          "record": "ERRORS",
+          "observed": 0,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "FAULT",
+          "requested_us": 0,
+          "fired": 0,
+          "restored": 0
+        }
+      ],
+      "transcript": "2026-11-05/controlled-after-example.log",
+      "transcript_sha256": "da16dbb260b35b4d4abbe7f1194e0ed5565aa9e714b84e60e348fbbe2d4e4104",
+      "accepted_payload_mbit_s": {
+        "min": 2.525537,
+        "mean": 2.529961,
+        "max": 2.534385
+      }
+    },
+    {
+      "id": "controlled-after-tx1024-fifo64",
+      "parameters": {
+        "mode": "reliable",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 1024,
+        "window_log": 6,
+        "bytes": 524288,
+        "samples": 2,
+        "application_priority": 23,
+        "rx_fifo": 64,
+        "rx_timeout": 1,
+        "chunk": 256,
+        "split_irq": false,
+        "fault_us": 0,
+        "timeout": 40.0,
+        "reset": true
+      },
+      "firmware_sha256": "2cc17fb7aaf590234762e0c9a709d6dc8e266ea388f97613f010018bdeca74a6",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 1024,
+          "window": 6,
+          "mode": 0,
+          "bytes": 524288,
+          "repeats": 2,
+          "app_prio": 23,
+          "rx_fifo": 64,
+          "rx_timeout": 1,
+          "chunk": 256,
+          "split_irq": 0,
+          "fault_us": 0,
+          "irq1_core": 1,
+          "irq2_core": 1,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 640,
+          "p50": 876,
+          "p90": 926,
+          "p99": 1509,
+          "max": 1509
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 524288,
+          "us": 1089134,
+          "mbps": 3.851045,
+          "bad": 0,
+          "sent": 2115,
+          "delivered": 2115
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 524288,
+          "us": 1088381,
+          "mbps": 3.853709,
+          "bad": 0,
+          "sent": 2116,
+          "delivered": 2116
+        },
+        {
+          "record": "LIFECYCLE",
+          "stream_eof_and_stop": "PASS"
+        },
+        {
+          "record": "ERRORS",
+          "observed": 0,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "FAULT",
+          "requested_us": 0,
+          "fired": 0,
+          "restored": 0
+        }
+      ],
+      "transcript": "2026-11-05/controlled-after-tx1024-fifo64.log",
+      "transcript_sha256": "e47efa67ab5dabbb9fa587140412988d1c1275378aecdb4c8f5a3315c41e8051",
+      "accepted_payload_mbit_s": {
+        "min": 3.851045,
+        "mean": 3.8523769999999997,
+        "max": 3.853709
+      }
+    },
+    {
+      "id": "controlled-after-tx2048-fifo64",
+      "parameters": {
+        "mode": "reliable",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 2048,
+        "window_log": 6,
+        "bytes": 524288,
+        "samples": 2,
+        "application_priority": 23,
+        "rx_fifo": 64,
+        "rx_timeout": 1,
+        "chunk": 256,
+        "split_irq": false,
+        "fault_us": 0,
+        "timeout": 40.0,
+        "reset": true
+      },
+      "firmware_sha256": "2cc17fb7aaf590234762e0c9a709d6dc8e266ea388f97613f010018bdeca74a6",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 2048,
+          "window": 6,
+          "mode": 0,
+          "bytes": 524288,
+          "repeats": 2,
+          "app_prio": 23,
+          "rx_fifo": 64,
+          "rx_timeout": 1,
+          "chunk": 256,
+          "split_irq": 0,
+          "fault_us": 0,
+          "irq1_core": 1,
+          "irq2_core": 1,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 556,
+          "p50": 856,
+          "p90": 965,
+          "p99": 1690,
+          "max": 1690
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 524288,
+          "us": 1406364,
+          "mbps": 2.982374,
+          "bad": 0,
+          "sent": 2115,
+          "delivered": 2115
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 524288,
+          "us": 1410091,
+          "mbps": 2.974492,
+          "bad": 0,
+          "sent": 2116,
+          "delivered": 2116
+        },
+        {
+          "record": "LIFECYCLE",
+          "stream_eof_and_stop": "PASS"
+        },
+        {
+          "record": "ERRORS",
+          "observed": 0,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "FAULT",
+          "requested_us": 0,
+          "fired": 0,
+          "restored": 0
+        }
+      ],
+      "transcript": "2026-11-05/controlled-after-tx2048-fifo64.log",
+      "transcript_sha256": "1f0ec9bd6210d1a18f8f913dc9ef1ea06ff3a29037505799f27f327788de7045",
+      "accepted_payload_mbit_s": {
+        "min": 2.974492,
+        "mean": 2.978433,
+        "max": 2.982374
+      }
+    },
+    {
+      "id": "controlled-after-tx2048-fifo96",
+      "parameters": {
+        "mode": "reliable",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 2048,
+        "window_log": 6,
+        "bytes": 524288,
+        "samples": 2,
+        "application_priority": 23,
+        "rx_fifo": 96,
+        "rx_timeout": 1,
+        "chunk": 256,
+        "split_irq": false,
+        "fault_us": 0,
+        "timeout": 40.0,
+        "reset": true
+      },
+      "firmware_sha256": "2cc17fb7aaf590234762e0c9a709d6dc8e266ea388f97613f010018bdeca74a6",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 2048,
+          "window": 6,
+          "mode": 0,
+          "bytes": 524288,
+          "repeats": 2,
+          "app_prio": 23,
+          "rx_fifo": 96,
+          "rx_timeout": 1,
+          "chunk": 256,
+          "split_irq": 0,
+          "fault_us": 0,
+          "irq1_core": 1,
+          "irq2_core": 1,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 635,
+          "p50": 881,
+          "p90": 932,
+          "p99": 1498,
+          "max": 1498
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 524288,
+          "us": 1089734,
+          "mbps": 3.848925,
+          "bad": 0,
+          "sent": 2117,
+          "delivered": 2115
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 524288,
+          "us": 1089116,
+          "mbps": 3.851109,
+          "bad": 0,
+          "sent": 2117,
+          "delivered": 2116
+        },
+        {
+          "record": "LIFECYCLE",
+          "stream_eof_and_stop": "PASS"
+        },
+        {
+          "record": "ERRORS",
+          "observed": 0,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "FAULT",
+          "requested_us": 0,
+          "fired": 0,
+          "restored": 0
+        }
+      ],
+      "transcript": "2026-11-05/controlled-after-tx2048-fifo96.log",
+      "transcript_sha256": "c4feaaaf3b79c1dd24789c13a3242d8215ba238ea6126503cebbe2d0746dc739",
+      "accepted_payload_mbit_s": {
+        "min": 3.848925,
+        "mean": 3.8500170000000002,
+        "max": 3.851109
+      }
+    },
+    {
+      "id": "controlled-after-tx4096-fifo64",
+      "parameters": {
+        "mode": "reliable",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 4096,
+        "window_log": 6,
+        "bytes": 524288,
+        "samples": 2,
+        "application_priority": 23,
+        "rx_fifo": 64,
+        "rx_timeout": 1,
+        "chunk": 256,
+        "split_irq": false,
+        "fault_us": 0,
+        "timeout": 40.0,
+        "reset": true
+      },
+      "firmware_sha256": "2cc17fb7aaf590234762e0c9a709d6dc8e266ea388f97613f010018bdeca74a6",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 4096,
+          "window": 6,
+          "mode": 0,
+          "bytes": 524288,
+          "repeats": 2,
+          "app_prio": 23,
+          "rx_fifo": 64,
+          "rx_timeout": 1,
+          "chunk": 256,
+          "split_irq": 0,
+          "fault_us": 0,
+          "irq1_core": 1,
+          "irq2_core": 1,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 649,
+          "p50": 855,
+          "p90": 917,
+          "p99": 1604,
+          "max": 1604
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 524288,
+          "us": 1088959,
+          "mbps": 3.851664,
+          "bad": 0,
+          "sent": 2127,
+          "delivered": 2115
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 524288,
+          "us": 1089277,
+          "mbps": 3.850539,
+          "bad": 0,
+          "sent": 2125,
+          "delivered": 2116
+        },
+        {
+          "record": "LIFECYCLE",
+          "stream_eof_and_stop": "PASS"
+        },
+        {
+          "record": "ERRORS",
+          "observed": 0,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 0,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "FAULT",
+          "requested_us": 0,
+          "fired": 0,
+          "restored": 0
+        }
+      ],
+      "transcript": "2026-11-05/controlled-after-tx4096-fifo64.log",
+      "transcript_sha256": "831cedce2303cc334889747405fe7dfa5f77a22d75c25e33b06bde1554dc4d7e",
+      "accepted_payload_mbit_s": {
+        "min": 3.850539,
+        "mean": 3.8511015,
+        "max": 3.851664
+      }
+    },
+    {
+      "id": "drain-raw-idf-fifo120",
+      "parameters": {
+        "mode": "raw-idf",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 1024,
+        "window_log": 6,
+        "bytes": 1048576,
+        "samples": 3,
+        "application_priority": 23,
+        "rx_fifo": 120,
+        "rx_timeout": 1,
+        "chunk": 4096,
+        "timeout": 35.0,
+        "reset": true
+      },
+      "firmware_sha256": "c3d1fd7446b09d2ccd2f1b147c607a22c3b4e819ab8a5da68df7b1f43b65c469",
+      "passed": false,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 1024,
+          "window": 6,
+          "mode": 2,
+          "bytes": 1048576,
+          "repeats": 3,
+          "app_prio": 23,
+          "rx_fifo": 120,
+          "rx_timeout": 1,
+          "chunk": 4096,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 1,
+          "uart": 1,
+          "total": 1,
+          "break": 1,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 1,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "TRANSFER_ERRORS",
+          "observed": 1,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "TRANSFER_ERRORS",
+          "observed": 1,
+          "uart": 2,
+          "total": 2,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 2,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "MISMATCH",
+          "offset": 124,
+          "actual": 239,
+          "expected": 111
+        },
+        {
+          "record": "RESULT",
+          "kind": "raw",
+          "sample": 0,
+          "bytes": 1048539,
+          "us": 2098312,
+          "mbps": 3.997648,
+          "bad": 1048293
+        }
+      ],
+      "transcript": "2026-11-05/drain-raw-idf-fifo120.log",
+      "transcript_sha256": "256057483b6e0882a1a6b6e2652e180dd74e893689133e25c9da9f44bbda4782",
+      "rejection": "UART FIFO overflows and incomplete/corrupt raw payload; printed rates are not accepted throughput."
+    },
+    {
+      "id": "drain-raw-idf-fifo64",
+      "parameters": {
+        "mode": "raw-idf",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 1024,
+        "window_log": 6,
+        "bytes": 1048576,
+        "samples": 3,
+        "application_priority": 23,
+        "rx_fifo": 64,
+        "rx_timeout": 1,
+        "chunk": 4096,
+        "timeout": 35.0,
+        "reset": true
+      },
+      "firmware_sha256": "c3d1fd7446b09d2ccd2f1b147c607a22c3b4e819ab8a5da68df7b1f43b65c469",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 1024,
+          "window": 6,
+          "mode": 2,
+          "bytes": 1048576,
+          "repeats": 3,
+          "app_prio": 23,
+          "rx_fifo": 64,
+          "rx_timeout": 1,
+          "chunk": 4096,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 1,
+          "uart": 1,
+          "total": 1,
+          "break": 1,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 1,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "raw",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2109305,
+          "mbps": 3.976954,
+          "bad": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "raw",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2110047,
+          "mbps": 3.975555,
+          "bad": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "raw",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2110039,
+          "mbps": 3.97557,
+          "bad": 0
+        },
+        {
+          "record": "ERRORS",
+          "observed": 1,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 1,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 1,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        }
+      ],
+      "transcript": "2026-11-05/drain-raw-idf-fifo64.log",
+      "transcript_sha256": "575883c2fe64129026ac2c0076582d7f77d5d10047e1acb96c03dd3179085a7d",
+      "accepted_payload_mbit_s": {
+        "min": 3.975555,
+        "mean": 3.9760263333333334,
+        "max": 3.976954
+      }
+    },
+    {
+      "id": "drain-raw-idf-reverse-fifo120",
+      "parameters": {
+        "mode": "raw-idf-reverse",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 1024,
+        "window_log": 6,
+        "bytes": 1048576,
+        "samples": 3,
+        "application_priority": 23,
+        "rx_fifo": 120,
+        "rx_timeout": 1,
+        "chunk": 4096,
+        "timeout": 35.0,
+        "reset": true
+      },
+      "firmware_sha256": "c3d1fd7446b09d2ccd2f1b147c607a22c3b4e819ab8a5da68df7b1f43b65c469",
+      "passed": false,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 1024,
+          "window": 6,
+          "mode": 3,
+          "bytes": 1048576,
+          "repeats": 3,
+          "app_prio": 23,
+          "rx_fifo": 120,
+          "rx_timeout": 1,
+          "chunk": 4096,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 1,
+          "uart": 1,
+          "total": 1,
+          "break": 1,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 1,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "TRANSFER_ERRORS",
+          "observed": 1,
+          "uart": 1,
+          "total": 2,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 2,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "TRANSFER_ERRORS",
+          "observed": 1,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "MISMATCH",
+          "offset": 124,
+          "actual": 239,
+          "expected": 111
+        },
+        {
+          "record": "RESULT",
+          "kind": "raw",
+          "sample": 0,
+          "bytes": 1048539,
+          "us": 2097678,
+          "mbps": 3.998856,
+          "bad": 1048293
+        }
+      ],
+      "transcript": "2026-11-05/drain-raw-idf-reverse-fifo120.log",
+      "transcript_sha256": "5713d59719a11aba422b0cf10cdbe89a4664a181d5be096699f13a27e21840ed",
+      "rejection": "UART FIFO overflows and incomplete/corrupt raw payload; printed rates are not accepted throughput."
+    },
+    {
+      "id": "drain-raw-idf-reverse-fifo64",
+      "parameters": {
+        "mode": "raw-idf-reverse",
+        "baud": 5000000,
+        "rx_buffer": 8192,
+        "tx_buffer": 1024,
+        "window_log": 6,
+        "bytes": 1048576,
+        "samples": 3,
+        "application_priority": 23,
+        "rx_fifo": 64,
+        "rx_timeout": 1,
+        "chunk": 4096,
+        "timeout": 35.0,
+        "reset": true
+      },
+      "firmware_sha256": "c3d1fd7446b09d2ccd2f1b147c607a22c3b4e819ab8a5da68df7b1f43b65c469",
+      "passed": true,
+      "rows": [
+        {
+          "record": "SYSTEM",
+          "chip": "ESP32-D0WD-V3",
+          "revision": 301,
+          "sdk": "v5.5.2-729-g87912cd291"
+        },
+        {
+          "record": "CONFIG",
+          "baud": 5000000,
+          "actual": 5000000,
+          "actual2": 5000000,
+          "cpu": 240000000,
+          "apb": 80000000,
+          "rxbuf": 8192,
+          "txbuf": 1024,
+          "window": 6,
+          "mode": 3,
+          "bytes": 1048576,
+          "repeats": 3,
+          "app_prio": 23,
+          "rx_fifo": 64,
+          "rx_timeout": 1,
+          "chunk": 4096,
+          "cores": 2,
+          "tick": 1000
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 1,
+          "uart": 1,
+          "total": 1,
+          "break": 1,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "STARTUP_ERRORS",
+          "observed": 1,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "raw",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2099322,
+          "mbps": 3.995865,
+          "bad": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "raw",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2098492,
+          "mbps": 3.997446,
+          "bad": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "raw",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2099057,
+          "mbps": 3.99637,
+          "bad": 0
+        },
+        {
+          "record": "ERRORS",
+          "observed": 1,
+          "uart1": 0,
+          "uart2": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 1,
+          "uart": 1,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        },
+        {
+          "record": "ERROR_TYPES",
+          "observed": 1,
+          "uart": 2,
+          "total": 0,
+          "break": 0,
+          "buffer": 0,
+          "fifo": 0,
+          "frame": 0,
+          "parity": 0,
+          "other": 0
+        }
+      ],
+      "transcript": "2026-11-05/drain-raw-idf-reverse-fifo64.log",
+      "transcript_sha256": "e4104fda965598997682f16bf20717652141c45fa3c5ee100aeb053887afc136",
+      "accepted_payload_mbit_s": {
+        "min": 3.995865,
+        "mean": 3.9965603333333335,
+        "max": 3.997446
+      }
+    }
+  ],
+  "host_validation": {
+    "profile": "roo_testing_arduino_esp32",
+    "command": "bazel test --config=roo_testing_arduino_esp32 @roo_transport//:all",
+    "test_targets_passed": 9,
+    "new_receive_drain_cases": 5,
+    "runner_saved_transcript_checks_passed": 12
+  }
+}

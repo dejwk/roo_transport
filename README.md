@@ -17,6 +17,8 @@ On ESP32, with short wires, the reliable UART link achieves 3.4 Mbps throughput 
 
 When tested over 7.5 meters of a cheap, unshielded, 4-wire cable, it still pulled 2.5 Mbps and 0.92ms p99 rtt latency, despite experiencing ~20% packet loss in that setup.
 
+A classic ESP32 single-board loopback also sustained 3.856 Mbit/s of useful payload at 5 Mbaud (about 99.5% of the ideal full-packet ceiling), using tuned RX FIFO margin and TX buffering. See the [ESP32 hardware benchmark](benchmarks/esp32/README.md) for the configuration, controlled comparisons, error/recovery checks and reproducible results.
+
 For RP2040 with Arduino-Pico FreeRTOS, the opt-in native DMA transport reaches about 3.9 Mbit/s on a single-board UART loopback. See the [Pico hardware benchmark](benchmarks/pico/README.md) for the backend API, exact configuration, diagnosis, validation and reproducible results.
 
 ## Host emulation

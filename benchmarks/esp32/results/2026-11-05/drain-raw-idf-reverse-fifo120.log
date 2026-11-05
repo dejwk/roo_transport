@@ -1,0 +1,18 @@
+ets Jul 29 2019 12:21:46
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:4640
+load:0x40078000,len:15660
+load:0x40080400,len:3164
+entry 0x4008059c
+READY
+SYSTEM chip=ESP32-D0WD-V3 revision=301 sdk=v5.5.2-729-g87912cd291
+CONFIG baud=5000000 actual=5000000 actual2=5000000 cpu=240000000 apb=80000000 rxbuf=8192 txbuf=1024 window=6 mode=3 bytes=1048576 repeats=3 app_prio=23 rx_fifo=120 rx_timeout=1 chunk=4096 cores=2 tick=1000
+STARTUP_ERRORS observed=1 uart=1 total=1 break=1 buffer=0 fifo=0 frame=0 parity=0 other=0
+STARTUP_ERRORS observed=1 uart=2 total=0 break=0 buffer=0 fifo=0 frame=0 parity=0 other=0
+TRANSFER_ERRORS observed=1 uart=1 total=2 break=0 buffer=0 fifo=2 frame=0 parity=0 other=0
+TRANSFER_ERRORS observed=1 uart=2 total=0 break=0 buffer=0 fifo=0 frame=0 parity=0 other=0
+MISMATCH offset=124 actual=239 expected=111
+RESULT kind=raw sample=0 bytes=1048539 us=2097678 mbps=3.998856 bad=1048293
