@@ -71,9 +71,9 @@ class Esp32SerialLinkTransport
   /// Starts the transport and UART receive callbacks.
   void begin() {
     transport_.begin();
-    this->serial_.onReceive([this]() { receiver_.tryReceive(process_fn_); });
+    this->serial_.onReceive([this]() { receiveAvailable(); });
     this->serial_.onReceiveError(
-        [this](hardwareSerial_error_t) { receiver_.tryReceive(process_fn_); });
+        [this](hardwareSerial_error_t) { receiveAvailable(); });
   }
 
   /// Stops the transport and UART receive callbacks.
@@ -113,6 +113,21 @@ class Esp32SerialLinkTransport
   }
 
  private:
+  // Drain the entry backlog even if UART events coalesce or a chunk contains no
+  // valid packet. A snapshot bounds each callback so fresh traffic cannot keep
+  // the high-priority receive task running indefinitely.
+  void receiveAvailable() {
+    const int available = this->serial_.available();
+    if (available <= 0) return;
+    const size_t initial_bytes = receiver_.bytes_received();
+    while (receiver_.bytes_received() - initial_bytes <
+           static_cast<size_t>(available)) {
+      const size_t previous_bytes = receiver_.bytes_received();
+      receiver_.tryReceive(process_fn_);
+      if (receiver_.bytes_received() == previous_bytes) break;
+    }
+  }
+
   PacketSenderOverStream sender_;
   PacketReceiverOverStream receiver_;
 

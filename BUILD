@@ -187,3 +187,17 @@ cc_test(
         "@roo_testing//:arduino_gtest_main",
     ],
 )
+cc_test(
+    name = "esp32_receive_drain_test",
+    size = "small",
+    srcs = ["test/esp32_receive_drain_test.cpp"],
+    linkstatic = 1,
+    target_compatible_with = [
+        "@roo_testing//roo_testing/platforms:arduino",
+        "@roo_testing//roo_testing/platforms:esp32",
+    ],
+    deps = [
+        ":roo_transport",
+        "@roo_testing//:arduino_gtest_main",
+    ],
+)
