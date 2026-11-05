@@ -28,6 +28,7 @@ uint32_t transfer_size = 262144;
 uint32_t repeats = 3;
 uint32_t sys_peri = 0;
 uint32_t application_priority = 0;
+uint32_t sender_priority = 0;
 uint32_t fault_us = 0;
 uint32_t uart0_init_core = 0;
 std::atomic<uint32_t> received_progress{0};
@@ -81,11 +82,12 @@ void ConfigureUarts() {
   }
   Serial.printf(
       "CONFIG baud=%lu actual=%d cpu=%lu peri=%lu fifo=%lu window=%lu mode=%lu "
-      "bytes=%lu repeats=%lu cores=%d tick=%d app_prio=%lu fault_us=%lu\n",
+      "bytes=%lu repeats=%lu cores=%d tick=%d app_prio=%lu fault_us=%lu "
+      "sender_prio=%lu\n",
       baud, actual_baud, clock_get_hz(clk_sys), clock_get_hz(clk_peri),
       fifo_size, window_log, mode, transfer_size, repeats,
-      configNUMBER_OF_CORES, configTICK_RATE_HZ, application_priority,
-      fault_us);
+      configNUMBER_OF_CORES, configTICK_RATE_HZ, application_priority, fault_us,
+      sender_priority);
 }
 
 // Starts the selected Arduino or native DMA endpoint.
@@ -93,7 +95,17 @@ void BeginEndpoint(bool server) {
   roo_transport::LinkStreamTransport* endpoint =
       server ? server_transport : client_transport;
   if (mode == 10) {
-    (server ? library_server : library_client)->begin();
+    roo_transport::pico::ReliableUartDma* dma =
+        server ? library_server : library_client;
+    if (sender_priority == 0) {
+      dma->begin();
+    } else {
+      roo::thread::attributes sender_attrs;
+      sender_attrs.set_stack_size(4096);
+      sender_attrs.set_priority(sender_priority);
+      sender_attrs.set_name(server ? "server-send" : "client-send");
+      dma->begin(sender_attrs);
+    }
   } else if (server) {
     static_cast<roo_transport::ReliableSerial1*>(endpoint)->begin();
   } else {
@@ -405,9 +417,16 @@ void setup() {
     delay(1);
   }
   if (strcmp(config, "reset") == 0) rp2040.reboot();
-  if (sscanf(config, "run %lu %lu %lu %lu %lu %lu %lu %lu %lu", &baud,
+  const int fields =
+      sscanf(config, "run %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu", &baud,
              &fifo_size, &window_log, &mode, &transfer_size, &repeats,
-             &sys_peri, &application_priority, &fault_us) < 6) {
+             &sys_peri, &application_priority, &fault_us, &sender_priority);
+  if (fields < 6 || baud == 0 || transfer_size == 0 || repeats == 0 ||
+      window_log > 10 || sys_peri > 1 ||
+      application_priority >= configMAX_PRIORITIES - 1 ||
+      sender_priority >= configMAX_PRIORITIES - 1 ||
+      (sender_priority != 0 && mode != 10) ||
+      (fault_us != 0 && (mode != 10 || transfer_size < 65536))) {
     Serial.println("ERROR config");
     return;
   }

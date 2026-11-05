@@ -1,0 +1,25 @@
+ets Jul 29 2019 12:21:46
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:4640
+load:0x40078000,len:15660
+load:0x40080400,len:3164
+entry 0x4008059c
+READY
+SYSTEM chip=ESP32-D0WD-V3 revision=301 sdk=v5.5.2-729-g87912cd291
+CONFIG baud=5000000 actual=5000000 actual2=5000000 cpu=240000000 apb=80000000 rxbuf=256 txbuf=1024 window=3 mode=0 bytes=1048576 repeats=3 app_prio=23 rx_fifo=64 rx_timeout=1 chunk=256 split_irq=0 fault_us=0 irq1_core=1 irq2_core=1 cores=2 tick=1000
+STARTUP_ERRORS observed=0 uart=1 total=0 break=0 buffer=0 fifo=0 frame=0 parity=0 other=0
+STARTUP_ERRORS observed=0 uart=2 total=0 break=0 buffer=0 fifo=0 frame=0 parity=0 other=0
+CONNECTED
+LATENCY min=669 p50=888 p90=937 p99=1451 max=1451
+RESULT kind=link sample=0 bytes=1048576 us=2184694 mbps=3.839718 bad=0 sent=4229 delivered=4229
+RESULT kind=link sample=1 bytes=1048576 us=2183276 mbps=3.842211 bad=0 sent=4229 delivered=4229
+RESULT kind=link sample=2 bytes=1048576 us=2184920 mbps=3.839320 bad=0 sent=4230 delivered=4230
+LIFECYCLE stream_eof_and_stop=PASS
+ERRORS observed=0 uart1=0 uart2=0
+ERROR_TYPES observed=0 uart=1 total=0 break=0 buffer=0 fifo=0 frame=0 parity=0 other=0
+ERROR_TYPES observed=0 uart=2 total=0 break=0 buffer=0 fifo=0 frame=0 parity=0 other=0
+FAULT requested_us=0 fired=0 restored=0
+DONE

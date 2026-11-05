@@ -1,0 +1,43 @@
+ets Jul 29 2019 12:21:46
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:4640
+load:0x40078000,len:15660
+load:0x40080400,len:3164
+entry 0x4008059c
+CONFIG mode=0 baud=5000000 window_log2=3 io_priority=1 payload=1048576 runs=10 chunk=256
+SENDER priority=1 stack=4096
+BACKEND esp32-idf rx_buffer=256 tx_buffer=1024 rx_fifo=64 rx_timeout=1
+LATENCY_MS min=0.808000 p50=0.996000 p90=1.155000 p99=1.463000 max=1.463000
+RESULT bytes=1048576 us=2197925 mbps=3.816603 bad=0
+PACKETS local=server sent=4256 delivered=4229 received=1
+LATENCY_MS min=0.625000 p50=0.990000 p90=1.031000 p99=1.158000 max=1.158000
+RESULT bytes=1048576 us=2199797 mbps=3.813356 bad=0
+PACKETS local=server sent=4252 delivered=4229 received=1
+LATENCY_MS min=0.624000 p50=0.971000 p90=1.046000 p99=1.235000 max=1.235000
+RESULT bytes=1048576 us=2196247 mbps=3.819519 bad=0
+PACKETS local=server sent=4250 delivered=4229 received=1
+LATENCY_MS min=0.634000 p50=0.994000 p90=1.103000 p99=1.166000 max=1.166000
+RESULT bytes=1048576 us=2199524 mbps=3.813829 bad=0
+PACKETS local=server sent=4254 delivered=4229 received=1
+LATENCY_MS min=0.716000 p50=0.982000 p90=1.132000 p99=1.167000 max=1.167000
+RESULT bytes=1048576 us=2195720 mbps=3.820436 bad=0
+PACKETS local=server sent=4251 delivered=4229 received=1
+LATENCY_MS min=0.728000 p50=0.979000 p90=1.134000 p99=1.159000 max=1.159000
+RESULT bytes=1048576 us=2191415 mbps=3.827941 bad=0
+PACKETS local=server sent=4239 delivered=4229 received=1
+LATENCY_MS min=0.693000 p50=0.998000 p90=1.048000 p99=1.164000 max=1.164000
+RESULT bytes=1048576 us=2199224 mbps=3.814349 bad=0
+PACKETS local=server sent=4252 delivered=4229 received=1
+LATENCY_MS min=0.679000 p50=0.996000 p90=1.078000 p99=1.159000 max=1.159000
+RESULT bytes=1048576 us=2196729 mbps=3.818681 bad=0
+PACKETS local=server sent=4249 delivered=4229 received=1
+LATENCY_MS min=0.789000 p50=0.980000 p90=1.131000 p99=1.167000 max=1.167000
+RESULT bytes=1048576 us=2192661 mbps=3.825766 bad=0
+PACKETS local=server sent=4244 delivered=4229 received=1
+LATENCY_MS min=0.836000 p50=1.006000 p90=1.017000 p99=1.101000 max=1.101000
+RESULT bytes=1048576 us=2198826 mbps=3.815039 bad=0
+PACKETS local=server sent=4253 delivered=4229 received=1
+DONE

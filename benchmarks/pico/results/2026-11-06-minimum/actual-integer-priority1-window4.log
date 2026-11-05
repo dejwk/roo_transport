@@ -1,0 +1,15 @@
+UART server actual_baud=8312500
+UART client actual_baud=8312500
+CONFIG mode=0 baud=8312500 window_log2=4 io_priority=1 payload=1048576 runs=3 chunk=256
+SENDER priority=1 stack=4096
+BACKEND pico-dma cpu=133000000 peri=133000000 rx_ring=8192 tx_ring=8192
+LATENCY_MS min=2.062000 p50=2.646000 p90=2.924000 p99=2.990000 max=2.990000
+RESULT bytes=1048576 us=2199051 mbps=3.814649 bad=0
+PACKETS local=server sent=4229 delivered=4229 received=1
+LATENCY_MS min=2.056000 p50=2.624000 p90=2.860000 p99=3.570000 max=3.570000
+RESULT bytes=1048576 us=2181509 mbps=3.845324 bad=0
+PACKETS local=server sent=4230 delivered=4230 received=1
+LATENCY_MS min=2.085000 p50=2.586000 p90=2.811000 p99=3.009000 max=3.009000
+RESULT bytes=1048576 us=2167016 mbps=3.871041 bad=0
+PACKETS local=server sent=4229 delivered=4229 received=1
+DONE

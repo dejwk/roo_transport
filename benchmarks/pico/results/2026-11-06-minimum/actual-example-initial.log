@@ -1,0 +1,17 @@
+UART server actual_baud=8312500
+UART client actual_baud=8312500
+CONFIG mode=0 baud=8312500 window_log2=6 io_priority=6 payload=1048576 runs=3
+SENDER priority=6 stack=4096
+BACKEND pico-dma cpu=133000000 peri=133000000 rx_ring=8192 tx_ring=8192
+#< CLIXML
+LATENCY_MS min=2.513000 p50=3.056000 p90=3.280000 p99=4.594000 max=4.594000
+RESULT bytes=1048576 us=2715618 mbps=3.089024 bad=0
+PACKETS local=server sent=4229 delivered=4229 received=1
+LATENCY_MS min=2.761000 p50=3.036000 p90=3.309000 p99=3.730000 max=3.730000
+RESULT bytes=1048576 us=2756662 mbps=3.043031 bad=0
+PACKETS local=server sent=4229 delivered=4229 received=1
+LATENCY_MS min=2.434000 p50=3.056000 p90=3.304000 p99=3.708000 max=3.708000
+RESULT bytes=1048576 us=2749506 mbps=3.050951 bad=0
+PACKETS local=server sent=4229 delivered=4229 received=1
+DONE
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

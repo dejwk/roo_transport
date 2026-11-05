@@ -1,0 +1,36 @@
+ets Jul 29 2019 12:21:46
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:4640
+load:0x40078000,len:15660
+load:0x40080400,len:3164
+entry 0x4008059c
+CONFIG mode=0 baud=5000000 window_log2=3 io_priority=1 payload=1048576 runs=3 chunk=256
+SENDER priority=1 stack=4096
+BACKEND esp32-idf rx_buffer=256 tx_buffer=1024 rx_fifo=64 rx_timeout=1
+LATENCY_MS min=1.225000 p50=1.557000 p90=1.694000 p99=2.054000 max=2.054000
+RESULT bytes=1048576 us=2873328 mbps=2.919475 bad=0
+PACKETS local=server sent=4229 delivered=4229 received=1
+PROFILE case=0 label=example valid=1 counter_bits=32 clock_us=2875998 wall_us=2873337 clock_wrapped=0 cores=2 tasks_before=12 tasks_after=12 capture_before_us=2677 capture_after_us=2659
+PROFILE_TASK case=0 task=12 name="cli-send" base_prio=1 prio_before=1 prio_after=1 pinned_core=1 state_before=2 state_after=1 runtime_us=288754 one_core_pct=10.0401
+PROFILE_TASK case=0 task=8 name="loopTask" base_prio=1 prio_before=1 prio_after=1 pinned_core=1 state_before=0 state_after=0 runtime_us=125653 one_core_pct=4.3690
+PROFILE_TASK case=0 task=5 name="IDLE0" base_prio=0 prio_before=0 prio_after=0 pinned_core=0 state_before=1 state_after=1 runtime_us=1324540 one_core_pct=46.0550
+PROFILE_TASK case=0 task=6 name="IDLE1" base_prio=0 prio_before=0 prio_after=0 pinned_core=1 state_before=1 state_after=1 runtime_us=243522 one_core_pct=8.4674
+PROFILE_TASK case=0 task=10 name="srv-send" base_prio=1 prio_before=1 prio_after=1 pinned_core=0 state_before=2 state_after=2 runtime_us=1447187 one_core_pct=50.3195
+PROFILE_TASK case=0 task=7 name="Tmr Svc" base_prio=1 prio_before=1 prio_after=1 pinned_core=2147483647 state_before=2 state_after=2 runtime_us=0 one_core_pct=0.0000
+PROFILE_TASK case=0 task=2 name="ipc1" base_prio=24 prio_before=24 prio_after=24 pinned_core=1 state_before=3 state_after=3 runtime_us=0 one_core_pct=0.0000
+PROFILE_TASK case=0 task=11 name="uart_event_task" base_prio=24 prio_before=24 prio_after=24 pinned_core=2147483647 state_before=2 state_after=2 runtime_us=179618 one_core_pct=6.2454
+PROFILE_TASK case=0 task=14 name="server" base_prio=1 prio_before=1 prio_after=1 pinned_core=2147483647 state_before=3 state_after=3 runtime_us=94966 one_core_pct=3.3020
+PROFILE_TASK case=0 task=13 name="uart_event_task" base_prio=24 prio_before=24 prio_after=24 pinned_core=2147483647 state_before=2 state_after=2 runtime_us=2048217 one_core_pct=71.2176
+PROFILE_TASK case=0 task=1 name="ipc0" base_prio=24 prio_before=24 prio_after=24 pinned_core=0 state_before=3 state_after=3 runtime_us=0 one_core_pct=0.0000
+PROFILE_TASK case=0 task=3 name="esp_timer" base_prio=22 prio_before=22 prio_after=22 pinned_core=0 state_before=3 state_after=3 runtime_us=0 one_core_pct=0.0000
+PROFILE_SUM case=0 matched=12 runtime_us=5752457 one_core_pct=200.0160 machine_pct=100.0080
+LATENCY_MS min=1.221000 p50=1.636000 p90=1.650000 p99=1.979000 max=1.979000
+RESULT bytes=1048576 us=2875075 mbps=2.917701 bad=0
+PACKETS local=server sent=4229 delivered=4229 received=1
+LATENCY_MS min=1.224000 p50=1.634000 p90=1.656000 p99=2.004000 max=2.004000
+RESULT bytes=1048576 us=2871281 mbps=2.921556 bad=0
+PACKETS local=server sent=4229 delivered=4229 received=1
+DONE

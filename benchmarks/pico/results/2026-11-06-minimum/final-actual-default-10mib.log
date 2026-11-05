@@ -1,0 +1,36 @@
+UART server actual_baud=8312500
+UART client actual_baud=8312500
+CONFIG mode=0 baud=8312500 window_log2=5 io_priority=1 payload=1048576 runs=10 chunk=256
+SENDER priority=1 stack=4096
+BACKEND pico-dma cpu=133000000 peri=133000000 rx_ring=8192 tx_ring=8192
+LATENCY_MS min=1.815000 p50=2.576000 p90=2.871000 p99=2.984000 max=2.984000
+RESULT bytes=1048576 us=1908172 mbps=4.396149 bad=0
+PACKETS local=server sent=4229 delivered=4229 received=1
+LATENCY_MS min=2.028000 p50=2.640000 p90=2.881000 p99=3.704000 max=3.704000
+RESULT bytes=1048576 us=1906757 mbps=4.399411 bad=0
+PACKETS local=server sent=4243 delivered=4229 received=1
+LATENCY_MS min=2.002000 p50=2.655000 p90=2.910000 p99=3.687000 max=3.687000
+RESULT bytes=1048576 us=1885406 mbps=4.449232 bad=0
+PACKETS local=server sent=4230 delivered=4230 received=1
+LATENCY_MS min=1.967000 p50=2.649000 p90=2.887000 p99=3.168000 max=3.168000
+RESULT bytes=1048576 us=1932551 mbps=4.340692 bad=0
+PACKETS local=server sent=4236 delivered=4229 received=1
+LATENCY_MS min=1.817000 p50=2.624000 p90=2.884000 p99=3.746000 max=3.746000
+RESULT bytes=1048576 us=1877286 mbps=4.468476 bad=0
+PACKETS local=server sent=4231 delivered=4229 received=1
+LATENCY_MS min=2.063000 p50=2.648000 p90=2.881000 p99=3.585000 max=3.585000
+RESULT bytes=1048576 us=1935673 mbps=4.333691 bad=0
+PACKETS local=server sent=4229 delivered=4229 received=1
+LATENCY_MS min=2.063000 p50=2.617000 p90=2.888000 p99=3.691000 max=3.691000
+RESULT bytes=1048576 us=1922638 mbps=4.363072 bad=0
+PACKETS local=server sent=4229 delivered=4229 received=1
+LATENCY_MS min=2.009000 p50=2.600000 p90=2.868000 p99=3.089000 max=3.089000
+RESULT bytes=1048576 us=1896405 mbps=4.423426 bad=0
+PACKETS local=server sent=4232 delivered=4229 received=1
+LATENCY_MS min=1.880000 p50=2.581000 p90=2.912000 p99=3.734000 max=3.734000
+RESULT bytes=1048576 us=1925579 mbps=4.356408 bad=0
+PACKETS local=server sent=4229 delivered=4229 received=1
+LATENCY_MS min=2.022000 p50=2.584000 p90=2.878000 p99=2.968000 max=2.968000
+RESULT bytes=1048576 us=1892254 mbps=4.433130 bad=0
+PACKETS local=server sent=4229 delivered=4229 received=1
+DONE

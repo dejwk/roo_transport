@@ -38,6 +38,7 @@ uint32_t mode = 0;
 uint32_t transfer_size = 1048576;
 uint32_t repeats = 5;
 uint32_t application_priority = 0;
+uint32_t sender_priority = 0;
 uint32_t rx_fifo_threshold = 120;
 uint32_t rx_timeout_symbols = 2;
 uint32_t chunk_size = 256;
@@ -190,13 +191,14 @@ void ConfigureUarts() {
       " window=%" PRIu32 " mode=%" PRIu32 " bytes=%" PRIu32 " repeats=%" PRIu32
       " app_prio=%" PRIu32 " rx_fifo=%" PRIu32 " rx_timeout=%" PRIu32
       " chunk=%" PRIu32 " split_irq=%" PRIu32 " fault_us=%" PRIu32
-      " irq1_core=%" PRIu32 " irq2_core=%" PRIu32 " cores=%u tick=%u\n",
+      " sender_prio=%" PRIu32 " irq1_core=%" PRIu32 " irq2_core=%" PRIu32
+      " cores=%u tick=%u\n",
       baud, actual1, actual2,
       static_cast<uint32_t>(getCpuFrequencyMhz() * 1000000), getApbFrequency(),
       rx_buffer_size, tx_buffer_size, window_log, mode, transfer_size, repeats,
       application_priority, rx_fifo_threshold, rx_timeout_symbols, chunk_size,
-      split_irq, fault_us, irq1_core, irq2_core, portNUM_PROCESSORS,
-      configTICK_RATE_HZ);
+      split_irq, fault_us, sender_priority, irq1_core, irq2_core,
+      portNUM_PROCESSORS, configTICK_RATE_HZ);
 }
 
 // Serves the finite latency and throughput request counts, then sends EOF.
@@ -247,13 +249,46 @@ void InjectFault(void*) {
   vTaskDelete(nullptr);
 }
 
+// Keep --transport-ref usable with revisions predating sender attributes.
+// Such references can benchmark their original defaults, but cannot apply an
+// explicit sender configuration that their public API does not support.
+template <typename Endpoint>
+auto BeginWithSenderAttributes(Endpoint& endpoint,
+                               const roo::thread::attributes& attributes, int)
+    -> decltype(endpoint.begin(attributes), void()) {
+  endpoint.begin(attributes);
+}
+
+template <typename Endpoint>
+void BeginWithSenderAttributes(Endpoint&, const roo::thread::attributes&,
+                               long) {
+  LOG(FATAL) << "Selected transport revision has no sender-attribute API";
+}
+
 // Validates complete ordered payloads and correct stream/worker shutdown.
 void LinkTests() {
   const auto window = static_cast<roo_transport::LinkBufferSize>(window_log);
   server_transport.reset(new roo_transport::ReliableSerial1(window, window));
   client_transport.reset(new roo_transport::ReliableSerial2(window, window));
-  server_transport->begin();
-  client_transport->begin();
+  if (sender_priority == 0) {
+    server_transport->begin();
+    client_transport->begin();
+  } else {
+    roo::thread::attributes sender_attrs;
+    sender_attrs.set_stack_size(4096);
+    sender_attrs.set_priority(sender_priority);
+    sender_attrs.set_name("serial1-send");
+    BeginWithSenderAttributes(*server_transport, sender_attrs, 0);
+    sender_attrs.set_name("serial2-send");
+    BeginWithSenderAttributes(*client_transport, sender_attrs, 0);
+  }
+  TaskHandle_t sender1 = xTaskGetHandle("serial1-send");
+  TaskHandle_t sender2 = xTaskGetHandle("serial2-send");
+  CHECK(sender1 != nullptr);
+  CHECK(sender2 != nullptr);
+  Serial.printf("SENDER_PRIORITY sender1=%u sender2=%u\n",
+                static_cast<unsigned int>(uxTaskPriorityGet(sender1)),
+                static_cast<unsigned int>(uxTaskPriorityGet(sender2)));
   StartServer(Server);
   {
     roo_transport::LinkStream link = client_transport->connectOrDie();
@@ -453,20 +488,23 @@ bool ReadConfig() {
     delay(1);
   }
   if (strcmp(command, "reset") == 0) ESP.restart();
-  const int fields = sscanf(
-      command,
-      "run %" SCNu32 " %" SCNu32 " %" SCNu32 " %" SCNu32 " %" SCNu32 " %" SCNu32
-      " %" SCNu32 " %" SCNu32 " %" SCNu32 " %" SCNu32 " %" SCNu32 " %" SCNu32
-      " %" SCNu32,
-      &baud, &rx_buffer_size, &tx_buffer_size, &window_log, &mode,
-      &transfer_size, &repeats, &application_priority, &rx_fifo_threshold,
-      &rx_timeout_symbols, &chunk_size, &split_irq, &fault_us);
-  if (fields < 8 || baud == 0 || rx_buffer_size < 256 || window_log > 10 ||
+  const int fields =
+      sscanf(command,
+             "run %" SCNu32 " %" SCNu32 " %" SCNu32 " %" SCNu32 " %" SCNu32
+             " %" SCNu32 " %" SCNu32 " %" SCNu32 " %" SCNu32 " %" SCNu32
+             " %" SCNu32 " %" SCNu32 " %" SCNu32 " %" SCNu32,
+             &baud, &rx_buffer_size, &tx_buffer_size, &window_log, &mode,
+             &transfer_size, &repeats, &application_priority,
+             &rx_fifo_threshold, &rx_timeout_symbols, &chunk_size, &split_irq,
+             &fault_us, &sender_priority);
+  if (fields < 8 || baud == 0 || rx_buffer_size < 129 || window_log > 10 ||
       mode > 3 || transfer_size == 0 || repeats == 0 ||
       application_priority >= configMAX_PRIORITIES - 1 ||
       rx_fifo_threshold == 0 || rx_fifo_threshold > 127 ||
       rx_timeout_symbols > 101 || chunk_size == 0 || chunk_size > kMaxChunk ||
       chunk_size % 256 != 0 || split_irq > 1 ||
+      sender_priority >= configMAX_PRIORITIES - 1 ||
+      (sender_priority != 0 && mode != 0) ||
       (fault_us != 0 && (mode != 0 || transfer_size < 65536))) {
     Serial.println("ERROR config=1");
     return false;

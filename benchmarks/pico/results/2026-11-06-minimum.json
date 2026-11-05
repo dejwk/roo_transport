@@ -1,0 +1,4864 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-06",
+  "measurement_dates": [
+    "2026-11-05",
+    "2026-11-06"
+  ],
+  "experiment": "minimum-settings",
+  "board": {
+    "board": "RP2040-Zero",
+    "chip": "RP2040 B2",
+    "cpu_mhz": 133,
+    "uart_format": "8N1",
+    "uart0_tx_gpio": 12,
+    "uart1_rx_gpio": 5,
+    "uart1_tx_gpio": 4,
+    "uart0_rx_gpio": 13
+  },
+  "notes": [
+    "Both reliable endpoints run on one board with crossed UARTs; this is not a two-board measurement.",
+    "passed is the saved runner correctness/lifecycle result, not a performance-threshold verdict.",
+    "Only passed runs with complete numeric RESULT rates receive accepted throughput summaries.",
+    "ESP32 reliable-mode UART error rows marked observed=0 are not independent hardware-error observations; payload and lifecycle checks remain the correctness evidence.",
+    "Each summary is the minimum, arithmetic mean and maximum useful-payload rate across that run.",
+    "Short independent screens do not establish combined or sustained configuration minima.",
+    "Task priorities are local scheduler values; producer/sender/receiver relationships also affect throughput.",
+    "Some initial screens adjust sender priorities through the private harness; use explicit sender_prio configuration rows to identify public-API measurements.",
+    "A sender_priority argument of zero retains the library default; application priority zero preserves the original application scheduling.",
+    "Build repository HEADs identify provenance at build time; source snapshot digests describe the actual copied source files, including pending edits.",
+    "Compact source digests hash the sorted JSON relative-path-to-SHA256 map as UTF-8 with comma/colon separators and no whitespace.",
+    "Transcripts are console-only evidence, with absolute local paths and MAC addresses redacted if present."
+  ],
+  "firmwares": {
+    "071439183cb9172c349030fbcd482711115c06cdd70b3980647673e7e50fd3b9": {
+      "repositories": {
+        "roo_transport": "2eb434e04a84e086e973c7992936e4962a736f06",
+        "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+        "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+        "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+        "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+        "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+        "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+        "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+      },
+      "board": "waveshare_rp2040_zero",
+      "test_rx_count": null,
+      "build_flags": [
+        "-fno-exceptions",
+        "-DPIO_FRAMEWORK_ARDUINO_ENABLE_FREERTOS",
+        "-DROO_TRANSPORT_BENCHMARK_RUNS=3"
+      ],
+      "firmware_sha256": "071439183cb9172c349030fbcd482711115c06cdd70b3980647673e7e50fd3b9",
+      "platform": "raspberrypi@src-ff76a3915224135aafad379817f41edd",
+      "sketch": "examples/ReliableSerial/Benchmark/Benchmark.ino",
+      "source_snapshot_sha256": "22f31dc400492d68119b86649679a33e6d32af33ae2b170514f88a7c1d1322ff",
+      "main_cpp_sha256": "26191a37b5f42f78e1d2dec4a515e9e899664e451ace4370f85eb9bebea7466b",
+      "per_library_source_snapshot_sha256": {
+        "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f",
+        "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+        "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+        "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+        "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+        "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+        "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+        "roo_transport": "01a2f9880c5b49405df45ccbb8f863db7cb5e16fec054f5d15177be2ba2c6cac"
+      },
+      "retry_source_sha256": {
+        "link/internal/out_buffer.cpp": "a35677084ce3346c29f2e3fc27885d729bc182d08420d88de13488a1507a9f18",
+        "link/internal/thread_safe/channel.cpp": "f230ed5596c8b7f11fc502e8f42148187ac5182418c50606c95ef0b805f8fecd"
+      }
+    },
+    "084dd9a2795f53c230b7095c5d90cda2cc375639ff8d554facd5db79dcd0c055": {
+      "repositories": {
+        "roo_transport": "d2d63ad6c897c1faeb8536d8ff1e31c1b6a53826",
+        "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+        "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+        "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+        "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+        "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+        "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+        "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+      },
+      "board": "waveshare_rp2040_zero",
+      "test_rx_count": null,
+      "build_flags": [
+        "-fno-exceptions",
+        "-DPIO_FRAMEWORK_ARDUINO_ENABLE_FREERTOS",
+        "-DROO_TRANSPORT_BENCHMARK_RUNS=3"
+      ],
+      "firmware_sha256": "084dd9a2795f53c230b7095c5d90cda2cc375639ff8d554facd5db79dcd0c055",
+      "platform": "raspberrypi@src-ff76a3915224135aafad379817f41edd",
+      "sketch": "actual-integer-priority1-window3.cpp",
+      "source_snapshot_sha256": "1db9a9a0802641264740a2715d425f76bf0b97ef5df5e4259f64c6fc00668adb",
+      "main_cpp_sha256": "b520b27917e8b6b960bb717f9a417263a982b43d44534d8b3f05d8c0a2921211",
+      "per_library_source_snapshot_sha256": {
+        "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f",
+        "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+        "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+        "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+        "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+        "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+        "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+        "roo_transport": "97d2cf1d446f254869b77679141e941013a1888b7f662badac2e4cf72f17850c"
+      },
+      "retry_source_sha256": {
+        "link/internal/out_buffer.cpp": "fd3f7a265d7c9c61f05c2b2d9cd9e7854ce13166150ea9692309a6f0c2170ad1",
+        "link/internal/thread_safe/channel.cpp": "c6f2fd04c151e664e2ccc70a8344557510bce86a8dbbb238ed3009eec275122c",
+        "link/internal/retry_backoff.h": "fc6e64d3f33eaa71726b8b2624f1cf0b347b6e03b23a7456bb3a302a3425b6d1"
+      }
+    },
+    "44b8f774aac69e785a2377aadbf72e033c80e86b7d4252b9d76319129fa8af7c": {
+      "repositories": {
+        "roo_transport": "2eb434e04a84e086e973c7992936e4962a736f06",
+        "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+        "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+        "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+        "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+        "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+        "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+        "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+      },
+      "board": "waveshare_rp2040_zero",
+      "test_rx_count": null,
+      "build_flags": [
+        "-fno-exceptions",
+        "-DPIO_FRAMEWORK_ARDUINO_ENABLE_FREERTOS",
+        "-DROO_TRANSPORT_BENCHMARK_RUNS=3"
+      ],
+      "firmware_sha256": "44b8f774aac69e785a2377aadbf72e033c80e86b7d4252b9d76319129fa8af7c",
+      "platform": "raspberrypi@src-ff76a3915224135aafad379817f41edd",
+      "sketch": "examples/ReliableSerial/Benchmark/Benchmark.ino",
+      "source_snapshot_sha256": "6418c7694dc5f77e6fbc736b93c6238c1b6b063c99c742abd14b2294f3ad2215",
+      "main_cpp_sha256": "eec3513fbed500ab68235816b8b258fa8631f8cb38d3dde8b6f79cf6e0ee5f91",
+      "per_library_source_snapshot_sha256": {
+        "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f",
+        "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+        "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+        "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+        "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+        "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+        "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+        "roo_transport": "01a2f9880c5b49405df45ccbb8f863db7cb5e16fec054f5d15177be2ba2c6cac"
+      },
+      "retry_source_sha256": {
+        "link/internal/out_buffer.cpp": "a35677084ce3346c29f2e3fc27885d729bc182d08420d88de13488a1507a9f18",
+        "link/internal/thread_safe/channel.cpp": "f230ed5596c8b7f11fc502e8f42148187ac5182418c50606c95ef0b805f8fecd"
+      }
+    },
+    "54dfd6f86802037621df27aa8570db8c11888a20d5aa5f39e6cb3a23c354e412": {
+      "repositories": {
+        "roo_transport": "2bc8cd492580a077e9f69352daa2a837bd048a28",
+        "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+        "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+        "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+        "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+        "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+        "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+        "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+      },
+      "board": "waveshare_rp2040_zero",
+      "test_rx_count": null,
+      "build_flags": [
+        "-fno-exceptions",
+        "-DPIO_FRAMEWORK_ARDUINO_ENABLE_FREERTOS",
+        "-DROO_TRANSPORT_BENCHMARK_RUNS=10"
+      ],
+      "firmware_sha256": "54dfd6f86802037621df27aa8570db8c11888a20d5aa5f39e6cb3a23c354e412",
+      "platform": "raspberrypi@src-ff76a3915224135aafad379817f41edd",
+      "sketch": "examples/ReliableSerial/Benchmark/Benchmark.ino",
+      "source_snapshot_sha256": "6d27ba4d89c2949e3469ff5172a2a571921f4127ebfc2e6d91ead42b3ec1cb1c",
+      "main_cpp_sha256": "473edd2788548c019b86f072ca04cae4971f0e195336cf9439b78805df2c7ca3",
+      "per_library_source_snapshot_sha256": {
+        "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f",
+        "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+        "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+        "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+        "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+        "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+        "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+        "roo_transport": "97d2cf1d446f254869b77679141e941013a1888b7f662badac2e4cf72f17850c"
+      },
+      "retry_source_sha256": {
+        "link/internal/out_buffer.cpp": "fd3f7a265d7c9c61f05c2b2d9cd9e7854ce13166150ea9692309a6f0c2170ad1",
+        "link/internal/thread_safe/channel.cpp": "c6f2fd04c151e664e2ccc70a8344557510bce86a8dbbb238ed3009eec275122c",
+        "link/internal/retry_backoff.h": "fc6e64d3f33eaa71726b8b2624f1cf0b347b6e03b23a7456bb3a302a3425b6d1"
+      }
+    },
+    "6e4b9f56407859e104fff8ae614763adc123b692af76d6fd7f8bb595abc2ca3d": {
+      "repositories": {
+        "roo_transport": "d2d63ad6c897c1faeb8536d8ff1e31c1b6a53826",
+        "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+        "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+        "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+        "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+        "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+        "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+        "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+      },
+      "board": "waveshare_rp2040_zero",
+      "test_rx_count": null,
+      "build_flags": [
+        "-fno-exceptions",
+        "-DPIO_FRAMEWORK_ARDUINO_ENABLE_FREERTOS",
+        "-DROO_TRANSPORT_BENCHMARK_RUNS=3"
+      ],
+      "firmware_sha256": "6e4b9f56407859e104fff8ae614763adc123b692af76d6fd7f8bb595abc2ca3d",
+      "platform": "raspberrypi@src-ff76a3915224135aafad379817f41edd",
+      "sketch": "actual-integer-priority1-window4.cpp",
+      "source_snapshot_sha256": "1773cae3ef81d8f1935badc8205ff5a55dbe1a09d0f6d00dd752260e153e8733",
+      "main_cpp_sha256": "de8dc4377b02684e2fe2d72a5cb873e222ae2f1906080b5c87dd36a53880471c",
+      "per_library_source_snapshot_sha256": {
+        "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f",
+        "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+        "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+        "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+        "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+        "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+        "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+        "roo_transport": "97d2cf1d446f254869b77679141e941013a1888b7f662badac2e4cf72f17850c"
+      },
+      "retry_source_sha256": {
+        "link/internal/out_buffer.cpp": "fd3f7a265d7c9c61f05c2b2d9cd9e7854ce13166150ea9692309a6f0c2170ad1",
+        "link/internal/thread_safe/channel.cpp": "c6f2fd04c151e664e2ccc70a8344557510bce86a8dbbb238ed3009eec275122c",
+        "link/internal/retry_backoff.h": "fc6e64d3f33eaa71726b8b2624f1cf0b347b6e03b23a7456bb3a302a3425b6d1"
+      }
+    },
+    "ac6ced0cda2b6e9e51ce2a4c434c0e517a3320605bb2844ead87948c345e6575": {
+      "repositories": {
+        "roo_transport": "d60cb440d182654a2178420c7f524c3701535c0c",
+        "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+        "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+        "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+        "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+        "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+        "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+        "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+      },
+      "board": "waveshare_rp2040_zero",
+      "test_rx_count": null,
+      "build_flags": [
+        "-fno-exceptions",
+        "-DPIO_FRAMEWORK_ARDUINO_ENABLE_FREERTOS"
+      ],
+      "firmware_sha256": "ac6ced0cda2b6e9e51ce2a4c434c0e517a3320605bb2844ead87948c345e6575",
+      "platform": "raspberrypi@src-ff76a3915224135aafad379817f41edd",
+      "sketch": "benchmarks/pico/main.cpp",
+      "source_snapshot_sha256": "e7fa58d60015cc6f09124fcfa7585d82b73c8ec271a87646a8b8cb19b01e47e2",
+      "main_cpp_sha256": "6b15ce4512048ea29cb02c4570f0aa22db80ceca2fa268f2ff4c9d4e278318c4",
+      "per_library_source_snapshot_sha256": {
+        "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f",
+        "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+        "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+        "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+        "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+        "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+        "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+        "roo_transport": "97d2cf1d446f254869b77679141e941013a1888b7f662badac2e4cf72f17850c"
+      },
+      "retry_source_sha256": {
+        "link/internal/out_buffer.cpp": "fd3f7a265d7c9c61f05c2b2d9cd9e7854ce13166150ea9692309a6f0c2170ad1",
+        "link/internal/thread_safe/channel.cpp": "c6f2fd04c151e664e2ccc70a8344557510bce86a8dbbb238ed3009eec275122c",
+        "link/internal/retry_backoff.h": "fc6e64d3f33eaa71726b8b2624f1cf0b347b6e03b23a7456bb3a302a3425b6d1"
+      }
+    },
+    "b84c590ab64b7d158a2b86028e5f13cad95bd189479ecc32854e8815e140492a": {
+      "repositories": {
+        "roo_transport": "dc8fb73c90e2898b7260a58cbd9c1449c07ea365",
+        "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+        "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+        "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+        "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+        "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+        "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+        "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+      },
+      "board": "waveshare_rp2040_zero",
+      "test_rx_count": null,
+      "firmware_sha256": "b84c590ab64b7d158a2b86028e5f13cad95bd189479ecc32854e8815e140492a",
+      "platform": "raspberrypi@src-ff76a3915224135aafad379817f41edd",
+      "source_snapshot_sha256": "e8c2257a05279c73dcb4692b0fa221dda4311d001ab21b65adb41c8b350eee64",
+      "main_cpp_sha256": "f4879ee7e9ecaa9df4a59c43dc582d286553fb3ac6f2b7846a5862d0d2f6eb3f",
+      "per_library_source_snapshot_sha256": {
+        "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f",
+        "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+        "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+        "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+        "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+        "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+        "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+        "roo_transport": "39f87a355b0224dd3eeae70690d2f0d53ea1a67f7d5a291f6db129bbf7622918"
+      },
+      "retry_source_sha256": {
+        "link/internal/out_buffer.cpp": "a35677084ce3346c29f2e3fc27885d729bc182d08420d88de13488a1507a9f18",
+        "link/internal/thread_safe/channel.cpp": "77b857aa8e1bf7e89b88b1e70961c77cb4880413b8965ab37c1ad39b929e7e71"
+      }
+    },
+    "bbf19a760a814bc8987601334d59d433fb41ea06a02db6a7158fa6a58be45cea": {
+      "repositories": {
+        "roo_transport": "23d269177b0dbe2932e8d74c1303b50f8e2e8f05",
+        "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+        "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+        "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+        "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+        "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+        "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+        "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+      },
+      "board": "waveshare_rp2040_zero",
+      "test_rx_count": null,
+      "build_flags": [
+        "-fno-exceptions",
+        "-DPIO_FRAMEWORK_ARDUINO_ENABLE_FREERTOS",
+        "-DROO_TRANSPORT_BENCHMARK_RUNS=3"
+      ],
+      "firmware_sha256": "bbf19a760a814bc8987601334d59d433fb41ea06a02db6a7158fa6a58be45cea",
+      "platform": "raspberrypi@src-ff76a3915224135aafad379817f41edd",
+      "sketch": "actual-integer-priority1-window5.cpp",
+      "source_snapshot_sha256": "2b17c60d5335ba629a4b38fa60946b4042fbec25e2c29f45633c27ebcb3f94e7",
+      "main_cpp_sha256": "5294f64ba4a99816197841d8a12b8e9af97438e5fee68d6390aeb885fa267f4e",
+      "per_library_source_snapshot_sha256": {
+        "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f",
+        "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+        "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+        "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+        "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+        "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+        "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+        "roo_transport": "97d2cf1d446f254869b77679141e941013a1888b7f662badac2e4cf72f17850c"
+      },
+      "retry_source_sha256": {
+        "link/internal/out_buffer.cpp": "fd3f7a265d7c9c61f05c2b2d9cd9e7854ce13166150ea9692309a6f0c2170ad1",
+        "link/internal/thread_safe/channel.cpp": "c6f2fd04c151e664e2ccc70a8344557510bce86a8dbbb238ed3009eec275122c",
+        "link/internal/retry_backoff.h": "fc6e64d3f33eaa71726b8b2624f1cf0b347b6e03b23a7456bb3a302a3425b6d1"
+      }
+    },
+    "c223db344b3879e431c9e1d6c107824bbf370012fe27fc9adf3f999b62e80628": {
+      "repositories": {
+        "roo_transport": "23d269177b0dbe2932e8d74c1303b50f8e2e8f05",
+        "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+        "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+        "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+        "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+        "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+        "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+        "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+      },
+      "board": "waveshare_rp2040_zero",
+      "test_rx_count": null,
+      "build_flags": [
+        "-fno-exceptions",
+        "-DPIO_FRAMEWORK_ARDUINO_ENABLE_FREERTOS",
+        "-DROO_TRANSPORT_BENCHMARK_RUNS=3"
+      ],
+      "firmware_sha256": "c223db344b3879e431c9e1d6c107824bbf370012fe27fc9adf3f999b62e80628",
+      "platform": "raspberrypi@src-ff76a3915224135aafad379817f41edd",
+      "sketch": "examples/ReliableSerial/Benchmark/Benchmark.ino",
+      "source_snapshot_sha256": "dce1edfc01dc1a9308f92cea70dc786fed62ee66095a8d6725c05b93523e852a",
+      "main_cpp_sha256": "eec3513fbed500ab68235816b8b258fa8631f8cb38d3dde8b6f79cf6e0ee5f91",
+      "per_library_source_snapshot_sha256": {
+        "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f",
+        "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+        "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+        "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+        "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+        "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+        "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+        "roo_transport": "e8c4bb37b47efe221bb709bb99da9372b80be81e735c36562cfa53104f2f212d"
+      },
+      "retry_source_sha256": {
+        "link/internal/out_buffer.cpp": "fd3f7a265d7c9c61f05c2b2d9cd9e7854ce13166150ea9692309a6f0c2170ad1",
+        "link/internal/thread_safe/channel.cpp": "e9b013f100400717561ef8418619d901d377098d1349d3e841c75146d1d95033",
+        "link/internal/retry_backoff.h": "fc6e64d3f33eaa71726b8b2624f1cf0b347b6e03b23a7456bb3a302a3425b6d1"
+      }
+    },
+    "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b": {
+      "repositories": {
+        "roo_transport": "2eb434e04a84e086e973c7992936e4962a736f06",
+        "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+        "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+        "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+        "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+        "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+        "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+        "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+      },
+      "board": "waveshare_rp2040_zero",
+      "test_rx_count": null,
+      "build_flags": [
+        "-fno-exceptions",
+        "-DPIO_FRAMEWORK_ARDUINO_ENABLE_FREERTOS"
+      ],
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "platform": "raspberrypi@src-ff76a3915224135aafad379817f41edd",
+      "sketch": "benchmarks/pico/main.cpp",
+      "source_snapshot_sha256": "c86ceed3a858c2fb829041b499dd015e74f6499244c6dfe16663069b791ab33c",
+      "main_cpp_sha256": "6b15ce4512048ea29cb02c4570f0aa22db80ceca2fa268f2ff4c9d4e278318c4",
+      "per_library_source_snapshot_sha256": {
+        "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f",
+        "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+        "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+        "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+        "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+        "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+        "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+        "roo_transport": "01a2f9880c5b49405df45ccbb8f863db7cb5e16fec054f5d15177be2ba2c6cac"
+      },
+      "retry_source_sha256": {
+        "link/internal/out_buffer.cpp": "a35677084ce3346c29f2e3fc27885d729bc182d08420d88de13488a1507a9f18",
+        "link/internal/thread_safe/channel.cpp": "f230ed5596c8b7f11fc502e8f42148187ac5182418c50606c95ef0b805f8fecd"
+      }
+    },
+    "faf734ddd68cb935a47e41523873fbc157b9cb6b3545a6a3729bd94a63ca52ed": {
+      "repositories": {
+        "roo_transport": "23d269177b0dbe2932e8d74c1303b50f8e2e8f05",
+        "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+        "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+        "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+        "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+        "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+        "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+        "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+      },
+      "board": "waveshare_rp2040_zero",
+      "test_rx_count": null,
+      "build_flags": [
+        "-fno-exceptions",
+        "-DPIO_FRAMEWORK_ARDUINO_ENABLE_FREERTOS",
+        "-DROO_TRANSPORT_BENCHMARK_RUNS=3"
+      ],
+      "firmware_sha256": "faf734ddd68cb935a47e41523873fbc157b9cb6b3545a6a3729bd94a63ca52ed",
+      "platform": "raspberrypi@src-ff76a3915224135aafad379817f41edd",
+      "sketch": "actual-integer-priority1-window6.cpp",
+      "source_snapshot_sha256": "d5c092fce7b730ebf7535cbbb5b5bf962f599ae43dc6156e15b368f85253bf39",
+      "main_cpp_sha256": "5f7120e1798991b5966b73bcda99a4e2f9ced9c511598c8937c029aec3f8ae44",
+      "per_library_source_snapshot_sha256": {
+        "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f",
+        "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+        "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+        "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+        "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+        "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+        "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+        "roo_transport": "97d2cf1d446f254869b77679141e941013a1888b7f662badac2e4cf72f17850c"
+      },
+      "retry_source_sha256": {
+        "link/internal/out_buffer.cpp": "fd3f7a265d7c9c61f05c2b2d9cd9e7854ce13166150ea9692309a6f0c2170ad1",
+        "link/internal/thread_safe/channel.cpp": "c6f2fd04c151e664e2ccc70a8344557510bce86a8dbbb238ed3009eec275122c",
+        "link/internal/retry_backoff.h": "fc6e64d3f33eaa71726b8b2624f1cf0b347b6e03b23a7456bb3a302a3425b6d1"
+      }
+    },
+    "ff60610d71c008f593254753f8b740bb4fb2bcfe9baa8b50ce196c69b803ca53": {
+      "repositories": {
+        "roo_transport": "2eb434e04a84e086e973c7992936e4962a736f06",
+        "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+        "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+        "roo_threads": "47be96c8a29df38a52a0b978f9733290a203d39f",
+        "roo_logging": "07829a7381a95e8cd9d5c4348fdd870b59a23066",
+        "roo_time": "9dd8ba3d202e3e4af0ad3577c8ce89332e9ad252",
+        "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+        "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+      },
+      "board": "waveshare_rp2040_zero",
+      "test_rx_count": null,
+      "build_flags": [
+        "-fno-exceptions",
+        "-DPIO_FRAMEWORK_ARDUINO_ENABLE_FREERTOS",
+        "-DROO_TRANSPORT_BENCHMARK_RUNS=3"
+      ],
+      "firmware_sha256": "ff60610d71c008f593254753f8b740bb4fb2bcfe9baa8b50ce196c69b803ca53",
+      "platform": "raspberrypi@src-ff76a3915224135aafad379817f41edd",
+      "sketch": "examples/ReliableSerial/Benchmark/Benchmark.ino",
+      "source_snapshot_sha256": "dec25eff353a9e2716ad1c696cc86793f2e0ae1cd0cc7426fa49d7c280d48b39",
+      "main_cpp_sha256": "d50ae862dcab9b5afe76b998dcd56bef4dfd9d9a7989f1d3d9fbbab3ffcdb42a",
+      "per_library_source_snapshot_sha256": {
+        "roo_backport": "590d4480f3c2e2d99c432403c5589ecb12558fd0e329b16cfd84e09b9acf776f",
+        "roo_collections": "6c709ee4ac5d21a1c8ec6522da3895a41a4c2532207139de828d0a41ed0cbe49",
+        "roo_flags": "35d2ab97d1512ba12bfc8b1bbbdccf51a6dc51725547e41232f6ac1f73536b5c",
+        "roo_io": "d3dc7ff09436aacb27234d3bcddb9b3e23ddffa121ff611beba9afb18333facb",
+        "roo_logging": "8c0fd74f096685fb0e4d2d36c8b69e13a6e4515e79b7fb0eb95af29c8ffcc174",
+        "roo_threads": "0032291015164dfc56dbed8eaca7e98ba6cf99dd7b479f7f3cd0029eabdb505b",
+        "roo_time": "fe48f0b7266d0d46770d0ec31b5035c905f31ae66c041475e9db43bedc2ecefc",
+        "roo_transport": "01a2f9880c5b49405df45ccbb8f863db7cb5e16fec054f5d15177be2ba2c6cac"
+      },
+      "retry_source_sha256": {
+        "link/internal/out_buffer.cpp": "a35677084ce3346c29f2e3fc27885d729bc182d08420d88de13488a1507a9f18",
+        "link/internal/thread_safe/channel.cpp": "f230ed5596c8b7f11fc502e8f42148187ac5182418c50606c95ef0b805f8fecd"
+      }
+    }
+  },
+  "runs": [
+    {
+      "id": "actual-example-block-validation",
+      "parameters": {
+        "mode": 0,
+        "chunk": 256,
+        "baud": 8312500,
+        "window_log2": 6,
+        "io_priority": 6,
+        "payload": 1048576,
+        "runs": 3
+      },
+      "firmware_sha256": "44b8f774aac69e785a2377aadbf72e033c80e86b7d4252b9d76319129fa8af7c",
+      "passed": true,
+      "rows": [
+        {
+          "record": "UART",
+          "actual_baud": 8312500
+        },
+        {
+          "record": "UART",
+          "actual_baud": 8312500
+        },
+        {
+          "record": "CONFIG",
+          "mode": 0,
+          "baud": 8312500,
+          "window_log2": 6,
+          "io_priority": 6,
+          "payload": 1048576,
+          "runs": 3,
+          "chunk": 256
+        },
+        {
+          "record": "SENDER",
+          "priority": 6,
+          "stack": 4096
+        },
+        {
+          "record": "BACKEND",
+          "cpu": 133000000,
+          "peri": 133000000,
+          "rx_ring": 8192,
+          "tx_ring": 8192,
+          "kind": "pico-dma"
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.587,
+          "p50": 3.047,
+          "p90": 3.699,
+          "p99": 4.011,
+          "max": 4.011
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 2589733,
+          "mbps": 3.239179,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.284,
+          "p50": 3.07,
+          "p90": 3.558,
+          "p99": 3.855,
+          "max": 3.855
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 2633574,
+          "mbps": 3.185256,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.457,
+          "p50": 3.048,
+          "p90": 3.676,
+          "p99": 3.805,
+          "max": 3.805
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 2616015,
+          "mbps": 3.206636,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        }
+      ],
+      "transcript": "2026-11-06-minimum/actual-example-block-validation.log",
+      "transcript_sha256": "f13178fc3df28576fe8dd31b5f36202319f8476ea1d980eb6b4fe6a162e09eb3",
+      "accepted_payload_mbit_s": {
+        "min": 3.185256,
+        "mean": 3.210357,
+        "max": 3.239179
+      },
+      "validation": "actual default sketch, finite byte/pattern validation, response EOF, worker stop and DONE"
+    },
+    {
+      "id": "actual-example-console-race",
+      "parameters": {
+        "mode": 0,
+        "baud": 8312500,
+        "window_log2": 6,
+        "io_priority": 6,
+        "payload": 1048576,
+        "runs": 3
+      },
+      "firmware_sha256": "071439183cb9172c349030fbcd482711115c06cdd70b3980647673e7e50fd3b9",
+      "passed": false,
+      "rows": [],
+      "transcript": "2026-11-06-minimum/actual-example-console-race.log",
+      "transcript_sha256": "eaab8afd2e37f41449bc03807306d5381d6e507a317e8f418c43581ae5b5c1f2",
+      "rejection": "Saved runner validation failed; printed rates are not accepted throughput.",
+      "validation": "actual default sketch, finite byte/pattern validation, response EOF, worker stop and DONE"
+    },
+    {
+      "id": "actual-example-initial",
+      "parameters": {
+        "mode": 0,
+        "baud": 8312500,
+        "window_log2": 6,
+        "io_priority": 6,
+        "payload": 1048576,
+        "runs": 3
+      },
+      "firmware_sha256": "ff60610d71c008f593254753f8b740bb4fb2bcfe9baa8b50ce196c69b803ca53",
+      "passed": true,
+      "rows": [
+        {
+          "record": "UART",
+          "actual_baud": 8312500
+        },
+        {
+          "record": "UART",
+          "actual_baud": 8312500
+        },
+        {
+          "record": "CONFIG",
+          "mode": 0,
+          "baud": 8312500,
+          "window_log2": 6,
+          "io_priority": 6,
+          "payload": 1048576,
+          "runs": 3
+        },
+        {
+          "record": "SENDER",
+          "priority": 6,
+          "stack": 4096
+        },
+        {
+          "record": "BACKEND",
+          "cpu": 133000000,
+          "peri": 133000000,
+          "rx_ring": 8192,
+          "tx_ring": 8192,
+          "kind": "pico-dma"
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.513,
+          "p50": 3.056,
+          "p90": 3.28,
+          "p99": 4.594,
+          "max": 4.594
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 2715618,
+          "mbps": 3.089024,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.761,
+          "p50": 3.036,
+          "p90": 3.309,
+          "p99": 3.73,
+          "max": 3.73
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 2756662,
+          "mbps": 3.043031,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.434,
+          "p50": 3.056,
+          "p90": 3.304,
+          "p99": 3.708,
+          "max": 3.708
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 2749506,
+          "mbps": 3.050951,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        }
+      ],
+      "transcript": "2026-11-06-minimum/actual-example-initial.log",
+      "transcript_sha256": "0d87a946de02bdadd9297b5ec7cfee143e287325bbafca053309f2a19a5136bf",
+      "accepted_payload_mbit_s": {
+        "min": 3.043031,
+        "mean": 3.0610020000000002,
+        "max": 3.089024
+      },
+      "validation": "actual default sketch, finite byte/pattern validation, response EOF, worker stop and DONE"
+    },
+    {
+      "id": "actual-example-integer-backoff",
+      "parameters": {
+        "mode": 0,
+        "chunk": 256,
+        "baud": 8312500,
+        "window_log2": 6,
+        "io_priority": 6,
+        "payload": 1048576,
+        "runs": 3
+      },
+      "firmware_sha256": "c223db344b3879e431c9e1d6c107824bbf370012fe27fc9adf3f999b62e80628",
+      "passed": true,
+      "rows": [
+        {
+          "record": "UART",
+          "actual_baud": 8312500
+        },
+        {
+          "record": "UART",
+          "actual_baud": 8312500
+        },
+        {
+          "record": "CONFIG",
+          "mode": 0,
+          "baud": 8312500,
+          "window_log2": 6,
+          "io_priority": 6,
+          "payload": 1048576,
+          "runs": 3,
+          "chunk": 256
+        },
+        {
+          "record": "SENDER",
+          "priority": 6,
+          "stack": 4096
+        },
+        {
+          "record": "BACKEND",
+          "cpu": 133000000,
+          "peri": 133000000,
+          "rx_ring": 8192,
+          "tx_ring": 8192,
+          "kind": "pico-dma"
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 1.961,
+          "p50": 2.675,
+          "p90": 2.882,
+          "p99": 3.098,
+          "max": 3.098
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1790710,
+          "mbps": 4.684515,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4231,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 1.977,
+          "p50": 2.587,
+          "p90": 2.883,
+          "p99": 3.096,
+          "max": 3.096
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1802121,
+          "mbps": 4.654853,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4233,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.03,
+          "p50": 2.478,
+          "p90": 2.879,
+          "p99": 3.784,
+          "max": 3.784
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1768436,
+          "mbps": 4.743518,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4230,
+          "delivered": 4229,
+          "received": 1
+        }
+      ],
+      "transcript": "2026-11-06-minimum/actual-example-integer-backoff.log",
+      "transcript_sha256": "d138ee608201e24c8221f76baf04012e53264730e6bf82795fba58abba1279a1",
+      "accepted_payload_mbit_s": {
+        "min": 4.654853,
+        "mean": 4.694295333333334,
+        "max": 4.743518
+      },
+      "validation": "actual default sketch, finite byte/pattern validation, response EOF, worker stop and DONE"
+    },
+    {
+      "id": "actual-example-ordered",
+      "parameters": {
+        "mode": 0,
+        "baud": 8312500,
+        "window_log2": 6,
+        "io_priority": 6,
+        "payload": 1048576,
+        "runs": 3
+      },
+      "firmware_sha256": "071439183cb9172c349030fbcd482711115c06cdd70b3980647673e7e50fd3b9",
+      "passed": true,
+      "rows": [
+        {
+          "record": "UART",
+          "actual_baud": 8312500
+        },
+        {
+          "record": "UART",
+          "actual_baud": 8312500
+        },
+        {
+          "record": "CONFIG",
+          "mode": 0,
+          "baud": 8312500,
+          "window_log2": 6,
+          "io_priority": 6,
+          "payload": 1048576,
+          "runs": 3
+        },
+        {
+          "record": "SENDER",
+          "priority": 6,
+          "stack": 4096
+        },
+        {
+          "record": "BACKEND",
+          "cpu": 133000000,
+          "peri": 133000000,
+          "rx_ring": 8192,
+          "tx_ring": 8192,
+          "kind": "pico-dma"
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.538,
+          "p50": 3.062,
+          "p90": 3.432,
+          "p99": 4.574,
+          "max": 4.574
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 2785712,
+          "mbps": 3.011298,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.234,
+          "p50": 3.047,
+          "p90": 3.537,
+          "p99": 3.815,
+          "max": 3.815
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 2760227,
+          "mbps": 3.039101,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.565,
+          "p50": 3.05,
+          "p90": 3.552,
+          "p99": 3.735,
+          "max": 3.735
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 2760563,
+          "mbps": 3.038731,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        }
+      ],
+      "transcript": "2026-11-06-minimum/actual-example-ordered.log",
+      "transcript_sha256": "99f2aeffa1e344c439ad32d0e9aae8ab7e018018f471fe8f737359833e57fa04",
+      "accepted_payload_mbit_s": {
+        "min": 3.011298,
+        "mean": 3.02971,
+        "max": 3.039101
+      },
+      "validation": "actual default sketch, finite byte/pattern validation, response EOF, worker stop and DONE"
+    },
+    {
+      "id": "actual-integer-priority1-window3",
+      "parameters": {
+        "mode": 0,
+        "chunk": 256,
+        "baud": 8312500,
+        "window_log2": 3,
+        "io_priority": 1,
+        "payload": 1048576,
+        "runs": 3
+      },
+      "firmware_sha256": "084dd9a2795f53c230b7095c5d90cda2cc375639ff8d554facd5db79dcd0c055",
+      "passed": true,
+      "rows": [
+        {
+          "record": "UART",
+          "actual_baud": 8312500
+        },
+        {
+          "record": "UART",
+          "actual_baud": 8312500
+        },
+        {
+          "record": "CONFIG",
+          "mode": 0,
+          "baud": 8312500,
+          "window_log2": 3,
+          "io_priority": 1,
+          "payload": 1048576,
+          "runs": 3,
+          "chunk": 256
+        },
+        {
+          "record": "SENDER",
+          "priority": 1,
+          "stack": 4096
+        },
+        {
+          "record": "BACKEND",
+          "cpu": 133000000,
+          "peri": 133000000,
+          "rx_ring": 8192,
+          "tx_ring": 8192,
+          "kind": "pico-dma"
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.001,
+          "p50": 2.571,
+          "p90": 2.879,
+          "p99": 3.311,
+          "max": 3.311
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 2769350,
+          "mbps": 3.029089,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.072,
+          "p50": 2.645,
+          "p90": 2.879,
+          "p99": 3.107,
+          "max": 3.107
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 2775575,
+          "mbps": 3.022296,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 1.989,
+          "p50": 2.675,
+          "p90": 2.882,
+          "p99": 3.084,
+          "max": 3.084
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 2759563,
+          "mbps": 3.039832,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4231,
+          "delivered": 4231,
+          "received": 1
+        }
+      ],
+      "transcript": "2026-11-06-minimum/actual-integer-priority1-window3.log",
+      "transcript_sha256": "b2c4cc82e74ab708e087e8a80d5a65c362e135d28cc2177f8d6a5e3cbd13143c",
+      "accepted_payload_mbit_s": {
+        "min": 3.022296,
+        "mean": 3.0304056666666668,
+        "max": 3.039832
+      },
+      "validation": "actual default sketch, finite byte/pattern validation, response EOF, worker stop and DONE"
+    },
+    {
+      "id": "actual-integer-priority1-window4",
+      "parameters": {
+        "mode": 0,
+        "chunk": 256,
+        "baud": 8312500,
+        "window_log2": 4,
+        "io_priority": 1,
+        "payload": 1048576,
+        "runs": 3
+      },
+      "firmware_sha256": "6e4b9f56407859e104fff8ae614763adc123b692af76d6fd7f8bb595abc2ca3d",
+      "passed": true,
+      "rows": [
+        {
+          "record": "UART",
+          "actual_baud": 8312500
+        },
+        {
+          "record": "UART",
+          "actual_baud": 8312500
+        },
+        {
+          "record": "CONFIG",
+          "mode": 0,
+          "baud": 8312500,
+          "window_log2": 4,
+          "io_priority": 1,
+          "payload": 1048576,
+          "runs": 3,
+          "chunk": 256
+        },
+        {
+          "record": "SENDER",
+          "priority": 1,
+          "stack": 4096
+        },
+        {
+          "record": "BACKEND",
+          "cpu": 133000000,
+          "peri": 133000000,
+          "rx_ring": 8192,
+          "tx_ring": 8192,
+          "kind": "pico-dma"
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.062,
+          "p50": 2.646,
+          "p90": 2.924,
+          "p99": 2.99,
+          "max": 2.99
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 2199051,
+          "mbps": 3.814649,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.056,
+          "p50": 2.624,
+          "p90": 2.86,
+          "p99": 3.57,
+          "max": 3.57
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 2181509,
+          "mbps": 3.845324,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4230,
+          "delivered": 4230,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.085,
+          "p50": 2.586,
+          "p90": 2.811,
+          "p99": 3.009,
+          "max": 3.009
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 2167016,
+          "mbps": 3.871041,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        }
+      ],
+      "transcript": "2026-11-06-minimum/actual-integer-priority1-window4.log",
+      "transcript_sha256": "51583695e487357a9311f62aa7ba3b8269e6b5cfd668ac4997014b48fdcb45f8",
+      "accepted_payload_mbit_s": {
+        "min": 3.814649,
+        "mean": 3.8436713333333334,
+        "max": 3.871041
+      },
+      "validation": "actual default sketch, finite byte/pattern validation, response EOF, worker stop and DONE"
+    },
+    {
+      "id": "actual-integer-priority1-window5",
+      "parameters": {
+        "mode": 0,
+        "chunk": 256,
+        "baud": 8312500,
+        "window_log2": 5,
+        "io_priority": 1,
+        "payload": 1048576,
+        "runs": 3
+      },
+      "firmware_sha256": "bbf19a760a814bc8987601334d59d433fb41ea06a02db6a7158fa6a58be45cea",
+      "passed": true,
+      "rows": [
+        {
+          "record": "UART",
+          "actual_baud": 8312500
+        },
+        {
+          "record": "UART",
+          "actual_baud": 8312500
+        },
+        {
+          "record": "CONFIG",
+          "mode": 0,
+          "baud": 8312500,
+          "window_log2": 5,
+          "io_priority": 1,
+          "payload": 1048576,
+          "runs": 3,
+          "chunk": 256
+        },
+        {
+          "record": "SENDER",
+          "priority": 1,
+          "stack": 4096
+        },
+        {
+          "record": "BACKEND",
+          "cpu": 133000000,
+          "peri": 133000000,
+          "rx_ring": 8192,
+          "tx_ring": 8192,
+          "kind": "pico-dma"
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 1.847,
+          "p50": 2.673,
+          "p90": 2.879,
+          "p99": 3.88,
+          "max": 3.88
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1915281,
+          "mbps": 4.379831,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4250,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 1.86,
+          "p50": 2.665,
+          "p90": 2.887,
+          "p99": 3.665,
+          "max": 3.665
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1915572,
+          "mbps": 4.379166,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4231,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.015,
+          "p50": 2.511,
+          "p90": 2.894,
+          "p99": 3.048,
+          "max": 3.048
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1910694,
+          "mbps": 4.390346,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        }
+      ],
+      "transcript": "2026-11-06-minimum/actual-integer-priority1-window5.log",
+      "transcript_sha256": "d570a59c58bc4a9b4c490d8ce8cf40ec37ca37343db247eb1c71d057fa8f1298",
+      "accepted_payload_mbit_s": {
+        "min": 4.379166,
+        "mean": 4.383114333333333,
+        "max": 4.390346
+      },
+      "validation": "actual default sketch, finite byte/pattern validation, response EOF, worker stop and DONE"
+    },
+    {
+      "id": "actual-integer-priority1-window6",
+      "parameters": {
+        "mode": 0,
+        "chunk": 256,
+        "baud": 8312500,
+        "window_log2": 6,
+        "io_priority": 1,
+        "payload": 1048576,
+        "runs": 3
+      },
+      "firmware_sha256": "faf734ddd68cb935a47e41523873fbc157b9cb6b3545a6a3729bd94a63ca52ed",
+      "passed": true,
+      "rows": [
+        {
+          "record": "UART",
+          "actual_baud": 8312500
+        },
+        {
+          "record": "UART",
+          "actual_baud": 8312500
+        },
+        {
+          "record": "CONFIG",
+          "mode": 0,
+          "baud": 8312500,
+          "window_log2": 6,
+          "io_priority": 1,
+          "payload": 1048576,
+          "runs": 3,
+          "chunk": 256
+        },
+        {
+          "record": "SENDER",
+          "priority": 1,
+          "stack": 4096
+        },
+        {
+          "record": "BACKEND",
+          "cpu": 133000000,
+          "peri": 133000000,
+          "rx_ring": 8192,
+          "tx_ring": 8192,
+          "kind": "pico-dma"
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 1.965,
+          "p50": 2.559,
+          "p90": 2.885,
+          "p99": 3.647,
+          "max": 3.647
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1842743,
+          "mbps": 4.55224,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 1.977,
+          "p50": 2.638,
+          "p90": 2.894,
+          "p99": 3.0,
+          "max": 3.0
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1816122,
+          "mbps": 4.618967,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.0,
+          "p50": 2.681,
+          "p90": 2.893,
+          "p99": 2.977,
+          "max": 2.977
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1832644,
+          "mbps": 4.577325,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4243,
+          "delivered": 4229,
+          "received": 1
+        }
+      ],
+      "transcript": "2026-11-06-minimum/actual-integer-priority1-window6.log",
+      "transcript_sha256": "56c0e9aa213798ac80383c373f5ff8f752f4eb4c699bd03d18a51d10ff3bd200",
+      "accepted_payload_mbit_s": {
+        "min": 4.55224,
+        "mean": 4.582844,
+        "max": 4.618967
+      },
+      "validation": "actual default sketch, finite byte/pattern validation, response EOF, worker stop and DONE"
+    },
+    {
+      "id": "api-default-app",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 6,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 0,
+        "sender_priority": 1,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 0,
+          "fault_us": 0,
+          "sender_prio": 1
+        },
+        {
+          "record": "LATENCY",
+          "min": 2018,
+          "p50": 2858,
+          "p90": 3045,
+          "p99": 3485,
+          "max": 3485
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 592428,
+          "mbps": 3.539927,
+          "bad": 0,
+          "sent": 1058,
+          "delivered": 1058,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 588658,
+          "mbps": 3.562598,
+          "bad": 0,
+          "sent": 1059,
+          "delivered": 1059,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/api-default-app.log",
+      "transcript_sha256": "ca9038d6b8ae2325835a97048cd36b4c16ba127f556c0ad38a56c0677293c7d9",
+      "accepted_payload_mbit_s": {
+        "min": 3.539927,
+        "mean": 3.5512625,
+        "max": 3.562598
+      }
+    },
+    {
+      "id": "api-priority1",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 6,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 1,
+        "sender_priority": 1,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 1,
+          "fault_us": 0,
+          "sender_prio": 1
+        },
+        {
+          "record": "LATENCY",
+          "min": 2001,
+          "p50": 2730,
+          "p90": 2999,
+          "p99": 3960,
+          "max": 3960
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 560385,
+          "mbps": 3.742341,
+          "bad": 0,
+          "sent": 1058,
+          "delivered": 1058,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 577734,
+          "mbps": 3.629961,
+          "bad": 0,
+          "sent": 1065,
+          "delivered": 1059,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/api-priority1.log",
+      "transcript_sha256": "f825f4e33e41d9d30e139af7dd163de6e900e451eeeee5bbbef8d9072df0d956",
+      "accepted_payload_mbit_s": {
+        "min": 3.629961,
+        "mean": 3.686151,
+        "max": 3.742341
+      }
+    },
+    {
+      "id": "api-priority2",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 6,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 2,
+        "sender_priority": 2,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 2,
+          "fault_us": 0,
+          "sender_prio": 2
+        },
+        {
+          "record": "LATENCY",
+          "min": 1949,
+          "p50": 2726,
+          "p90": 3019,
+          "p99": 3915,
+          "max": 3915
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 563373,
+          "mbps": 3.722493,
+          "bad": 0,
+          "sent": 1058,
+          "delivered": 1058,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 596645,
+          "mbps": 3.514908,
+          "bad": 0,
+          "sent": 1059,
+          "delivered": 1059,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/api-priority2.log",
+      "transcript_sha256": "4357f4a492a4581b79664eeb06134c7d0eae5629282086ab9bd12ddb7b63431b",
+      "accepted_payload_mbit_s": {
+        "min": 3.514908,
+        "mean": 3.6187005,
+        "max": 3.722493
+      }
+    },
+    {
+      "id": "api-priority3",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 6,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 3,
+        "sender_priority": 3,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 3,
+          "fault_us": 0,
+          "sender_prio": 3
+        },
+        {
+          "record": "LATENCY",
+          "min": 1948,
+          "p50": 2572,
+          "p90": 3006,
+          "p99": 3837,
+          "max": 3837
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 573507,
+          "mbps": 3.656716,
+          "bad": 0,
+          "sent": 1058,
+          "delivered": 1058,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 570446,
+          "mbps": 3.676337,
+          "bad": 0,
+          "sent": 1075,
+          "delivered": 1059,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/api-priority3.log",
+      "transcript_sha256": "e42e6fd414040a5d2380b666c9308cea32aec5bf66f59ff721435e8ed9dce8e9",
+      "accepted_payload_mbit_s": {
+        "min": 3.656716,
+        "mean": 3.6665265,
+        "max": 3.676337
+      }
+    },
+    {
+      "id": "api-priority5",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 6,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 5,
+        "sender_priority": 5,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 5,
+          "fault_us": 0,
+          "sender_prio": 5
+        },
+        {
+          "record": "LATENCY",
+          "min": 1964,
+          "p50": 2747,
+          "p90": 3023,
+          "p99": 3839,
+          "max": 3839
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 595642,
+          "mbps": 3.520826,
+          "bad": 0,
+          "sent": 1171,
+          "delivered": 1058,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 565518,
+          "mbps": 3.708374,
+          "bad": 0,
+          "sent": 1059,
+          "delivered": 1059,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/api-priority5.log",
+      "transcript_sha256": "0056da8c637ddb7c11014708d0f24c863ba03f0cee52f24bcb4c5449fbb51fe3",
+      "accepted_payload_mbit_s": {
+        "min": 3.520826,
+        "mean": 3.6146000000000003,
+        "max": 3.708374
+      }
+    },
+    {
+      "id": "api-priority6",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 6,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 6,
+        "sender_priority": 6,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 6,
+          "fault_us": 0,
+          "sender_prio": 6
+        },
+        {
+          "record": "LATENCY",
+          "min": 1968,
+          "p50": 2715,
+          "p90": 3006,
+          "p99": 3486,
+          "max": 3486
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 547704,
+          "mbps": 3.828988,
+          "bad": 0,
+          "sent": 1059,
+          "delivered": 1058,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 527803,
+          "mbps": 3.973361,
+          "bad": 0,
+          "sent": 1059,
+          "delivered": 1059,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/api-priority6.log",
+      "transcript_sha256": "667df70c45095c0867a0509f684db9aee86c7933aba0eed6873d6d20df2510ed",
+      "accepted_payload_mbit_s": {
+        "min": 3.828988,
+        "mean": 3.9011744999999998,
+        "max": 3.973361
+      }
+    },
+    {
+      "id": "api-window0",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 0,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 1,
+        "sender_priority": 1,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 0,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 1,
+          "fault_us": 0,
+          "sender_prio": 1
+        },
+        {
+          "record": "LATENCY",
+          "min": 1936,
+          "p50": 2746,
+          "p90": 3014,
+          "p99": 3840,
+          "max": 3840
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 2299496,
+          "mbps": 0.912005,
+          "bad": 0,
+          "sent": 1058,
+          "delivered": 1058,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 2335523,
+          "mbps": 0.897937,
+          "bad": 0,
+          "sent": 1059,
+          "delivered": 1059,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/api-window0.log",
+      "transcript_sha256": "e9dfcc31fb25c0cf8acd43601284cb3bf88375027744adad69ba6e5452242e51",
+      "accepted_payload_mbit_s": {
+        "min": 0.897937,
+        "mean": 0.904971,
+        "max": 0.912005
+      }
+    },
+    {
+      "id": "api-window1",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 1,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 1,
+        "sender_priority": 1,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 1,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 1,
+          "fault_us": 0,
+          "sender_prio": 1
+        },
+        {
+          "record": "LATENCY",
+          "min": 1955,
+          "p50": 2749,
+          "p90": 3036,
+          "p99": 3960,
+          "max": 3960
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 1618275,
+          "mbps": 1.295918,
+          "bad": 0,
+          "sent": 1058,
+          "delivered": 1058,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 1618227,
+          "mbps": 1.295957,
+          "bad": 0,
+          "sent": 1060,
+          "delivered": 1060,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/api-window1.log",
+      "transcript_sha256": "b79e4736cbee5003ce58c8ffd1b83423b817f464acb63941a2d88610af530650",
+      "accepted_payload_mbit_s": {
+        "min": 1.295918,
+        "mean": 1.2959375,
+        "max": 1.295957
+      }
+    },
+    {
+      "id": "api-window2",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 2,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 1,
+        "sender_priority": 1,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 2,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 1,
+          "fault_us": 0,
+          "sender_prio": 1
+        },
+        {
+          "record": "LATENCY",
+          "min": 1997,
+          "p50": 2705,
+          "p90": 3019,
+          "p99": 3640,
+          "max": 3640
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 1085203,
+          "mbps": 1.932497,
+          "bad": 0,
+          "sent": 1058,
+          "delivered": 1058,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 1072834,
+          "mbps": 1.954778,
+          "bad": 0,
+          "sent": 1060,
+          "delivered": 1060,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/api-window2.log",
+      "transcript_sha256": "35979493c4090d03e1dee1c6ca1fa7d617893df22a4b60a66a1b7b2083be7fd1",
+      "accepted_payload_mbit_s": {
+        "min": 1.932497,
+        "mean": 1.9436375,
+        "max": 1.954778
+      }
+    },
+    {
+      "id": "api-window3",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 3,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 1,
+        "sender_priority": 1,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 3,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 1,
+          "fault_us": 0,
+          "sender_prio": 1
+        },
+        {
+          "record": "LATENCY",
+          "min": 1931,
+          "p50": 2772,
+          "p90": 3032,
+          "p99": 3879,
+          "max": 3879
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 780452,
+          "mbps": 2.687099,
+          "bad": 0,
+          "sent": 1058,
+          "delivered": 1058,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 770818,
+          "mbps": 2.720684,
+          "bad": 0,
+          "sent": 1061,
+          "delivered": 1061,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/api-window3.log",
+      "transcript_sha256": "dc4b668affad6be76e38a42092ef926511842fb794a7069f0b2931575b7c9fe8",
+      "accepted_payload_mbit_s": {
+        "min": 2.687099,
+        "mean": 2.7038915,
+        "max": 2.720684
+      }
+    },
+    {
+      "id": "api-window4",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 4,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 1,
+        "sender_priority": 1,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 4,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 1,
+          "fault_us": 0,
+          "sender_prio": 1
+        },
+        {
+          "record": "LATENCY",
+          "min": 1995,
+          "p50": 2742,
+          "p90": 3012,
+          "p99": 4149,
+          "max": 4149
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 632494,
+          "mbps": 3.315687,
+          "bad": 0,
+          "sent": 1058,
+          "delivered": 1058,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 625779,
+          "mbps": 3.351266,
+          "bad": 0,
+          "sent": 1059,
+          "delivered": 1059,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/api-window4.log",
+      "transcript_sha256": "0066a377523f0c0779a452b4e5a88f28b0d52bee22db4d4f55a72b2efe2dca65",
+      "accepted_payload_mbit_s": {
+        "min": 3.315687,
+        "mean": 3.3334764999999997,
+        "max": 3.351266
+      }
+    },
+    {
+      "id": "api-window5",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 5,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 1,
+        "sender_priority": 1,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 5,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 1,
+          "fault_us": 0,
+          "sender_prio": 1
+        },
+        {
+          "record": "LATENCY",
+          "min": 1985,
+          "p50": 2707,
+          "p90": 2999,
+          "p99": 3123,
+          "max": 3123
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 573550,
+          "mbps": 3.656441,
+          "bad": 0,
+          "sent": 1059,
+          "delivered": 1058,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 565600,
+          "mbps": 3.707836,
+          "bad": 0,
+          "sent": 1059,
+          "delivered": 1059,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/api-window5.log",
+      "transcript_sha256": "e88f222189a2e8d5a3ec99d3c0a1b0e2d4bdcc4c5fca45d8fda47865a42009df",
+      "accepted_payload_mbit_s": {
+        "min": 3.656441,
+        "mean": 3.6821384999999998,
+        "max": 3.707836
+      }
+    },
+    {
+      "id": "baseline-app0",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 6,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 0,
+        "sender_priority": 0,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "b84c590ab64b7d158a2b86028e5f13cad95bd189479ecc32854e8815e140492a",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 0,
+          "fault_us": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 2694,
+          "p50": 3524,
+          "p90": 3991,
+          "p99": 4350,
+          "max": 4350
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 1486383,
+          "mbps": 1.41091,
+          "bad": 0,
+          "sent": 1119,
+          "delivered": 1119,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 1456829,
+          "mbps": 1.439532,
+          "bad": 0,
+          "sent": 1108,
+          "delivered": 1108,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/baseline-app0.log",
+      "transcript_sha256": "e498839486d67215956bee48a5b738b2028f743d958a7666e26196d314cc5a5a",
+      "accepted_payload_mbit_s": {
+        "min": 1.41091,
+        "mean": 1.425221,
+        "max": 1.439532
+      }
+    },
+    {
+      "id": "baseline-app1",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 6,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 1,
+        "sender_priority": 0,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "b84c590ab64b7d158a2b86028e5f13cad95bd189479ecc32854e8815e140492a",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 1,
+          "fault_us": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 2738,
+          "p50": 3536,
+          "p90": 3983,
+          "p99": 4414,
+          "max": 4414
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 1535699,
+          "mbps": 1.365601,
+          "bad": 0,
+          "sent": 1094,
+          "delivered": 1094,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 1563243,
+          "mbps": 1.341539,
+          "bad": 0,
+          "sent": 1090,
+          "delivered": 1090,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/baseline-app1.log",
+      "transcript_sha256": "c641a4a3500153a27a6287f937c0d5ff3c626c9786f3947412ea27a1f46dad2b",
+      "accepted_payload_mbit_s": {
+        "min": 1.341539,
+        "mean": 1.35357,
+        "max": 1.365601
+      }
+    },
+    {
+      "id": "baseline-app3",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 6,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 3,
+        "sender_priority": 0,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "b84c590ab64b7d158a2b86028e5f13cad95bd189479ecc32854e8815e140492a",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 3,
+          "fault_us": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 2709,
+          "p50": 3625,
+          "p90": 3986,
+          "p99": 4442,
+          "max": 4442
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 1574597,
+          "mbps": 1.331866,
+          "bad": 0,
+          "sent": 1083,
+          "delivered": 1083,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 1567484,
+          "mbps": 1.33791,
+          "bad": 0,
+          "sent": 1086,
+          "delivered": 1086,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/baseline-app3.log",
+      "transcript_sha256": "ddf05a6843ffb9add565f57f1b52c296b5e2f469bda4518f82e386736e5e0856",
+      "accepted_payload_mbit_s": {
+        "min": 1.331866,
+        "mean": 1.3348879999999999,
+        "max": 1.33791
+      }
+    },
+    {
+      "id": "baseline-app5",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 6,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 5,
+        "sender_priority": 0,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "b84c590ab64b7d158a2b86028e5f13cad95bd189479ecc32854e8815e140492a",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 5,
+          "fault_us": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 2714,
+          "p50": 3559,
+          "p90": 3986,
+          "p99": 4477,
+          "max": 4477
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 1549543,
+          "mbps": 1.3534,
+          "bad": 0,
+          "sent": 1080,
+          "delivered": 1080,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 1550358,
+          "mbps": 1.352689,
+          "bad": 0,
+          "sent": 1099,
+          "delivered": 1099,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/baseline-app5.log",
+      "transcript_sha256": "59c5064e5858dcff089298fd8959184077e33901e24e6485d83ab6d1be6d9c3e",
+      "accepted_payload_mbit_s": {
+        "min": 1.352689,
+        "mean": 1.3530445,
+        "max": 1.3534
+      }
+    },
+    {
+      "id": "baseline-p6",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 6,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 6,
+        "sender_priority": 0,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "b84c590ab64b7d158a2b86028e5f13cad95bd189479ecc32854e8815e140492a",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 6,
+          "fault_us": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 2111,
+          "p50": 2767,
+          "p90": 3153,
+          "p99": 4198,
+          "max": 4198
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 539624,
+          "mbps": 3.886321,
+          "bad": 0,
+          "sent": 1060,
+          "delivered": 1058,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 530639,
+          "mbps": 3.952126,
+          "bad": 0,
+          "sent": 1059,
+          "delivered": 1059,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/baseline-p6.log",
+      "transcript_sha256": "f730b0e202acdf00ac530ccd519365a06be30fcc8dd192f3dcc8543d2978d864",
+      "accepted_payload_mbit_s": {
+        "min": 3.886321,
+        "mean": 3.9192235,
+        "max": 3.952126
+      }
+    },
+    {
+      "id": "baseline-window2",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 2,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 6,
+        "sender_priority": 0,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "b84c590ab64b7d158a2b86028e5f13cad95bd189479ecc32854e8815e140492a",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 2,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 6,
+          "fault_us": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 1939,
+          "p50": 2757,
+          "p90": 3093,
+          "p99": 4110,
+          "max": 4110
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 1114556,
+          "mbps": 1.881603,
+          "bad": 0,
+          "sent": 1058,
+          "delivered": 1058,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 1111727,
+          "mbps": 1.886391,
+          "bad": 0,
+          "sent": 1059,
+          "delivered": 1059,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/baseline-window2.log",
+      "transcript_sha256": "003f6f258c372da7246bc5b548f7a6033ccea5b8328b60eb4397d812472b938d",
+      "accepted_payload_mbit_s": {
+        "min": 1.881603,
+        "mean": 1.883997,
+        "max": 1.886391
+      }
+    },
+    {
+      "id": "baseline-window3",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 3,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 6,
+        "sender_priority": 0,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "b84c590ab64b7d158a2b86028e5f13cad95bd189479ecc32854e8815e140492a",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 3,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 6,
+          "fault_us": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 2122,
+          "p50": 2755,
+          "p90": 3051,
+          "p99": 4060,
+          "max": 4060
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 784607,
+          "mbps": 2.672869,
+          "bad": 0,
+          "sent": 1058,
+          "delivered": 1058,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 795782,
+          "mbps": 2.635335,
+          "bad": 0,
+          "sent": 1059,
+          "delivered": 1059,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/baseline-window3.log",
+      "transcript_sha256": "0ebdd2a5a35bca7cf79b8722194ca1b8d2c66313b9937ae113c9c8b2b9bedaf5",
+      "accepted_payload_mbit_s": {
+        "min": 2.635335,
+        "mean": 2.654102,
+        "max": 2.672869
+      }
+    },
+    {
+      "id": "baseline-window4",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 4,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 6,
+        "sender_priority": 0,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "b84c590ab64b7d158a2b86028e5f13cad95bd189479ecc32854e8815e140492a",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 4,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 6,
+          "fault_us": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 2021,
+          "p50": 2773,
+          "p90": 3072,
+          "p99": 3667,
+          "max": 3667
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 631369,
+          "mbps": 3.321595,
+          "bad": 0,
+          "sent": 1058,
+          "delivered": 1058,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 617891,
+          "mbps": 3.394048,
+          "bad": 0,
+          "sent": 1061,
+          "delivered": 1060,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/baseline-window4.log",
+      "transcript_sha256": "25afd8975b7204fddda55caf79c29fef02a0c068e1f3f42f7f4f8e282c0c75b7",
+      "accepted_payload_mbit_s": {
+        "min": 3.321595,
+        "mean": 3.3578215,
+        "max": 3.394048
+      }
+    },
+    {
+      "id": "baseline-window5",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 5,
+        "bytes": 262144,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 6,
+        "sender_priority": 0,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "b84c590ab64b7d158a2b86028e5f13cad95bd189479ecc32854e8815e140492a",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 5,
+          "mode": 10,
+          "bytes": 262144,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 6,
+          "fault_us": 0
+        },
+        {
+          "record": "LATENCY",
+          "min": 2142,
+          "p50": 2805,
+          "p90": 3118,
+          "p99": 3621,
+          "max": 3621
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 262144,
+          "us": 564077,
+          "mbps": 3.717847,
+          "bad": 0,
+          "sent": 1058,
+          "delivered": 1058,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 262144,
+          "us": 573307,
+          "mbps": 3.657991,
+          "bad": 0,
+          "sent": 1059,
+          "delivered": 1059,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/baseline-window5.log",
+      "transcript_sha256": "092886b65ae60e418c0f17bbf76f26d1697d9ab39eb7e6bdafcb9a3a1de172e2",
+      "accepted_payload_mbit_s": {
+        "min": 3.657991,
+        "mean": 3.687919,
+        "max": 3.717847
+      }
+    },
+    {
+      "id": "confirm-priority1",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 6,
+        "bytes": 1048576,
+        "samples": 3,
+        "peri_clock": "sys",
+        "application_priority": 1,
+        "sender_priority": 1,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 1048576,
+          "repeats": 3,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 1,
+          "fault_us": 0,
+          "sender_prio": 1
+        },
+        {
+          "record": "LATENCY",
+          "min": 1976,
+          "p50": 2681,
+          "p90": 3042,
+          "p99": 3670,
+          "max": 3670
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2251839,
+          "mbps": 3.725225,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2262403,
+          "mbps": 3.707831,
+          "bad": 0,
+          "sent": 4254,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2256144,
+          "mbps": 3.718117,
+          "bad": 0,
+          "sent": 4267,
+          "delivered": 4230,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/confirm-priority1.log",
+      "transcript_sha256": "e29f278ae13ed7638c79841879d34e4c9779ee7517e60deb39b71b9e4b23177b",
+      "accepted_payload_mbit_s": {
+        "min": 3.707831,
+        "mean": 3.717057666666667,
+        "max": 3.725225
+      }
+    },
+    {
+      "id": "confirm-priority2",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 6,
+        "bytes": 1048576,
+        "samples": 3,
+        "peri_clock": "sys",
+        "application_priority": 2,
+        "sender_priority": 2,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 1048576,
+          "repeats": 3,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 2,
+          "fault_us": 0,
+          "sender_prio": 2
+        },
+        {
+          "record": "LATENCY",
+          "min": 1979,
+          "p50": 2713,
+          "p90": 3047,
+          "p99": 4049,
+          "max": 4049
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2283124,
+          "mbps": 3.67418,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2245167,
+          "mbps": 3.736296,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2219065,
+          "mbps": 3.780244,
+          "bad": 0,
+          "sent": 4243,
+          "delivered": 4230,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/confirm-priority2.log",
+      "transcript_sha256": "78ccfae865e4452e492b5368b2c13069f3be31dba330be405f18355584238e7e",
+      "accepted_payload_mbit_s": {
+        "min": 3.67418,
+        "mean": 3.73024,
+        "max": 3.780244
+      }
+    },
+    {
+      "id": "confirm-priority3",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 6,
+        "bytes": 1048576,
+        "samples": 3,
+        "peri_clock": "sys",
+        "application_priority": 3,
+        "sender_priority": 3,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 1048576,
+          "repeats": 3,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 3,
+          "fault_us": 0,
+          "sender_prio": 3
+        },
+        {
+          "record": "LATENCY",
+          "min": 2001,
+          "p50": 2731,
+          "p90": 3021,
+          "p99": 3511,
+          "max": 3511
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2256023,
+          "mbps": 3.718317,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2266796,
+          "mbps": 3.700645,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2245174,
+          "mbps": 3.736284,
+          "bad": 0,
+          "sent": 4230,
+          "delivered": 4230,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/confirm-priority3.log",
+      "transcript_sha256": "9d299dfccf04bc19876794759ba5aa88a5b20ea15db786f88f9e99f5bce42918",
+      "accepted_payload_mbit_s": {
+        "min": 3.700645,
+        "mean": 3.718415333333333,
+        "max": 3.736284
+      }
+    },
+    {
+      "id": "confirm-priority4",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 6,
+        "bytes": 1048576,
+        "samples": 3,
+        "peri_clock": "sys",
+        "application_priority": 4,
+        "sender_priority": 4,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 1048576,
+          "repeats": 3,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 4,
+          "fault_us": 0,
+          "sender_prio": 4
+        },
+        {
+          "record": "LATENCY",
+          "min": 1973,
+          "p50": 2643,
+          "p90": 3035,
+          "p99": 3834,
+          "max": 3834
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2247706,
+          "mbps": 3.732075,
+          "bad": 0,
+          "sent": 4273,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2252354,
+          "mbps": 3.724374,
+          "bad": 0,
+          "sent": 4264,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2257631,
+          "mbps": 3.715668,
+          "bad": 0,
+          "sent": 4273,
+          "delivered": 4230,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/confirm-priority4.log",
+      "transcript_sha256": "91b6c7a2545351692d68824dc72f81a583874321dff4d5cc6f1483fecddf4d88",
+      "accepted_payload_mbit_s": {
+        "min": 3.715668,
+        "mean": 3.724039,
+        "max": 3.732075
+      }
+    },
+    {
+      "id": "confirm-priority5",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 6,
+        "bytes": 1048576,
+        "samples": 3,
+        "peri_clock": "sys",
+        "application_priority": 5,
+        "sender_priority": 5,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 1048576,
+          "repeats": 3,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 5,
+          "fault_us": 0,
+          "sender_prio": 5
+        },
+        {
+          "record": "LATENCY",
+          "min": 1928,
+          "p50": 2707,
+          "p90": 3028,
+          "p99": 3508,
+          "max": 3508
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2250025,
+          "mbps": 3.728229,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2231739,
+          "mbps": 3.758776,
+          "bad": 0,
+          "sent": 4256,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2204445,
+          "mbps": 3.805315,
+          "bad": 0,
+          "sent": 4240,
+          "delivered": 4230,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/confirm-priority5.log",
+      "transcript_sha256": "d806bb508cef8bb138f0492bd44faa2551dbaa0a2e5f72e131fde576644bbbc2",
+      "accepted_payload_mbit_s": {
+        "min": 3.728229,
+        "mean": 3.7641066666666667,
+        "max": 3.805315
+      }
+    },
+    {
+      "id": "confirm-window5-console-race",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 5,
+        "bytes": 1048576,
+        "samples": 3,
+        "peri_clock": "sys",
+        "application_priority": 1,
+        "sender_priority": 1,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": false,
+      "rows": [],
+      "transcript": "2026-11-06-minimum/confirm-window5-console-race.log",
+      "transcript_sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "rejection": "Saved runner validation failed; printed rates are not accepted throughput."
+    },
+    {
+      "id": "confirm-window5-priority1",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 5,
+        "bytes": 1048576,
+        "samples": 3,
+        "peri_clock": "sys",
+        "application_priority": 1,
+        "sender_priority": 1,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 5,
+          "mode": 10,
+          "bytes": 1048576,
+          "repeats": 3,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 1,
+          "fault_us": 0,
+          "sender_prio": 1
+        },
+        {
+          "record": "LATENCY",
+          "min": 2000,
+          "p50": 2665,
+          "p90": 3016,
+          "p99": 3757,
+          "max": 3757
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2301276,
+          "mbps": 3.645199,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2303526,
+          "mbps": 3.641638,
+          "bad": 0,
+          "sent": 4241,
+          "delivered": 4230,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2333527,
+          "mbps": 3.594819,
+          "bad": 0,
+          "sent": 4265,
+          "delivered": 4230,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/confirm-window5-priority1.log",
+      "transcript_sha256": "7c436b3a9f02e3d0062e6ae7506cffec543ab8e548a95114e5f5453065093158",
+      "accepted_payload_mbit_s": {
+        "min": 3.594819,
+        "mean": 3.627218666666667,
+        "max": 3.645199
+      }
+    },
+    {
+      "id": "confirm-window5-priority6",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 5,
+        "bytes": 1048576,
+        "samples": 3,
+        "peri_clock": "sys",
+        "application_priority": 6,
+        "sender_priority": 6,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 5,
+          "mode": 10,
+          "bytes": 1048576,
+          "repeats": 3,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 6,
+          "fault_us": 0,
+          "sender_prio": 6
+        },
+        {
+          "record": "LATENCY",
+          "min": 2009,
+          "p50": 2738,
+          "p90": 3040,
+          "p99": 4101,
+          "max": 4101
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2286159,
+          "mbps": 3.669302,
+          "bad": 0,
+          "sent": 4241,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2289225,
+          "mbps": 3.664388,
+          "bad": 0,
+          "sent": 4230,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2274815,
+          "mbps": 3.6876,
+          "bad": 0,
+          "sent": 4252,
+          "delivered": 4230,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/confirm-window5-priority6.log",
+      "transcript_sha256": "eaa184793febb88e24a32709579f2b936fa08861bd52c3298d83d8a0cb07b40e",
+      "accepted_payload_mbit_s": {
+        "min": 3.664388,
+        "mean": 3.6737633333333335,
+        "max": 3.6876
+      }
+    },
+    {
+      "id": "final-actual-default-10mib",
+      "parameters": {
+        "mode": 0,
+        "chunk": 256,
+        "baud": 8312500,
+        "window_log2": 5,
+        "io_priority": 1,
+        "payload": 1048576,
+        "runs": 10
+      },
+      "firmware_sha256": "54dfd6f86802037621df27aa8570db8c11888a20d5aa5f39e6cb3a23c354e412",
+      "passed": true,
+      "rows": [
+        {
+          "record": "UART",
+          "actual_baud": 8312500
+        },
+        {
+          "record": "UART",
+          "actual_baud": 8312500
+        },
+        {
+          "record": "CONFIG",
+          "mode": 0,
+          "baud": 8312500,
+          "window_log2": 5,
+          "io_priority": 1,
+          "payload": 1048576,
+          "runs": 10,
+          "chunk": 256
+        },
+        {
+          "record": "SENDER",
+          "priority": 1,
+          "stack": 4096
+        },
+        {
+          "record": "BACKEND",
+          "cpu": 133000000,
+          "peri": 133000000,
+          "rx_ring": 8192,
+          "tx_ring": 8192,
+          "kind": "pico-dma"
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 1.815,
+          "p50": 2.576,
+          "p90": 2.871,
+          "p99": 2.984,
+          "max": 2.984
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1908172,
+          "mbps": 4.396149,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.028,
+          "p50": 2.64,
+          "p90": 2.881,
+          "p99": 3.704,
+          "max": 3.704
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1906757,
+          "mbps": 4.399411,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4243,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.002,
+          "p50": 2.655,
+          "p90": 2.91,
+          "p99": 3.687,
+          "max": 3.687
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1885406,
+          "mbps": 4.449232,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4230,
+          "delivered": 4230,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 1.967,
+          "p50": 2.649,
+          "p90": 2.887,
+          "p99": 3.168,
+          "max": 3.168
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1932551,
+          "mbps": 4.340692,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4236,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 1.817,
+          "p50": 2.624,
+          "p90": 2.884,
+          "p99": 3.746,
+          "max": 3.746
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1877286,
+          "mbps": 4.468476,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4231,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.063,
+          "p50": 2.648,
+          "p90": 2.881,
+          "p99": 3.585,
+          "max": 3.585
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1935673,
+          "mbps": 4.333691,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.063,
+          "p50": 2.617,
+          "p90": 2.888,
+          "p99": 3.691,
+          "max": 3.691
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1922638,
+          "mbps": 4.363072,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.009,
+          "p50": 2.6,
+          "p90": 2.868,
+          "p99": 3.089,
+          "max": 3.089
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1896405,
+          "mbps": 4.423426,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4232,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 1.88,
+          "p50": 2.581,
+          "p90": 2.912,
+          "p99": 3.734,
+          "max": 3.734
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1925579,
+          "mbps": 4.356408,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        },
+        {
+          "record": "LATENCY_MS",
+          "min": 2.022,
+          "p50": 2.584,
+          "p90": 2.878,
+          "p99": 2.968,
+          "max": 2.968
+        },
+        {
+          "record": "RESULT",
+          "bytes": 1048576,
+          "us": 1892254,
+          "mbps": 4.43313,
+          "bad": 0
+        },
+        {
+          "record": "PACKETS",
+          "local": "server",
+          "sent": 4229,
+          "delivered": 4229,
+          "received": 1
+        }
+      ],
+      "transcript": "2026-11-06-minimum/final-actual-default-10mib.log",
+      "transcript_sha256": "1b896fdb564b06b008a4c44582394e3937ee45539f3ee572174fdfa9bab352f8",
+      "accepted_payload_mbit_s": {
+        "min": 4.333691,
+        "mean": 4.3963687,
+        "max": 4.468476
+      },
+      "validation": "actual default sketch, finite byte/pattern validation, response EOF, worker stop and DONE"
+    },
+    {
+      "id": "final-integer-profile-3mib",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 5,
+        "bytes": 1048576,
+        "samples": 3,
+        "peri_clock": "sys",
+        "application_priority": 1,
+        "sender_priority": 1,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ac6ced0cda2b6e9e51ce2a4c434c0e517a3320605bb2844ead87948c345e6575",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 5,
+          "mode": 10,
+          "bytes": 1048576,
+          "repeats": 3,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 1,
+          "fault_us": 0,
+          "sender_prio": 1
+        },
+        {
+          "record": "LATENCY",
+          "min": 1869,
+          "p50": 2331,
+          "p90": 2901,
+          "p99": 3461,
+          "max": 3461
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2210396,
+          "mbps": 3.79507,
+          "bad": 0,
+          "sent": 4243,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2233292,
+          "mbps": 3.756163,
+          "bad": 0,
+          "sent": 4231,
+          "delivered": 4230,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2233636,
+          "mbps": 3.755584,
+          "bad": 0,
+          "sent": 4234,
+          "delivered": 4230,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/final-integer-profile-3mib.log",
+      "transcript_sha256": "32020733b2fe8e3c9c0f5ec5a48c03cc6d72a6ea9e0b837e7b4a537e5d82d0e7",
+      "accepted_payload_mbit_s": {
+        "min": 3.755584,
+        "mean": 3.768939,
+        "max": 3.79507
+      }
+    },
+    {
+      "id": "final-integer-receive-break",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 5,
+        "bytes": 1048576,
+        "samples": 2,
+        "peri_clock": "sys",
+        "application_priority": 1,
+        "sender_priority": 1,
+        "fault_us": 50000,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ac6ced0cda2b6e9e51ce2a4c434c0e517a3320605bb2844ead87948c345e6575",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 5,
+          "mode": 10,
+          "bytes": 1048576,
+          "repeats": 2,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 1,
+          "fault_us": 50000,
+          "sender_prio": 1
+        },
+        {
+          "record": "LATENCY",
+          "min": 1948,
+          "p50": 2340,
+          "p90": 2881,
+          "p99": 4113,
+          "max": 4113
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2225753,
+          "mbps": 3.768885,
+          "bad": 0,
+          "sent": 4377,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2166603,
+          "mbps": 3.871779,
+          "bad": 0,
+          "sent": 4232,
+          "delivered": 4230,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 1
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/final-integer-receive-break.log",
+      "transcript_sha256": "372b29b3c42634f30e147e77b3c36bc176976d2b07021e2023bd7e14f82f5ae8",
+      "accepted_payload_mbit_s": {
+        "min": 3.768885,
+        "mean": 3.820332,
+        "max": 3.871779
+      }
+    },
+    {
+      "id": "final-priority6-10mib",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 6,
+        "bytes": 1048576,
+        "samples": 10,
+        "peri_clock": "sys",
+        "application_priority": 6,
+        "sender_priority": 6,
+        "fault_us": 0,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 1048576,
+          "repeats": 10,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 6,
+          "fault_us": 0,
+          "sender_prio": 6
+        },
+        {
+          "record": "LATENCY",
+          "min": 1995,
+          "p50": 2617,
+          "p90": 3015,
+          "p99": 4096,
+          "max": 4096
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2245421,
+          "mbps": 3.735873,
+          "bad": 0,
+          "sent": 4229,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2253872,
+          "mbps": 3.721865,
+          "bad": 0,
+          "sent": 4233,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2236603,
+          "mbps": 3.750602,
+          "bad": 0,
+          "sent": 4273,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 3,
+          "bytes": 1048576,
+          "us": 2229736,
+          "mbps": 3.762153,
+          "bad": 0,
+          "sent": 4248,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 4,
+          "bytes": 1048576,
+          "us": 2232868,
+          "mbps": 3.756876,
+          "bad": 0,
+          "sent": 4243,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 5,
+          "bytes": 1048576,
+          "us": 2233811,
+          "mbps": 3.75529,
+          "bad": 0,
+          "sent": 4284,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 6,
+          "bytes": 1048576,
+          "us": 2230618,
+          "mbps": 3.760665,
+          "bad": 0,
+          "sent": 4230,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 7,
+          "bytes": 1048576,
+          "us": 2225071,
+          "mbps": 3.770041,
+          "bad": 0,
+          "sent": 4236,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 8,
+          "bytes": 1048576,
+          "us": 2257214,
+          "mbps": 3.716355,
+          "bad": 0,
+          "sent": 4275,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 9,
+          "bytes": 1048576,
+          "us": 2229246,
+          "mbps": 3.76298,
+          "bad": 0,
+          "sent": 4230,
+          "delivered": 4230,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 0
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/final-priority6-10mib.log",
+      "transcript_sha256": "80796514335c55accba4f9d302e4c0b28bd821f024b7048300a9854594d48a2f",
+      "accepted_payload_mbit_s": {
+        "min": 3.716355,
+        "mean": 3.74927,
+        "max": 3.770041
+      }
+    },
+    {
+      "id": "final-receive-break",
+      "parameters": {
+        "mode": "dma",
+        "baud": 8312500,
+        "fifo": 8192,
+        "window_log": 6,
+        "bytes": 1048576,
+        "samples": 3,
+        "peri_clock": "sys",
+        "application_priority": 6,
+        "sender_priority": 6,
+        "fault_us": 50000,
+        "timeout": 50.0,
+        "reset": true
+      },
+      "firmware_sha256": "ead4542cabe1a7199d990c26a0b4b390b055b3a7e66803de38e2a14596b10e2b",
+      "passed": true,
+      "rows": [
+        {
+          "record": "CONFIG",
+          "baud": 8312500,
+          "actual": 8312500,
+          "cpu": 133000000,
+          "peri": 133000000,
+          "fifo": 8192,
+          "window": 6,
+          "mode": 10,
+          "bytes": 1048576,
+          "repeats": 3,
+          "cores": 2,
+          "tick": 1000,
+          "app_prio": 6,
+          "fault_us": 50000,
+          "sender_prio": 6
+        },
+        {
+          "record": "LATENCY",
+          "min": 1999,
+          "p50": 2713,
+          "p90": 3022,
+          "p99": 3263,
+          "max": 3263
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 0,
+          "bytes": 1048576,
+          "us": 2268127,
+          "mbps": 3.698474,
+          "bad": 0,
+          "sent": 4419,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 1,
+          "bytes": 1048576,
+          "us": 2230081,
+          "mbps": 3.761571,
+          "bad": 0,
+          "sent": 4231,
+          "delivered": 4229,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "RESULT",
+          "kind": "link",
+          "sample": 2,
+          "bytes": 1048576,
+          "us": 2228686,
+          "mbps": 3.763925,
+          "bad": 0,
+          "sent": 4230,
+          "delivered": 4230,
+          "overflow_server": 0,
+          "overflow_client": 0
+        },
+        {
+          "record": "DMA",
+          "overruns1": 0,
+          "overruns2": 0,
+          "errors1": 0,
+          "errors2": 1
+        },
+        {
+          "record": "LIFECYCLE",
+          "idle_stop_and_reuse": "PASS"
+        }
+      ],
+      "transcript": "2026-11-06-minimum/final-receive-break.log",
+      "transcript_sha256": "6fb9c66b3ca624ff8c4ac208d53157a9195f78cf846690fa22bdd310bd1a66b7",
+      "accepted_payload_mbit_s": {
+        "min": 3.698474,
+        "mean": 3.7413233333333333,
+        "max": 3.763925
+      }
+    }
+  ]
+}

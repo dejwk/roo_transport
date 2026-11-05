@@ -35,18 +35,22 @@ def main():
     parser.add_argument("--samples", type=int, default=5)
     parser.add_argument("--peri-clock", choices=("usb", "sys"), default="sys")
     parser.add_argument("--application-priority", type=int, choices=range(7), default=6)
+    parser.add_argument("--sender-priority", type=int, choices=range(7), default=0,
+                        help="Sender worker priority; zero retains the library default")
     parser.add_argument("--fault-us", type=int, default=0)
     parser.add_argument("--timeout", type=float, default=120)
     parser.add_argument("--reset", action="store_true",
                         help="Reboot firmware waiting for a command or already DONE")
     args = parser.parse_args()
+    if args.sender_priority != 0 and args.mode != "dma":
+        parser.error("sender priority control requires dma mode")
     if args.bytes <= 0 or args.samples <= 0 or args.fault_us < 0:
         parser.error("byte/sample counts must be positive; fault duration nonnegative")
     if args.fault_us != 0 and (args.mode != "dma" or args.bytes < 65536):
         parser.error("fault injection requires DMA mode and at least 65536 bytes")
     params = [args.baud, args.fifo, args.window_log, MODES[args.mode], args.bytes,
               args.samples, int(args.peri_clock == "sys"), args.application_priority,
-              args.fault_us]
+              args.fault_us, args.sender_priority]
     if args.reset:
         with serial.Serial(args.port, 115200, timeout=.2) as port:
             port.dtr = True
@@ -81,6 +85,7 @@ def main():
                 "bytes": args.bytes, "repeats": args.samples,
                 "app_prio": args.application_priority, "fault_us": args.fault_us}
     valid &= all(config.get(key) == value for key, value in expected.items())
+    valid &= config.get("sender_prio", 0) == args.sender_priority
     if args.mode not in ("cpu-cost", "read-cost"):
         valid &= len(results) == args.samples
         valid &= all(row.get("bad") == 0 and row.get("bytes") == args.bytes

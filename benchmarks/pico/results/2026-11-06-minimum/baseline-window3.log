@@ -1,0 +1,12 @@
+READY reset=1
+CONFIG baud=8312500 actual=8312500 cpu=133000000 peri=133000000 fifo=8192 window=3 mode=10 bytes=262144 repeats=2 cores=2 tick=1000 app_prio=6 fault_us=0
+OWNER uart0_init_core=0 server_task_core=1
+CONNECTED
+LATENCY min=2122 p50=2755 p90=3051 p99=4060 max=4060
+REQUEST len=262144
+RESULT kind=link sample=0 bytes=262144 us=784607 mbps=2.672869 bad=0 sent=1058 delivered=1058 overflow_server=0 overflow_client=0
+REQUEST len=262144
+RESULT kind=link sample=1 bytes=262144 us=795782 mbps=2.635335 bad=0 sent=1059 delivered=1059 overflow_server=0 overflow_client=0
+DMA overruns1=0 overruns2=0 errors1=0 errors2=0
+LIFECYCLE idle_stop_and_reuse=PASS
+DONE

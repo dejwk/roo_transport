@@ -40,21 +40,25 @@ def main():
     parser.add_argument("--chunk", type=int, choices=range(256, 4097, 256), default=256)
     parser.add_argument("--split-irq", action="store_true",
                         help="Install UART1 IRQ on core0 and UART2 on the application core")
+    parser.add_argument("--sender-priority", type=int, choices=range(24), default=0,
+                        help="Sender worker priority; zero retains the library default")
     parser.add_argument("--fault-us", type=int, default=0,
                         help="Force UART2 RX low internally after 32768 delivered bytes")
     parser.add_argument("--timeout", type=float, default=120)
     parser.add_argument("--reset", action="store_true",
                         help="Reset the ESP32 through the USB-UART RTS/EN control line")
     args = parser.parse_args()
-    if args.bytes <= 0 or args.samples <= 0 or args.rx_buffer < 256 or args.tx_buffer < 0:
-        parser.error("positive byte/sample counts and RX>=256, TX>=0 are required")
+    if args.sender_priority != 0 and args.mode != "reliable":
+        parser.error("sender priority control requires reliable mode")
+    if args.bytes <= 0 or args.samples <= 0 or args.rx_buffer < 129 or args.tx_buffer < 0:
+        parser.error("positive byte/sample counts and RX>=129, TX>=0 are required")
     if args.fault_us < 0 or (args.fault_us != 0 and
                             (args.mode != "reliable" or args.bytes < 65536)):
         parser.error("fault injection requires reliable mode, bytes>=65536, fault-us>=0")
     params = [args.baud, args.rx_buffer, args.tx_buffer, args.window_log,
               MODES[args.mode], args.bytes, args.samples,
               args.application_priority, args.rx_fifo, args.rx_timeout, args.chunk,
-              int(args.split_irq), args.fault_us]
+              int(args.split_irq), args.fault_us, args.sender_priority]
     lines = []
     sent = False
     deadline = time.monotonic() + args.timeout
@@ -92,7 +96,7 @@ def main():
     record["parameters"] = {k: str(v) if isinstance(v, Path) else v
                             for k, v in record["parameters"].items()}
     for line in lines:
-        if line.startswith(("SYSTEM", "CONFIG", "RESULT", "LATENCY", "STARTUP_ERRORS", "ERRORS", "TRANSFER_ERRORS", "MISMATCH", "ERROR_TYPES", "FAULT", "LIFECYCLE")):
+        if line.startswith(("SYSTEM", "CONFIG", "RESULT", "LATENCY", "STARTUP_ERRORS", "ERRORS", "TRANSFER_ERRORS", "MISMATCH", "ERROR_TYPES", "FAULT", "SENDER_PRIORITY", "LIFECYCLE")):
             record["rows"].append({"record": line.split()[0], **fields(line)})
     results = [row for row in record["rows"] if row["record"] == "RESULT"]
     valid = sent and "DONE" in lines and len(results) == args.samples
@@ -104,6 +108,7 @@ def main():
                 "rx_timeout": args.rx_timeout, "chunk": args.chunk,
                 "split_irq": int(args.split_irq), "fault_us": args.fault_us}
     valid &= all(config.get(key) == value for key, value in expected.items())
+    valid &= config.get("sender_prio", 0) == args.sender_priority
     valid &= config.get("actual", 0) > 0 and config.get("actual2", 0) > 0
     valid &= all(row.get("bad") == 0 and row.get("bytes") == args.bytes
                  for row in results)

@@ -1,0 +1,22 @@
+ets Jul 29 2019 12:21:46
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:4640
+load:0x40078000,len:15660
+load:0x40080400,len:3164
+entry 0x4008059c
+CONFIG mode=0 baud=5000000 window_log2=3 io_priority=1 payload=1048576 runs=3
+SENDER priority=1 stack=4096
+BACKEND esp32-idf rx_buffer=256 tx_buffer=1024 rx_fifo=64 rx_timeout=1
+LATENCY_MS min=1.016000 p50=1.039000 p90=1.050000 p99=1.896000 max=1.896000
+RESULT bytes=1048576 us=2344458 mbps=3.578059 bad=0
+PACKETS local=server sent=4229 delivered=4229 received=1
+LATENCY_MS min=0.920000 p50=1.036000 p90=1.047000 p99=1.070000 max=1.070000
+RESULT bytes=1048576 us=2342188 mbps=3.581526 bad=0
+PACKETS local=server sent=4230 delivered=4229 received=1
+LATENCY_MS min=0.980000 p50=1.039000 p90=1.047000 p99=1.059000 max=1.059000
+RESULT bytes=1048576 us=2354508 mbps=3.562786 bad=0
+PACKETS local=server sent=4229 delivered=4229 received=1
+DONE
