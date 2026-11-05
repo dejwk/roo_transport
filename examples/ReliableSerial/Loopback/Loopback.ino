@@ -18,6 +18,10 @@ struct Emulator {
 
 #endif
 
+// This intentionally throttled small-message example keeps modest task
+// priorities. For bulk UART setup and native Pico DMA selection, see
+// ../Benchmark/README.md; use each example's own pin constants for its wiring.
+//
 // This example demonstrates a reliable serial link in loopback mode, where
 // the server and client are connected to each other using two different UARTs
 // on the same device. The server sends a sequence of messages to the client,

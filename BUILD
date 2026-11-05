@@ -219,6 +219,21 @@ cc_test(
 )
 
 cc_test(
+    name = "benchmark_example_test",
+    size = "small",
+    srcs = ["test/benchmark_example_test.cpp"],
+    linkstatic = 1,
+    target_compatible_with = [
+        "@roo_testing//roo_testing/platforms:arduino",
+        "@roo_testing//roo_testing/platforms:esp32",
+    ],
+    deps = [
+        "//examples/ReliableSerial/Benchmark:sketch_under_test",
+        "@roo_testing//:arduino_gtest_main",
+    ],
+)
+
+cc_test(
     name = "retry_backoff_test",
     size = "small",
     srcs = ["test/retry_backoff_test.cpp"],

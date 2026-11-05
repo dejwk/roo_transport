@@ -19,7 +19,9 @@ When tested over 7.5 meters of a cheap, unshielded, 4-wire cable, it still pulle
 
 A classic ESP32 single-board loopback also sustained 3.856 Mbit/s of useful payload at 5 Mbaud (about 99.5% of the ideal full-packet ceiling), using tuned RX FIFO margin and TX buffering. See the [ESP32 hardware benchmark](benchmarks/esp32/README.md) for the configuration, controlled comparisons, error/recovery checks and reproducible results.
 
-For RP2040 with Arduino-Pico FreeRTOS, the opt-in native DMA transport reaches about 3.9 Mbit/s on a single-board UART loopback. See the [Pico hardware benchmark](benchmarks/pico/README.md) for the backend API, exact configuration, diagnosis, validation and reproducible results.
+For RP2040 with Arduino-Pico FreeRTOS, the native DMA transport reached 4.65–4.74 Mbit/s of useful payload on a single-board UART loopback after reducing retry-computation overhead. See the [Pico hardware benchmark](benchmarks/pico/README.md) for the exact configuration, diagnosis and results.
+
+The [reliable serial benchmark example](examples/ReliableSerial/Benchmark/README.md) shows the UART, buffering and task configuration needed in applications. It automatically selects native DMA on supported RP2040 FreeRTOS builds, and documents lower-priority and smaller-window options measured on both boards.
 
 ## Host emulation
 
