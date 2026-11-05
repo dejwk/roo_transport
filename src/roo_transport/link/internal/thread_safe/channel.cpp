@@ -1,18 +1,22 @@
 #include "roo_transport/link/internal/thread_safe/compile_guard.h"
 #ifdef ROO_USE_THREADS
 
-#include <cmath>
+#include <cstdlib>
 
 #include "roo_transport/link/internal/protocol.h"
+#include "roo_transport/link/internal/retry_backoff.h"
 #include "roo_transport/link/internal/thread_safe/channel.h"
 
 #if (defined ESP32 || defined ROO_TESTING)
 #include "esp_random.h"
 #define RANDOM_INTEGER esp_random
+#define RANDOM_INTEGER_MAX UINT32_MAX
 #elif (defined ARDUINO_ARCH_RP2040)
 #define RANDOM_INTEGER rp2040.hwrand32
+#define RANDOM_INTEGER_MAX UINT32_MAX
 #else
 #define RANDOM_INTEGER rand
+#define RANDOM_INTEGER_MAX RAND_MAX
 #endif
 
 #if !defined(MLOG_roo_transport_reliable_channel_connection)
@@ -35,15 +39,8 @@ unsigned int ValidateBufferSizes(LinkBufferSize sendbuf,
 }
 
 roo_time::Duration Backoff(int retry_count) {
-  float min_delay_us = 1000.0f;     // 1ms
-  float max_delay_us = 1000000.0f;  // 1s
-  float delay = pow(1.33, retry_count) * min_delay_us;
-  if (delay > max_delay_us) {
-    delay = max_delay_us;
-  }
-  // Randomize by +=20%, to make unrelated retries spread more evenly in time.
-  delay += (float)delay * ((float)RANDOM_INTEGER() / RAND_MAX - 0.5f) * 0.4f;
-  return roo_time::Micros((uint64_t)delay);
+  return roo_time::Micros(internal::RetryBackoffMicros<RANDOM_INTEGER_MAX>(
+      1000, 1000000, retry_count, RANDOM_INTEGER()));
 }
 
 }  // namespace

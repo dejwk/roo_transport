@@ -217,3 +217,18 @@ cc_test(
         "@roo_threads",
     ],
 )
+
+cc_test(
+    name = "retry_backoff_test",
+    size = "small",
+    srcs = ["test/retry_backoff_test.cpp"],
+    linkstatic = 1,
+    target_compatible_with = select({
+        "@roo_testing//roo_testing/platforms:is_arduino": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        ":roo_transport",
+        "@roo_testing//:arduino_gtest_main",
+    ],
+)

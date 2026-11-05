@@ -1,16 +1,19 @@
 #include "roo_transport/link/internal/out_buffer.h"
 
-#include <cmath>
+#include <cstdlib>
 
 #include "roo_io/memory/load.h"
 #include "roo_io/memory/store.h"
 #include "roo_transport/link/internal/protocol.h"
+#include "roo_transport/link/internal/retry_backoff.h"
 
 #if (defined ESP32 || defined ROO_TESTING)
 #include "esp_random.h"
 #define RANDOM_INTEGER esp_random
+#define RANDOM_INTEGER_MAX UINT32_MAX
 #else
 #define RANDOM_INTEGER rand
+#define RANDOM_INTEGER_MAX RAND_MAX
 #endif
 
 namespace roo_transport {
@@ -30,15 +33,8 @@ void OutBuffer::init(SeqNum seq_id, bool control_bit) {
 namespace {
 
 roo_time::Duration Backoff(int retry_count) {
-  float min_delay_us = 5000.0f;    // 5ms
-  float max_delay_us = 200000.0f;  // 200ms
-  float delay = pow(1.33, retry_count) * min_delay_us;
-  if (delay > max_delay_us) {
-    delay = max_delay_us;
-  }
-  // Randomize by +=20%, to make unrelated retries spread more evenly in time.
-  delay += (float)delay * ((float)RANDOM_INTEGER() / RAND_MAX - 0.5f) * 0.4f;
-  return roo_time::Micros((uint64_t)delay);
+  return roo_time::Micros(RetryBackoffMicros<RANDOM_INTEGER_MAX>(
+      5000, 200000, retry_count, RANDOM_INTEGER()));
 }
 
 }  // namespace
