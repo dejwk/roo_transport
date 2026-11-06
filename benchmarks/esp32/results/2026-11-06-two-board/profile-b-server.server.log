@@ -1,0 +1,17 @@
+ets Jun  8 2016 00:22:57
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:4640
+load:0x40078000,len:15660
+load:0x40080400,len:3164
+entry 0x4008059c
+E (270) esp_core_dump_flash: Cor\uFFFD\x06\x18VW\x0b\uFFFDdata check failed:
+Calculated checksum='84eb2547'
+Image checksum='ffffffff'
+READY role=server
+SYSTEM role=server chip=ESP32-D0WDQ6 revision=101 sdk=v5.5.2-729-g87912cd291 cpu=240000000 apb=80000000
+CONFIG role=server baud=5000000 actual=5000000 tx=4 rx=2 window=3 bytes=1048576 runs=10 latency_samples=100 chunk=256 app_prio=1 sender_prio=1 rxbuf=256 txbuf=1024 rx_fifo=64 rx_timeout=1
+LIFECYCLE role=server stream_eof_and_stop=PASS
+DONE role=server

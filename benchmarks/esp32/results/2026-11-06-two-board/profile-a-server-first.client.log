@@ -1,0 +1,37 @@
+ets Jun  8 2016 00:22:57
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:4640
+load:0x40078000,len:15660
+load:0x40080400,len:3164
+entry 0x4008059c
+E (271) esp_core_dump_flash: Core\x00\x18VW\x0b\uFFFDdata check failed:
+Calculated checksum='84eb2547'
+Image checksum='ffffffff'
+READY role=client
+SYSTEM role=client chip=ESP32-D0WDQ6 revision=101 sdk=v5.5.2-729-g87912cd291 cpu=240000000 apb=80000000
+CONFIG role=client baud=5000000 actual=5000000 tx=4 rx=2 window=3 bytes=1048576 runs=10 latency_samples=100 chunk=256 app_prio=1 sender_prio=1 rxbuf=256 txbuf=1024 rx_fifo=64 rx_timeout=1
+LATENCY role=client min_ms=0.509000 p50_ms=0.560000 p90_ms=0.600000 p99_ms=1.596000 max_ms=1.596000
+RESULT role=client sample=0 bytes=1048576 us=2188703 mbps=3.832684 bad=0
+LATENCY role=client min_ms=0.531000 p50_ms=0.555000 p90_ms=0.568000 p99_ms=0.738000 max_ms=0.738000
+RESULT role=client sample=1 bytes=1048576 us=2188016 mbps=3.833888 bad=0
+LATENCY role=client min_ms=0.539000 p50_ms=0.555000 p90_ms=0.592000 p99_ms=0.736000 max_ms=0.736000
+RESULT role=client sample=2 bytes=1048576 us=2187710 mbps=3.834424 bad=0
+LATENCY role=client min_ms=0.516000 p50_ms=0.555000 p90_ms=0.576000 p99_ms=0.742000 max_ms=0.742000
+RESULT role=client sample=3 bytes=1048576 us=2189465 mbps=3.831351 bad=0
+LATENCY role=client min_ms=0.541000 p50_ms=0.554000 p90_ms=0.576000 p99_ms=0.739000 max_ms=0.739000
+RESULT role=client sample=4 bytes=1048576 us=2188514 mbps=3.833015 bad=0
+LATENCY role=client min_ms=0.540000 p50_ms=0.554000 p90_ms=0.576000 p99_ms=0.739000 max_ms=0.739000
+RESULT role=client sample=5 bytes=1048576 us=2188365 mbps=3.833276 bad=0
+LATENCY role=client min_ms=0.538000 p50_ms=0.553000 p90_ms=0.571000 p99_ms=0.752000 max_ms=0.752000
+RESULT role=client sample=6 bytes=1048576 us=2188562 mbps=3.832931 bad=0
+LATENCY role=client min_ms=0.536000 p50_ms=0.554000 p90_ms=0.594000 p99_ms=0.750000 max_ms=0.750000
+RESULT role=client sample=7 bytes=1048576 us=2188860 mbps=3.832410 bad=0
+LATENCY role=client min_ms=0.535000 p50_ms=0.553000 p90_ms=0.588000 p99_ms=0.747000 max_ms=0.747000
+RESULT role=client sample=8 bytes=1048576 us=2188001 mbps=3.833914 bad=0
+LATENCY role=client min_ms=0.534000 p50_ms=0.555000 p90_ms=0.569000 p99_ms=0.750000 max_ms=0.750000
+RESULT role=client sample=9 bytes=1048576 us=2188378 mbps=3.833254 bad=0
+LIFECYCLE role=client stream_eof_and_stop=PASS
+DONE role=client

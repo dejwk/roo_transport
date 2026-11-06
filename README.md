@@ -17,22 +17,23 @@ shows UART setup, latency measurement and bulk transfer.
 
 ## Performance
 
-Get about **3.82 Mbit/s of useful payload on ESP32** and up to **4.74 Mbit/s
+Get about **3.83 Mbit/s of useful payload between two ESP32s** and up to **4.74 Mbit/s
 on RP2040**, at normal CPU clocks. These are delivered and validated application
 bytes, with the link handling integrity checks, flow control and retransmission.
 
-On classic ESP32, that uses **95.5% of the UART's theoretical raw payload
-bandwidth**: 5 Mbaud with 8N1 framing carries at most 4 Mbit/s of byte data.
+On classic ESP32, the two-board mean uses **95.8% of the UART's theoretical
+raw payload bandwidth**: 5 Mbaud with 8N1 framing carries at most 4 Mbit/s of byte data.
 Accounting for protocol framing, the ideal full-frame payload ceiling is
-3.875 Mbit/s; the measured throughput reaches **98.5% of that ceiling**.
+3.875 Mbit/s; the measured throughput reaches **98.9% of that ceiling**.
 
-Measured single-board loopback configurations include:
+Measured short-wire configurations include:
 
-| Platform | UART baud | Window per direction | Application/sender priority | Payload Mbit/s |
-| --- | ---: | ---: | ---: | ---: |
-| Classic ESP32, Arduino UART backend | 5,000,000 | 2 KiB | 1/1 | 3.81–3.83 |
-| RP2040, native DMA backend | 8,312,500 | 8 KiB | 1/1 | 4.33–4.47 |
-| RP2040, native DMA backend | 8,312,500 | 16 KiB | 6/6 | 4.65–4.74 |
+| Platform | Topology | UART baud | Window per direction | Application/sender priority | Payload Mbit/s |
+| --- | --- | ---: | ---: | ---: | ---: |
+| Classic ESP32, Arduino UART backend | Two boards | 5,000,000 | 2 KiB | 1/1 | **3.83** |
+| Classic ESP32, Arduino UART backend | One-board loopback | 5,000,000 | 2 KiB | 1/1 | 3.81–3.83 |
+| RP2040, native DMA backend | One-board loopback | 8,312,500 | 8 KiB | 1/1 | 4.33–4.47 |
+| RP2040, native DMA backend | One-board loopback | 8,312,500 | 16 KiB | 6/6 | 4.65–4.74 |
 
 These rates count delivered and validated payload bytes. UART framing and
 protocol overhead use additional bandwidth. The ESP32 and Pico guides describe
@@ -41,9 +42,11 @@ the complete [ESP32 configuration](benchmarks/esp32/README.md) and
 workloads and measurement records. Actual performance depends on these settings
 and the application's scheduling and traffic.
 
-Two-board ESP32 measurements include about 3.4 Mbit/s with short wires and
-2.5 Mbit/s over 7.5 meters of inexpensive, unshielded cable. Cable length and
-signal quality affect retransmission overhead and latency.
+The two-board ESP32 profile sustains 30 checked 1 MiB transfers across repeated
+boots and both payload directions, with **0.553–0.560 ms median round-trip
+latency per batch**. A separate 7.5-meter unshielded-cable measurement delivers
+about 2.5 Mbit/s. Cable length and signal quality affect retransmission overhead
+and latency.
 
 The benchmark example selects native DMA automatically on supported RP2040
 Arduino-Pico FreeRTOS builds. Its mode, workload and platform settings are
