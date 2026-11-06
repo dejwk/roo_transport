@@ -1,144 +1,156 @@
-#ifdef ROO_TESTING
-
-// This section is intended for testing the example on Linux. You can disregard
-// it when analyzing the example itself - just scroll down to the #endif.
-
-#include "roo_testing/buses/uart/fake_uart.h"
-#include "roo_testing/microcontrollers/esp32/fake_esp32.h"
-
-struct Emulator {
-  FakeUartCable cable;
-
-  Emulator() {
-    auto& board = FakeEsp32();
-    board.attachUartDevice(cable.end_a(), 27, 14);
-    board.attachUartDevice(cable.end_b(), 25, 26);
-  }
-} emulator;
-
-#endif
-
-// This intentionally throttled small-message example keeps modest task
-// priorities. For bulk UART setup and native Pico DMA selection, see
-// ../Benchmark/README.md; use each example's own pin constants for its wiring.
+// Send small structured messages reliably between two UARTs on one board.
+// Cross kPinServerTx to kPinClientRx, and kPinClientTx to kPinServerRx with
+// jumper wires. The server writes messages; the client reads the same fields
+// in the same order. Both run concurrently because stream reads can block.
 //
-// This example demonstrates a reliable serial link in loopback mode, where
-// the server and client are connected to each other using two different UARTs
-// on the same device. The server sends a sequence of messages to the client,
-// which receives and prints them to the standard output.
-//
-// Important: to run this example, you need to connect the TX and RX pins of the
-// two UARTs to each other using jumper wires. The pin numbers are defined by
-// the constants kPinServerTx, kPinServerRx, kPinClientTx, and
-// kPinClientRx below. Make sure to cross the wires, i.e. to connect
-// kPinServerTx with kPinClientRx, and kPinServerRx with kPinClientTx.
+// Edit the constants below to change the wiring or pace. This example favors
+// clarity over bulk throughput; see ../Benchmark/README.md for the bulk
+// example.
+
+#include <Arduino.h>
+
+#include <cstddef>
+#include <cstdint>
+#include <string>
 
 #include "roo_io.h"
 #include "roo_io/data/input_stream_reader.h"
 #include "roo_io/data/output_stream_writer.h"
+#include "roo_threads.h"
 #include "roo_transport.h"
 #include "roo_transport/link/arduino/reliable_serial.h"
 
 using namespace roo_transport;
 
-#if defined(ESP_PLATFORM)
+static constexpr uint32_t kMessageIntervalMs = 2;
+static constexpr uint32_t kPrintEveryMessages = 1000;
+static constexpr int kServerPriority = 1;
 
-static const int kPinServerTx = 27;
-static const int kPinServerRx = 14;
-static const int kPinClientTx = 25;
-static const int kPinClientRx = 26;
+// The UART setup is the only platform-dependent part of the message exchange.
+// Initialize both UARTs before starting either application thread.
+#if defined(ESP32) || defined(ESP_PLATFORM)
 
-static const uint32_t baud_rate = 5000000;
+static constexpr int kPinServerTx = 27;
+static constexpr int kPinServerRx = 14;
+static constexpr int kPinClientTx = 25;
+static constexpr int kPinClientRx = 26;
+static constexpr uint32_t kBaudRate = 5000000;
+static constexpr size_t kRxBufferSize = 4096;
+
+void ConfigureUarts() {
+  Serial1.setRxBufferSize(kRxBufferSize);
+  Serial1.begin(kBaudRate, SERIAL_8N1, kPinServerRx, kPinServerTx);
+  Serial2.setRxBufferSize(kRxBufferSize);
+  Serial2.begin(kBaudRate, SERIAL_8N1, kPinClientRx, kPinClientTx);
+}
 
 #elif defined(ARDUINO_ARCH_RP2040)
 
-static const int kPinServerTx = 12;
-static const int kPinServerRx = 13;
-static const int kPinClientTx = 4;
-static const int kPinClientRx = 5;
+static constexpr int kPinServerTx = 12;
+static constexpr int kPinServerRx = 13;
+static constexpr int kPinClientTx = 4;
+static constexpr int kPinClientRx = 5;
+static constexpr uint32_t kBaudRate = 115200;
+static constexpr size_t kRxBufferSize = 1024;
 
-static const uint32_t baud_rate = 115200;
+void ConfigureUarts() {
+  Serial1.setPinout(kPinServerTx, kPinServerRx);
+  Serial1.setFIFOSize(kRxBufferSize);
+  Serial1.begin(kBaudRate, SERIAL_8N1);
+  Serial2.setPinout(kPinClientTx, kPinClientRx);
+  Serial2.setFIFOSize(kRxBufferSize);
+  Serial2.begin(kBaudRate, SERIAL_8N1);
+}
 
 #else
 #error "Unsupported platform"
 #endif
 
+#ifdef ROO_TESTING
+// Host emulation replaces the jumper wires with a byte cable. Skip this
+// section when reading the example for a physical board.
+#include "roo_testing/buses/uart/fake_uart.h"
+#include "roo_testing/microcontrollers/esp32/fake_esp32.h"
+
+/// Supplies the physical loopback connection in host emulation.
+struct Emulator {
+  /// Connects the emulated UARTs using the pin choices above.
+  Emulator() {
+    FakeEsp32().attachUartDevice(cable.end_a(), kPinServerTx, kPinServerRx);
+    FakeEsp32().attachUartDevice(cable.end_b(), kPinClientTx, kPinClientRx);
+  }
+
+  FakeUartCable cable;
+} emulator;
+#endif
+
 roo::thread server_thread;
 
-// ReliableSerial1 and ReliableSerial2 are wrappers for Serial1 and Serial2,
-// accordingly, that implement a reliable transport on top the underlying UART
-// connection.
+// These wrappers add framing, acknowledgments and retransmission to Serial1
+// and Serial2. Applications exchange an ordered byte stream through the Link.
 ReliableSerial1 reliable_serial1;
 ReliableSerial2 reliable_serial2;
 
-void server() {
+// Sends a sequence number followed by a string for each message.
+void RunServer() {
   LOG(INFO) << "Server connecting...";
-#if defined(ESP_PLATFORM)
-  Serial1.setRxBufferSize(4096);
-  Serial1.begin(baud_rate, SERIAL_8N1, kPinServerRx, kPinServerTx);
-#elif defined(ARDUINO_ARCH_RP2040)
-  Serial1.setPinout(kPinServerTx, kPinServerRx);
-  Serial1.setFIFOSize(1024);
-  Serial1.begin(baud_rate, SERIAL_8N1);
-#endif
-  reliable_serial1.begin();
   LinkStream link = reliable_serial1.connectOrDie();
   LOG(INFO) << "Server connected.";
 
-  roo_io::OutputStreamWriter serial1_out(link.out());
-  uint32_t i = 0;
+  roo_io::OutputStreamWriter out(link.out());
+  uint32_t sequence = 0;
   while (true) {
-    serial1_out.writeBeU32(i++);
-    serial1_out.writeString("Hello, world!\n");
-    serial1_out.flush();
-    // Throttle (to 200 messages per second, max) to avoid starving other
-    // threads, particularly in the loopback mode.
-    delay(2);
+    // Specify the integer's byte order explicitly. Strings carry their length,
+    // so the receiver knows where the next message starts without a delimiter.
+    out.writeBeU32(sequence++);
+    out.writeString("Hello, world!\n");
+    // Release this small message for transmission without waiting to fill a
+    // transport packet.
+    out.flush();
+    // Pace greetings and give other tasks time to run. This delay is deliberate
+    // for a readable message demo; a bulk sender would keep writing instead.
+    delay(kMessageIntervalMs);
   }
 }
 
-// Start the server in a separate task thread, so that it runs concurrently with
-// the client (which executes in the main loop).
-void startServer() {
+// The server must run separately: the client blocks while waiting for bytes.
+void StartServer() {
   roo::thread::attributes attrs;
   attrs.set_name("server");
-  // Use a reasonably low priority to avoid starving the (receiving) client
-  // thread in the loopback mode.
-  attrs.set_priority(1);
-  server_thread = roo::thread(attrs, &server);
+  // Keep application work at a modest priority so the receiver can progress.
+  attrs.set_priority(kServerPriority);
+  server_thread = roo::thread(attrs, RunServer);
 }
 
-void client() {
+// Decodes exactly the fields written by RunServer(), in the same order.
+void RunClient() {
   LOG(INFO) << "Client connecting...";
-#if defined(ESP_PLATFORM)
-  Serial2.setRxBufferSize(4096);
-  Serial2.begin(baud_rate, SERIAL_8N1, kPinClientRx, kPinClientTx);
-#elif defined(ARDUINO_ARCH_RP2040)
-  Serial2.setPinout(kPinClientTx, kPinClientRx);
-  Serial2.setFIFOSize(1024);
-  Serial2.begin(baud_rate, SERIAL_8N1);
-#endif
-  reliable_serial2.begin();
   LinkStream link = reliable_serial2.connectOrDie();
   CHECK_EQ(link.status(), LinkStatus::kConnected);
   LOG(INFO) << "Client connected.";
 
-  roo_io::InputStreamReader serial2_in(link.in());
+  roo_io::InputStreamReader in(link.in());
   while (true) {
-    uint32_t idx = serial2_in.readBeU32();
-    std::string msg = serial2_in.readString();
-    if ((idx % 1000) == 0) {
-      // Print one in every 1000 messages to avoid flooding the output.
-      LOG(INFO) << "Received " << idx << ": " << msg;
+    // Reads wait for complete values even when UART packets arrive in pieces.
+    const uint32_t sequence = in.readBeU32();
+    const std::string message = in.readString();
+    if (sequence % kPrintEveryMessages == 0) {
+      // Print only occasional messages so console output does not dominate.
+      LOG(INFO) << "Received " << sequence << ": " << message;
     }
   }
 }
 
 void setup() {
   Serial.begin(115200);
-  startServer();
-  client();
+  ConfigureUarts();
+  // Start both transports on the UART initialization core. Application threads
+  // can then connect and exchange data without configuring hardware themselves.
+  reliable_serial1.begin();
+  reliable_serial2.begin();
+  StartServer();
+  RunClient();
 }
 
-// Never reached.
+// RunClient() continues in setup(), so Arduino never reaches loop().
 void loop() {}
