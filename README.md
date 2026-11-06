@@ -1,9 +1,10 @@
 # roo_transport
 
-roo_transport provides reliable bidirectional byte streams over UART, framed
-messaging, and RPC for microcontrollers. A reliable link handles packet framing,
-integrity checks, acknowledgments and retransmission so applications can exchange
-an ordered byte stream through roo_io readers and writers.
+roo_transport delivers **reliable UART communication at multi-megabit speeds**,
+with bidirectional byte streams, framed messaging and RPC for microcontrollers.
+A reliable link handles packet framing, integrity checks, acknowledgments and
+retransmission so applications can exchange an ordered byte stream through roo_io
+readers and writers.
 
 The library also provides packet transports for applications that need datagram
 semantics: each delivered packet has its integrity checked, while packet delivery
@@ -16,8 +17,16 @@ shows UART setup, latency measurement and bulk transfer.
 
 ## Performance
 
-Measured useful-payload rates for single-board UART loopbacks at normal CPU
-clocks include:
+Get about **3.82 Mbit/s of useful payload on ESP32** and up to **4.74 Mbit/s
+on RP2040**, at normal CPU clocks. These are delivered and validated application
+bytes, with the link handling integrity checks, flow control and retransmission.
+
+On classic ESP32, that uses **95.5% of the UART's theoretical raw payload
+bandwidth**: 5 Mbaud with 8N1 framing carries at most 4 Mbit/s of byte data.
+Accounting for protocol framing, the ideal full-frame payload ceiling is
+3.875 Mbit/s; the measured throughput reaches **98.5% of that ceiling**.
+
+Measured single-board loopback configurations include:
 
 | Platform | UART baud | Window per direction | Application/sender priority | Payload Mbit/s |
 | --- | ---: | ---: | ---: | ---: |
