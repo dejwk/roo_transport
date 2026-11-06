@@ -1,0 +1,25 @@
+ets Jul 29 2019 12:21:46
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:4640
+load:0x40078000,len:15660
+load:0x40080400,len:3164
+entry 0x4008059c
+READY role=server
+RAMSIZE role=server endpoint=856 out_buffer=272 in_buffer=256 channel=760 link=40 mutex=96 cv=32 static_semaphore=92 static_task=352 ring_control=112 uart_event=12 pattern=256
+RAM role=server stage=baseline free=262988 allocated=35668 min_free=257064 largest=110580 blocks=95
+RAM role=server stage=uart_driver free=259256 allocated=39096 min_free=259256 largest=110580 blocks=114
+RAM role=server stage=uart_event free=254528 allocated=43792 min_free=254528 largest=110580 blocks=116
+RAM role=server stage=transport_object free=248312 allocated=49912 min_free=248312 largest=110580 blocks=122
+RAM role=server stage=sender_worker free=243340 allocated=54820 min_free=243340 largest=110580 blocks=126
+SYSTEM role=server chip=ESP32-D0WD-V3 revision=301 sdk=v5.5.2-729-g87912cd291 cpu=240000000 apb=80000000
+CONFIG role=server baud=5000000 actual=5000000 tx=4 rx=2 window=3 bytes=1048576 runs=1 latency_samples=100 chunk=256 app_prio=1 sender_prio=1 rxbuf=256 txbuf=1024 rx_fifo=64 rx_timeout=1
+RAM role=server stage=link_connected free=243340 allocated=54820 min_free=243136 largest=110580 blocks=126
+RAM role=server stage=io_readers_writers free=243180 allocated=54948 min_free=243136 largest=110580 blocks=128
+RAMSTACK role=server sender_free=2920 receiver_free=3084 app_free=6224 stack_type=1
+RAM role=server stage=links_closed free=243340 allocated=54820 min_free=243136 largest=110580 blocks=126
+RAM role=server stage=stopped_after_idle free=262684 allocated=35908 min_free=243136 largest=110580 blocks=99
+LIFECYCLE role=server stream_eof_and_stop=PASS
+DONE role=server

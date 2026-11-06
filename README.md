@@ -48,6 +48,10 @@ latency per batch**. A separate 7.5-meter unshielded-cable measurement delivers
 about 2.5 Mbit/s. Cable length and signal quality affect retransmission overhead
 and latency.
 
+The tested ESP32 profile uses about **19.2 KiB of additional heap per endpoint**,
+including the UART driver and both task stacks. See the [RAM breakdown](benchmarks/esp32/README.md#ram-footprint)
+for the window, framing, task and application-buffer costs.
+
 The benchmark example selects native DMA automatically on supported RP2040
 Arduino-Pico FreeRTOS builds. Its mode, workload and platform settings are
 editable constants in the sketch.

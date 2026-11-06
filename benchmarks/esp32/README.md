@@ -110,6 +110,70 @@ payload ceiling of `5,000,000 × 8/10 × 248/256 = 3,875,000 bit/s`, before gaps
 control work. The paired-board mean uses 95.8% and 98.9% of those respective
 ceilings.
 
+## RAM footprint
+
+With 2 KiB send and receive windows, the measured endpoint uses **19,648 bytes
+(19.19 KiB) of additional internal, byte-accessible heap per ESP32**, including
+its UART integration. Both boards show the same allocation deltas:
+
+| Allocation phase | Heap decrease per board | Includes |
+| --- | ---: | --- |
+| UART driver | 3,732 B | RX/TX rings, FIFO scratch, event queue, synchronization and driver bookkeeping |
+| Arduino UART receive-event task | 4,728 B | 4,096 B stack plus task/runtime and allocator overhead |
+| Transport construction | 6,216 B | Window arrays, framing buffers, transport object and allocation overhead |
+| Transport sender task | 4,972 B | 4,096 B stack, thread/join state, task/runtime and allocator overhead |
+| **Endpoint total** | **19,648 B** | **About 38.4 KiB for the pair, before application buffers** |
+
+The transport construction and sender account for 11,188 B; the SDK UART driver
+and receive-event task account for another 8,460 B. Heap decreases include
+allocator rounding and runtime costs, so they are not just sums of `sizeof`.
+
+The nominal windows are **2 KiB in each direction on each board**, not 2 KiB
+for the whole connection. Each direction has eight packet slots carrying up to
+248 application bytes apiece. Native compiler sizes are:
+
+- `OutBuffer`: 272 B; eight slots occupy 2,176 B.
+- `InBuffer`: 256 B; eight slots occupy 2,048 B.
+- The two arrays occupy **4,224 B**, with **1,984 B of application capacity per
+  direction**. Metadata and padding explain the difference from nominal sizes.
+- Three separate 256 B buffers add **768 B** for TX framing, RX packet assembly
+  and RX read scratch.
+- `ReliableSerialX` itself is **856 B**, including the channel, adapters,
+  callbacks and synchronization state. Its four inline mutexes and five optimized
+  condition variables are already included in this size.
+
+Each task reserves its full 4 KiB stack even when it uses less. The measured
+sender stack has 2,920 B unused at its high-water mark; the UART event tasks have
+3,052–3,084 B unused. These observations cover this clean transfer, not every
+error or logging path. The observed usage is below 2 KiB; reserving 2 KiB for
+both workers would save 4 KiB per endpoint, but that smaller-stack configuration
+is not validated by these runs. Local scratch, such as the sender's 250 B packet
+buffer, is already inside the stack reservation.
+
+The benchmark has additional application costs:
+
+- A 256 B static pattern on each board.
+- A 64 B input buffer and 64 B output buffer per active reader/writer pair;
+  their measured heap decrease is 160 B including allocation overhead.
+- On the client, a 400 B latency array or a 256 B receive block. They do not
+  coexist. The 1 MiB response is streamed, not allocated in full.
+- The existing 8 KiB Arduino `loopTask` stack and core/global serial state belong
+  to the baseline, not to the added endpoint.
+
+The observed local heap low-water marks correspond to increases of **19,852 B
+on the server** and **20,612 B on the client** above the baseline. These include
+benchmark buffers and transient runtime/logging work. After shutdown and idle
+cleanup, differences of 304 B and 568 B remain; these measurements alone do not
+assign every retained runtime allocation to an owner.
+
+The [RAM measurement record](results/2026-11-06-memory.json) includes native
+sizes, heap snapshots, stack watermarks and the instrumented sources. The probe
+pre-creates the same Arduino receive-event task to measure its cost separately
+from the sender; the normal receive callback replaces its no-op callback.
+Snapshots are outside timed transfers. These are incremental heap measurements
+for this SDK and ABI, not the whole firmware's static RAM or other platforms'
+footprints. The RAM probe and throughput profiles are recorded separately.
+
 ## Reproduce the two-board benchmark
 
 Keep the Roo repositories as sibling source checkouts. Build the paired firmware

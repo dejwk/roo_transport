@@ -34,8 +34,10 @@ more resilient application can detect resets and rebuild its state cleanly.
 This is not a TCP/IP stack. It does not implement IP, it does not expose socket
 APIs, and it will not interoperate directly with TCP/IP sockets. That tradeoff
 is deliberate: the protocol is custom, UART-oriented, and designed to stay
-light on RAM. In common configurations, a realistic footprint is roughly 10-20
-KB per endpoint. In return, it performs very well on the hardware it targets.
+light on RAM. Footprint depends on the backend, windows, task stacks and UART
+buffers. The tested ESP32 profile with 2 KiB windows uses about 19.2 KiB of
+additional heap per endpoint, including its UART integration; the [measured RAM
+breakdown](../benchmarks/esp32/README.md#ram-footprint) separates those costs.
 See the [performance summary](../README.md#performance) and platform benchmark
 guides for measured configurations, useful throughput and round-trip latency.
 Results depend on the UART setup, application workload and physical connection.
