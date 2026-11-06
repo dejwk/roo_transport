@@ -266,6 +266,71 @@ Snapshots are outside timed transfers. These are incremental heap measurements
 for this SDK and ABI, not the whole firmware's static RAM or other platforms'
 footprints. The RAM probe and throughput profiles are recorded separately.
 
+### Comparison with other reliable transports
+
+For the same crossed-wire UART link, the IP-stack equivalent is **TCP over
+PPP over serial (PPPoS)**. TCP supplies reliability; PPP supplies serial packet
+framing and an IP interface. Comparing Roo with UDP, raw UART or a framing-only
+library would leave out reliability. ESP-IDF supports
+[PPPoS and a shared TCP/IP task](https://docs.espressif.com/projects/esp-idf/en/v5.5.2/esp32/api-guides/lwip.html).
+
+Roo's **19,648 B measured endpoint** includes **11,188 B for transport
+construction and its sender task**, plus **8,460 B for UART integration**.
+The [native SDK size probe](results/2026-11-06-ram-comparison.json) gives these
+lwIP quantities for the installed Arduino-ESP32 build:
+
+| lwIP component | Bytes | Allocation scope |
+| --- | ---: | --- |
+| TCP control block plus socket's `netconn` | 300 B | Per connection; excludes mailbox/socket bookkeeping |
+| PPP control block | 4,740 B | Per PPP interface; includes 4,364 B of optional VJ compression state |
+| PPPoS control block plus network interface | 528 B | Per PPP interface |
+| TCP/IP task stack | 4,608 B | Shared across connections: configured 4,096 B plus SDK's 512 B allowance |
+| Default TCP send capacity | 5,744 B | Per connection; data allocated as needed |
+| Default TCP receive window | 5,760 B | Per connection; data allocated as needed |
+
+These are object sizes, stack reservations and capacity limits, **not a measured
+lwIP heap total**. For illustration, holding UART integration at Roo's 8,460 B
+and starting a new TCP/IP task/interface, the rows above sum to **30,140 B
+(29.43 KiB)** if both TCP windows are occupied. These defaults provide about
+5.6 KiB of application capacity in each direction, versus Roo's 1,984 B; much of
+the difference therefore comes from unequal buffering. This subtotal excludes
+packet headers/descriptors, PPP transient buffers, mailboxes, adapter state,
+task/runtime and allocator overhead. It models bidirectional buffering rather
+than the benchmark's predominantly one-way traffic; an actual PPP UART backend
+can also have different driver/task costs.
+
+The comparison has important configuration choices:
+
+- Roo reserves both window arrays up front. lwIP
+  [allocates queued TCP data as needed](https://github.com/lwip-tcpip/lwip/blob/master/src/core/tcp_out.c),
+  so an idle connection does not consume both configured payload capacities.
+  The ESP32 port uses
+  [heap-backed allocation](https://github.com/espressif/esp-idf/blob/v5.5.2/components/lwip/port/include/lwipopts.h),
+  rather than reserving all upstream pool capacities in advance.
+- lwIP's larger default windows are tunable. Removing PPP VJ compression in a
+  rebuilt SDK also removes its large embedded state; merely declining runtime
+  compression negotiation does not remove that allocation.
+- An application already running lwIP for Wi-Fi or Ethernet shares its TCP/IP
+  task and other global infrastructure. Introducing a UART link into that
+  application is a different incremental-cost comparison.
+
+Smaller reliable serial protocols can use substantially less protocol RAM.
+[MIN/T-MIN](https://github.com/min-protocol/min/blob/master/target/min.h) has a
+source-derived default of approximately **1.5 KiB** on a 32-bit ABI: a 1 KiB TX
+payload ring, TX descriptors, one 255 B RX assembly buffer and protocol state.
+This excludes UART buffers and task stacks. It runs through polling and
+[delivers received frames synchronously](https://github.com/min-protocol/min/blob/master/target/min.c),
+without Roo's buffered receive stream and application-consumption backpressure.
+Adding application queues and scheduling consumes more RAM. Its smaller default
+buffering is also not a measurement of equivalent multi-megabit performance.
+
+Roo therefore offers a predictable memory budget for a buffered reliable stream;
+it is not the smallest possible reliable serial implementation. The current
+ESP32 endpoint spends more on its two 4 KiB stacks than on its windows, object
+and framing workspace combined. Tuned lwIP or a polling/callback serial protocol
+can narrow or reverse the memory difference, depending on the required API,
+buffering and existing application infrastructure.
+
 ## Reproduce the two-board benchmark
 
 Keep the Roo repositories as sibling source checkouts. Build the paired firmware

@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-06",
+  "analysis": "ESP32 UART RAM comparison: measured Roo endpoint versus lwIP configuration and object sizes",
+  "unit": "bytes",
+  "platform": "Classic ESP32, Arduino-ESP32 3.3.7, ESP-IDF 87912cd291, Xtensa GCC 14.2.0",
+  "method": "Compile the supplied source with the benchmark compiler arguments, replacing its input translation unit. Read BSS symbol sizes using native xtensa-esp-elf-nm -S --radix=d. No alternative firmware was linked, flashed or RAM-profiled.",
+  "size_probe_source": "#include \"lwip/api.h\"\n#include \"lwip/tcp.h\"\n#include \"lwip/priv/tcp_priv.h\"\n#include \"lwip/priv/tcpip_priv.h\"\n#include \"lwip/pbuf.h\"\n#include \"lwip/netif.h\"\n#include \"netif/ppp/ppp_impl.h\"\n#include \"netif/ppp/pppos.h\"\nextern \"C\" {\nchar audit_tcp_pcb[sizeof(struct tcp_pcb)];\nchar audit_tcp_seg[sizeof(struct tcp_seg)];\nchar audit_netconn[sizeof(struct netconn)];\nchar audit_pbuf[sizeof(struct pbuf)];\nchar audit_netif[sizeof(struct netif)];\nchar audit_ppp_pcb[sizeof(struct ppp_pcb_s)];\nchar audit_pppos_pcb[sizeof(struct pppos_pcb_s)];\nchar audit_tcpip_msg[sizeof(struct tcpip_msg)];\nchar audit_tcp_snd_buf[TCP_SND_BUF];\nchar audit_tcp_wnd[TCP_WND];\nchar audit_tcpip_stack[TCPIP_THREAD_STACKSIZE];\nchar audit_vjcompress[sizeof(struct vjcompress)];\n}\n",
+  "sdk_header_sha256": {
+    "dio_qspi/include/sdkconfig.h": "fc4161f5f308f1830d363aac1d8512ae420706ad34956031e99b98761c65e242",
+    "include/esp_system/include/esp_task.h": "78bc0f886085c922e4d4c5c9a27d460378c7a923eef5dcc9d3b1cde1e9f7005b",
+    "include/lwip/port/include/lwipopts.h": "2c9aacaa8e152d5270fabf0b76eefd2801d051c847b8ef875d12a17259d2f4ac",
+    "include/lwip/lwip/src/include/lwip/tcp.h": "3ad840499a0298a5700064ce857343cce90254f59e944169b8bbaf3223abcd33",
+    "include/lwip/lwip/src/include/lwip/api.h": "39a93870e9151ab0a4a70c007c931cf3b642b0704eee43aa662aba9cb9d14f4a",
+    "include/lwip/lwip/src/include/netif/ppp/ppp.h": "980aca3ab5ad5e5d90922728b1e0779f53fc747bcd1e47b7e2cf0c63e1d17863",
+    "include/lwip/lwip/src/include/netif/ppp/pppos.h": "afaafbc40596ccc0511cf3352deec609f5a114e181cfeb3eb804525abecf49e3",
+    "include/lwip/lwip/src/include/netif/ppp/vj.h": "a6ee51c1e925570d6a84d4885c42b646fdd2cceb85d38f501fc91178e237fc05"
+  },
+  "compiled_sizes": {
+    "netconn": 60,
+    "netif": 432,
+    "pbuf": 16,
+    "ppp_pcb": 4740,
+    "pppos_pcb": 96,
+    "tcp_pcb": 240,
+    "tcp_seg": 16,
+    "tcp_snd_buf": 5744,
+    "tcp_wnd": 5760,
+    "tcpip_msg": 16,
+    "tcpip_stack": 4608,
+    "vjcompress": 4364
+  },
+  "configuration": {
+    "CONFIG_LWIP_TCP_SND_BUF_DEFAULT": 5744,
+    "CONFIG_LWIP_TCP_WND_DEFAULT": 5760,
+    "CONFIG_LWIP_TCP_MSS": 1436,
+    "CONFIG_LWIP_TCPIP_TASK_STACK_SIZE": 4096,
+    "TASK_EXTRA_STACK_SIZE": 512,
+    "TCPIP_THREAD_STACKSIZE": 4608,
+    "CONFIG_LWIP_TCPIP_RECVMBOX_SIZE": 32,
+    "CONFIG_LWIP_TCP_RECVMBOX_SIZE": 6,
+    "CONFIG_LWIP_PPP_VJ_HEADER_COMPRESSION": 1,
+    "MEM_LIBC_MALLOC": 1,
+    "MEMP_MEM_MALLOC": 1
+  },
+  "roo_measured": {
+    "record": "2026-11-06-memory.json",
+    "complete_uart_endpoint": 19648,
+    "transport_construction_and_sender_task": 11188,
+    "uart_driver_and_receive_task": 8460
+  },
+  "lwip_illustrative_subtotal": {
+    "assumptions": [
+      "One new TCP socket over a new PPPoS interface; TCP/IP task is not already running.",
+      "Hold UART backend cost equal to the measured Roo driver plus Arduino event task solely to expose protocol differences; a real PPP integration can use a different task/ring architecture.",
+      "Both configured TCP send and receive capacities are occupied simultaneously. This is a bidirectional buffering model, not the one-way benchmark traffic profile or idle allocation."
+    ],
+    "components": {
+      "assumed_same_uart_driver_and_receive_task": 8460,
+      "shared_tcpip_task_stack": 4608,
+      "ppp_interface_control_objects": 5268,
+      "tcp_pcb_and_netconn": 300,
+      "tcp_payload_if_both_default_windows_are_occupied": 11504
+    },
+    "subtotal": 30140,
+    "excludes": [
+      "Task control/runtime and allocator overhead for new lwIP allocations",
+      "Core and per-socket mailboxes, synchronization and socket/global bookkeeping",
+      "TCP/IP packet/segment headers and pbuf descriptors",
+      "Transient PPP input/output framing buffers and parser packet assembly",
+      "ESP-NETIF adapter/event-loop state and other enabled networking services"
+    ]
+  },
+  "limits": [
+    "This is not a measured total lwIP footprint or a throughput comparison.",
+    "TCP windows are capacities, not eagerly allocated payload arrays. Queued traffic drives dynamic heap use.",
+    "The installed SDK defaults differ from generic ESP-IDF Kconfig defaults; use the compiled values above.",
+    "PPP control state includes 4364 bytes of embedded optional VJ compression state. Removing that feature requires rebuilding the SDK, not just disabling negotiation at runtime.",
+    "Shared infrastructure may already be paid for by Wi-Fi/Ethernet. A tuned or already-running lwIP configuration can be more competitive than this new-stack model."
+  ],
+  "primary_sources": [
+    "https://docs.espressif.com/projects/esp-idf/en/v5.5.2/esp32/api-guides/lwip.html",
+    "https://github.com/espressif/esp-idf/blob/v5.5.2/components/lwip/port/include/lwipopts.h",
+    "https://github.com/lwip-tcpip/lwip/blob/master/src/core/tcp_out.c",
+    "https://github.com/min-protocol/min/blob/master/target/min.h",
+    "https://github.com/min-protocol/min/blob/master/target/min.c"
+  ]
+}
