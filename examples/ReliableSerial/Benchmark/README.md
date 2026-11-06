@@ -81,7 +81,7 @@ the link can deliver data again.
 
 A finite client closes its request stream and waits for response EOF. Readers
 and writers are destroyed before their `Link`, and the loopback joins its server
-before stopping either transport. The legacy Pico Arduino adapter leaves its
+before stopping either transport. The Pico Arduino UART adapter leaves its
 idle receive worker alive until reset because it cannot stop an idle worker.
 
 ## Build and explore
@@ -100,8 +100,7 @@ Building does not upload. When building ESP32 outside the helper, also set the
 Arduino core build flag `-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096`; the core's
 UART event task has a separate stack from the transport sender.
 
-For tuning experiments and recorded results, see the [ESP32 measurements](../../../benchmarks/esp32/README.md)
-and [Pico measurements](../../../benchmarks/pico/README.md). Those reports retain
-the measured source snapshots and detailed resource comparisons. The adjacent
+For tested configurations and measurement records, see the [ESP32 guide](../../../benchmarks/esp32/README.md)
+and [Pico guide](../../../benchmarks/pico/README.md). The adjacent
 [Loopback example](../Loopback/Loopback.ino) illustrates paced structured messages
 rather than bulk transfer measurements.

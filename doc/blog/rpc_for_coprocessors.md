@@ -89,14 +89,14 @@ coprocessor API can look like typed C++ calls rather than like a packet parser.
 RPC only feels natural when the underlying link is fast enough and predictable
 enough that remote calls do not become a last resort.
 
-That is why the benchmark numbers matter here more than anywhere else in the
-library. On ESP32, `roo_transport` currently reports about **3.4 Mbps** over
-short wires at 5 Mbps UART with sub-millisecond round-trip latency, and about
-**2.5 Mbps** with **0.92 ms p99 round-trip latency** over a **7.5 m
-unshielded four-wire cable** under heavy packet loss.
+The [performance summary](../../README.md#performance) and platform guides for
+[ESP32](../../benchmarks/esp32/README.md) and
+[Pico](../../benchmarks/pico/README.md) report throughput and latency alongside
+their UART, buffering and scheduling configurations.
 
-Those numbers do not turn every remote call into a local one, but they do make
-RPC a practical control-plane tool between microcontrollers.
+Use those measurements as a starting point, then measure your request/response
+workload. Serialization, handler execution, message sizes and competing tasks
+also contribute to the time a caller waits for a result.
 
 ## You are not locked into synchronous handlers
 

@@ -114,14 +114,15 @@ but you still make the application-level decision about what a reconnect means.
 The library's benchmark example exists for a reason. Reliable transport is only
 useful if it is still fast enough to keep out of the way.
 
-On ESP32, the current benchmark reports about **3.4 Mbps** over short wires at
-5 Mbps UART, with sub-millisecond round-trip latency. The documentation also
-reports about **2.5 Mbps** with **0.92 ms p99 round-trip latency** over a
-**7.5 m unshielded four-wire cable** under heavy packet loss.
+The [performance summary](../../README.md#performance),
+[ESP32 measurements](../../benchmarks/esp32/README.md) and
+[Pico measurements](../../benchmarks/pico/README.md) describe useful payload
+throughput and latency for specified hardware configurations. Baud rate, UART
+buffering, task scheduling, wiring and application traffic all affect results.
 
-That is enough headroom for a large class of board-to-board protocols. In many
-projects, the real bottleneck is no longer the transport overhead. It is the
-application logic on either side.
+Use those profiles to assess the headroom for your own protocol, then measure
+its actual workload. Application processing can consume time that a bulk
+transport benchmark leaves available to moving bytes.
 
 ## Where to start
 

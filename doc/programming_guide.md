@@ -36,10 +36,9 @@ APIs, and it will not interoperate directly with TCP/IP sockets. That tradeoff
 is deliberate: the protocol is custom, UART-oriented, and designed to stay
 light on RAM. In common configurations, a realistic footprint is roughly 10-20
 KB per endpoint. In return, it performs very well on the hardware it targets.
-On ESP32, the current implementation reaches about 3.4 Mbps over short wires
-with sub-millisecond round-trip latency, and about 2.5 Mbps with 0.92 ms p99
-round-trip latency even over a 7.5 m unshielded four-wire cable with heavy
-packet loss.
+See the [performance summary](../README.md#performance) and platform benchmark
+guides for measured configurations, useful throughput and round-trip latency.
+Results depend on the UART setup, application workload and physical connection.
 
 The stack has four main layers:
 
@@ -62,13 +61,14 @@ There are two convenient ways to run the examples:
 - Use two separate boards connected by UART wires.
 - Use one board in loopback mode with two UART peripherals wired to each other.
 
-The bundled examples use these pin pairs in loopback mode:
+The [ReliableSerial Loopback example](../examples/ReliableSerial/Loopback/Loopback.ino)
+uses these pin pairs:
 
 - ESP32: `Serial1` uses TX 27 / RX 14, and `Serial2` uses TX 25 / RX 26.
 - RP2040: `Serial1` uses TX 12 / RX 13, and `Serial2` uses TX 4 / RX 5.
 
-These are only example pin assignments. The transport layer does not require
-those exact pins.
+These are example pin assignments. The [Benchmark example](../examples/ReliableSerial/Benchmark/README.md#wire-the-endpoints)
+uses its own pin choices. The transport layer does not require these exact pins.
 
 Although UART is the main target, the higher-level abstractions are not limited
 to raw hardware serial. The packet, link, messaging, and RPC layers can also be
@@ -199,6 +199,20 @@ If you are not using one of the convenience serial adapters, the generic Arduino
 entry point is `LinkStreamTransport`, which works on any `Stream`. In that case
 you are responsible for calling `tryReceive()` or `receive()` so incoming
 packets are processed.
+
+#### Native RP2040 DMA
+
+On native RP2040 Arduino-Pico FreeRTOS builds, `pico::ReliableUartDma` provides
+an opt-in transport over SDK UARTs. The `ReliableSerial1/2` convenience adapters
+use Arduino UARTs; the [Benchmark example](../examples/ReliableSerial/Benchmark/README.md)
+selects native DMA automatically on supported hardware.
+
+Configure the SDK UART before constructing the DMA transport, provide a
+caller-owned 8 KiB receive ring with 8 KiB alignment, and construct and destroy
+the transport on the same setup core. Keep its ring alive until destruction,
+and stop application I/O before shutting down the transport. Do not use Arduino
+`Serial1/2` on a UART owned by DMA. The [Pico setup guide](../benchmarks/pico/README.md)
+describes the clock configuration and DMA interrupt ownership requirements.
 
 #### Link objects and lifecycle
 
@@ -610,12 +624,15 @@ encoding rules is a protocol change, not just a refactor.
 
 The most important performance knob in the reliable link layer is
 `LinkBufferSize`. It controls the size of the reliable send and receive windows
-and ranges from 256 bytes up to 1 MB.
+with nominal capacities from 256 bytes up to 256 KiB. Buffer bookkeeping
+consumes additional RAM.
 
-The default, 4 KB in each direction, is a sensible starting point for many
-applications. Reduce it when RAM is tight and traffic volume is modest. Increase
-it when the UART is fast, traffic is bursty, or you want to keep more data in
-flight before the sender stalls.
+The Arduino UART adapters default to 4 KiB per direction, while native
+`ReliableUartDma` defaults to 16 KiB. The Benchmark example chooses 2 KiB on
+ESP32 and 8 KiB on RP2040 DMA for its bulk-transfer workload. Reduce windows
+when RAM is tight and traffic volume is modest. Increase them when the UART
+is fast, traffic is bursty, or more data needs to remain in flight before the
+sender stalls.
 
 Remember that these buffers are not the same thing as the packet size. Packets
 still top out at 250 bytes, but the reliable link needs larger windows so it
@@ -628,17 +645,17 @@ In practice, tuning usually happens in this order:
 - size UART RX buffers or FIFOs appropriately for the platform,
 - only then raise baud rate or message size expectations.
 
-On ESP32, the README numbers are a good reference point: about 3.4 Mbps on
-short wires and about 2.5 Mbps over a much noisier 7.5 m cable. Treat those as
-measurements, not guarantees. Actual results depend on UART configuration, task
-scheduling, cable quality, and how quickly your application drains received
-data.
+The [ESP32 setup guide](../benchmarks/esp32/README.md) and
+[Pico setup guide](../benchmarks/pico/README.md) provide measured profiles with
+specified baud rates, UART buffers, protocol windows and task priorities.
+Actual results depend on those settings, cable quality, workload, and how
+quickly your application supplies and consumes data.
 
-On ESP32 specifically, it is often worth increasing the underlying serial RX
-buffer with `SerialX.setRxBufferSize()`. On RP2040, FIFO sizing and receive task
-responsiveness matter more than raw UART capability. In both cases, if you see
-throughput plateaus or stalls, check platform UART buffering before assuming the
-link protocol itself is the bottleneck.
+On ESP32, RX FIFO service margin and software buffer sizes both matter. With
+the RP2040 Arduino adapter, FIFO sizing and receive task responsiveness matter;
+with native DMA, follow the ring and peripheral-clock requirements above. If
+throughput plateaus or stalls, check UART buffering and application/sender
+scheduling alongside the protocol window size.
 
 ### Error handling and observability
 

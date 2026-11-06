@@ -1,43 +1,63 @@
-Did you ever wish that UART (Serial) was reliable, so that you could use it to connect two microcontrollers together at fast speeds and have them communicate as reliably as if they were using a proper network socket? Now you can!
+# roo_transport
 
-This library provides a lightweight implementation of a communication protocol that provides reliable and very fast bidirectional streaming byte transfer over unreliable connection (such as UART). (See performance, below).
+roo_transport provides reliable bidirectional byte streams over UART, framed
+messaging, and RPC for microcontrollers. A reliable link handles packet framing,
+integrity checks, acknowledgments and retransmission so applications can exchange
+an ordered byte stream through roo_io readers and writers.
 
-Additionally, the library provides a more foundational packet transport, which provides UDP-like (or, ESP-NOW-like) functionality: transmission of small packets, with the possibility of packet loss, but ensuring integrity of packets that get transmitted.
+The library also provides packet transports for applications that need datagram
+semantics: each delivered packet has its integrity checked, while packet delivery
+is not guaranteed.
 
-Finally, the library supplies a functional RPC framework that works on top of this reliable messaging.
-
-See the included examples.
-
-For a guided walkthrough of the layers, usage patterns, and extension points,
-see [the programming guide](doc/programming_guide.md).
+See the [programming guide](doc/programming_guide.md) for the layers, APIs and
+extension points. The [Loopback example](examples/ReliableSerial/Loopback/Loopback.ino)
+shows structured messages, and the [benchmark example](examples/ReliableSerial/Benchmark/README.md)
+shows UART setup, latency measurement and bulk transfer.
 
 ## Performance
 
-On ESP32, with short wires, the reliable UART link achieves 3.4 Mbps throughput (85% of the theoretical maximum UART bandwidth supported), and sub-millisecond round-trip time latency, making it suitable for RPC (remote procedure calls).
+Measured useful-payload rates for single-board UART loopbacks at normal CPU
+clocks include:
 
-When tested over 7.5 meters of a cheap, unshielded, 4-wire cable, it still pulled 2.5 Mbps and 0.92ms p99 rtt latency, despite experiencing ~20% packet loss in that setup.
+| Platform | UART baud | Window per direction | Application/sender priority | Payload Mbit/s |
+| --- | ---: | ---: | ---: | ---: |
+| Classic ESP32, Arduino UART backend | 5,000,000 | 2 KiB | 1/1 | 3.81–3.83 |
+| RP2040, native DMA backend | 8,312,500 | 8 KiB | 1/1 | 4.33–4.47 |
+| RP2040, native DMA backend | 8,312,500 | 16 KiB | 6/6 | 4.65–4.74 |
 
-A classic ESP32 single-board loopback also sustained 3.856 Mbit/s of useful payload at 5 Mbaud (about 99.5% of the ideal full-packet ceiling), using tuned RX FIFO margin and TX buffering. See the [ESP32 hardware benchmark](benchmarks/esp32/README.md) for the configuration, controlled comparisons, error/recovery checks and reproducible results.
+These rates count delivered and validated payload bytes. UART framing and
+protocol overhead use additional bandwidth. The ESP32 and Pico guides describe
+the complete [ESP32 configuration](benchmarks/esp32/README.md) and
+[Pico configuration](benchmarks/pico/README.md), including buffers, clocks, wiring,
+workloads and measurement records. Actual performance depends on these settings
+and the application's scheduling and traffic.
 
-For RP2040 with Arduino-Pico FreeRTOS, the native DMA transport reached 4.65–4.74 Mbit/s of useful payload on a single-board UART loopback after reducing retry-computation overhead. See the [Pico hardware benchmark](benchmarks/pico/README.md) for the exact configuration, diagnosis and results.
+Two-board ESP32 measurements include about 3.4 Mbit/s with short wires and
+2.5 Mbit/s over 7.5 meters of inexpensive, unshielded cable. Cable length and
+signal quality affect retransmission overhead and latency.
 
-The [reliable serial benchmark example](examples/ReliableSerial/Benchmark/README.md) shows the UART, buffering and task configuration needed in applications. It automatically selects native DMA on supported RP2040 FreeRTOS builds, and documents lower-priority and smaller-window options measured on both boards.
+The benchmark example selects native DMA automatically on supported RP2040
+Arduino-Pico FreeRTOS builds. Its mode, workload and platform settings are
+editable constants in the sketch.
 
 ## Host emulation
 
-Host builds support both Arduino and ESP-IDF through roo_testing 2.0. With
+Host builds support Arduino and ESP-IDF through roo_testing 2.0. With
 Bazelisk 1.21 or newer, a plain command defaults to Arduino and prints a notice:
 
-    bazel test ...
-    bazel test ... --config=asan
-    bazel test ... --config=roo_testing_arduino_esp32
-    bazel test ... --config=roo_testing_idf_esp32
-    .roo_testing/bin/test_all_profiles ...
+```sh
+bazel test ...
+bazel test ... --config=asan
+bazel test ... --config=roo_testing_arduino_esp32
+bazel test ... --config=roo_testing_idf_esp32
+.roo_testing/bin/test_all_profiles ...
+```
 
-A representative Arduino sketch is a first-class runnable target (stop it
-with Ctrl-C):
+Run an Arduino example on the host and stop it with Ctrl-C:
 
-    bazel run //examples/Packets:Packets
+```sh
+bazel run //examples/Packets:Packets
+```
 
-The files under .roo_testing are vendored from roo_testing; follow their
+The files under `.roo_testing` are vendored from roo_testing; follow their
 canonical-source headers when refreshing them.

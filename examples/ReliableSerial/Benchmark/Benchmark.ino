@@ -233,7 +233,7 @@ void InitializeEndpoints() {
 }
 
 void StopEndpoints() {
-  // This legacy adapter cannot stop an idle receive worker. Keep its global
+  // The Arduino adapter cannot stop an idle receive worker. Keep its global
   // endpoints alive until reset; the native DMA path above supports shutdown.
 }
 }  // namespace
