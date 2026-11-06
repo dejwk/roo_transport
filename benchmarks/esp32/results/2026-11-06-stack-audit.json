@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-06",
+  "experiment": "ESP32 worker stack path audit",
+  "unit": "bytes",
+  "platform": "Classic ESP32, Arduino-ESP32 3.3.7, ESP-IDF 87912cd291, Xtensa GCC 14.2.0",
+  "elf_sha256": "f51a353e8a593f77f6437e017131b4daafe2b059939e9e3b375e8c388ff028b9",
+  "elf_source_record": "2026-11-06-memory.json",
+  "method": [
+    "Read linked native Xtensa entry a1,N instructions for individual function frame reservations and verify synchronous call paths against source and disassembly.",
+    "Compile channel.cpp alone with the saved benchmark compiler arguments and -fstack-usage, both default and -DMLOG_roo_transport_reliable_channel_connection=1. The logging variant was not linked or flashed.",
+    "Read pxPortInitialiseStack, _xt_lowint1 and _frxt_int_enter in the same ELF to verify permanent coprocessor storage and task-stack interrupt context before the switch to port_IntStack."
+  ],
+  "source_sha256": {
+    "src/roo_transport/link/internal/thread_safe/channel.cpp": "c6f2fd04c151e664e2ccc70a8344557510bce86a8dbbb238ed3009eec275122c",
+    "src/roo_transport/link/internal/transmitter.cpp": "feea0c38315bfe9a77eada7580065765d40f3b9665eeb9802ba9e27512430445",
+    "src/roo_transport/link/arduino/esp32/reliable_serial.h": "d73f896374bb9f8d12cd868c15d9e0b3a13233ae8e6a303fdc6166b844dd6b08",
+    "../roo_logging/src/roo_logging/log_message.cpp": "7b395a0ee2de4d1eb34290366265376974e5c4344cb805fe8d449806aac3bde8",
+    "../roo_logging/src/roo_logging/stream_arduino.cpp": "a083fd5b958fd73bac87d76bb20efcca18ab89110f4fa8809dcb0788bed5b52d"
+  },
+  "channel_stack_usage": {
+    "default": {
+      "conn": 64,
+      "trySend": 288,
+      "handleHandshakePacket": 96,
+      "packetReceived": 80,
+      "sendLoop": 48
+    },
+    "connection_logging": {
+      "conn": 80,
+      "trySend": 288,
+      "handleHandshakePacket": 208,
+      "packetReceived": 80,
+      "sendLoop": 48
+    }
+  },
+  "logging_prefix_frames": [
+    {
+      "function": "LogMessage constructor",
+      "bytes": 48
+    },
+    {
+      "function": "LogMessage::Init",
+      "bytes": 112
+    },
+    {
+      "function": "ArduinoLogStream::printf",
+      "bytes": 80
+    },
+    {
+      "function": "vsnprintf",
+      "bytes": 64
+    },
+    {
+      "function": "_vsnprintf_r",
+      "bytes": 144
+    },
+    {
+      "function": "_svfprintf_r",
+      "bytes": 800
+    },
+    {
+      "function": "__ssprint_r",
+      "bytes": 48
+    }
+  ],
+  "logging_prefix_total": 1296,
+  "cpu_save_areas": {
+    "permanent_coprocessor": 96,
+    "interrupt_context_on_task_stack": 192,
+    "total": 288,
+    "evidence": [
+      "pxPortInitialiseStack 0x40089fb3: physical stack top minus 96 for coprocessor storage; 0x4008a00f stores that reduced pointer as initial application A1.",
+      "_xt_lowint1 0x40083bec: saves a 192-byte context below current task A1.",
+      "_frxt_int_enter 0x4008a2e7 saves task SP in TCB; 0x4008a2e9 switches to port_IntStack.",
+      "ELF _thread_local_start equals _thread_local_end: no additional TLS section reservation in this build."
+    ]
+  },
+  "sender_handshake": {
+    "condition": "Connection MLOG enabled, default log prefix enabled, interrupt arrives during deepest pointer-formatting call.",
+    "transport_frames": [
+      {
+        "function": "vPortTaskWrapper",
+        "bytes": 32
+      },
+      {
+        "function": "roo_threads::freertos::run_thread",
+        "bytes": 48
+      },
+      {
+        "function": "DynamicCallable<Channel::begin lambda>::call",
+        "bytes": 32
+      },
+      {
+        "function": "Channel::sendLoop",
+        "bytes": 48
+      },
+      {
+        "function": "Channel::trySend",
+        "bytes": 288
+      },
+      {
+        "function": "Channel::conn (connection logging enabled)",
+        "bytes": 80
+      }
+    ],
+    "active_frames_including_prefix": 1824,
+    "minimum_stack_extent_including_cpu_save_areas": 2112
+  },
+  "receive_ack_warning": {
+    "condition": "Checksum-valid ACK with unexpected control bit triggers the default-enabled cross-talk LOG(WARNING); default log prefix enabled; interrupt arrives during deepest pointer-formatting call.",
+    "transport_frames": [
+      {
+        "function": "vPortTaskWrapper",
+        "bytes": 32
+      },
+      {
+        "function": "HardwareSerial::_uartEventTask",
+        "bytes": 64
+      },
+      {
+        "function": "receive callback _M_invoke",
+        "bytes": 32
+      },
+      {
+        "function": "Esp32SerialLinkTransport::receiveAvailable",
+        "bytes": 32
+      },
+      {
+        "function": "PacketReceiverOverStream::tryReceive",
+        "bytes": 32
+      },
+      {
+        "function": "PacketReceiverOverStream::processIncoming",
+        "bytes": 32
+      },
+      {
+        "function": "PacketReceiverOverStream::processPacket",
+        "bytes": 64
+      },
+      {
+        "function": "packet-processing callback _M_invoke",
+        "bytes": 32
+      },
+      {
+        "function": "LinkTransport::processIncomingPacket",
+        "bytes": 32
+      },
+      {
+        "function": "Channel::packetReceived",
+        "bytes": 80
+      },
+      {
+        "function": "ThreadSafeTransmitter::ack",
+        "bytes": 48
+      },
+      {
+        "function": "Transmitter::ack",
+        "bytes": 80
+      }
+    ],
+    "active_frames_including_prefix": 1856,
+    "minimum_stack_extent_including_cpu_save_areas": 2144
+  },
+  "limits": [
+    "These are lower bounds for particular reachable synchronous paths, not whole-program worst-case upper bounds or hardware measurements of these paths.",
+    "Additional helper calls, register spills, application callbacks, logging hooks, alternative backends and different compiler/SDK configurations can change stack requirements.",
+    "Logging text buffers and all framing/window arrays are heap allocations, not task-local arrays.",
+    "Firmware stack settings remain 4096 bytes; neither a 2048-byte nor 3072-byte worker configuration is validated by this static audit."
+  ]
+}

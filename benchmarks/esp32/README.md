@@ -128,27 +128,119 @@ The transport construction and sender account for 11,188 B; the SDK UART driver
 and receive-event task account for another 8,460 B. Heap decreases include
 allocator rounding and runtime costs, so they are not just sums of `sizeof`.
 
-The nominal windows are **2 KiB in each direction on each board**, not 2 KiB
-for the whole connection. Each direction has eight packet slots carrying up to
-248 application bytes apiece. Native compiler sizes are:
+The nominal windows are **2 KiB in each direction on each board**. A window
+holds eight packet slots, each carrying up to 248 application bytes: **1,984 B
+of application capacity per direction**. The TX window retains unacknowledged
+packets for retransmission; the RX window retains validated data until ordering
+and application reads allow its release. These are separate from the UART rings.
 
-- `OutBuffer`: 272 B; eight slots occupy 2,176 B.
-- `InBuffer`: 256 B; eight slots occupy 2,048 B.
-- The two arrays occupy **4,224 B**, with **1,984 B of application capacity per
-  direction**. Metadata and padding explain the difference from nominal sizes.
-- Three separate 256 B buffers add **768 B** for TX framing, RX packet assembly
-  and RX read scratch.
-- `ReliableSerialX` itself is **856 B**, including the channel, adapters,
-  callbacks and synchronization state. Its four inline mutexes and five optimized
-  condition variables are already included in this size.
+### Windows and transport objects
 
-Each task reserves its full 4 KiB stack even when it uses less. The measured
-sender stack has 2,920 B unused at its high-water mark; the UART event tasks have
-3,052–3,084 B unused. These observations cover this clean transfer, not every
-error or logging path. The observed usage is below 2 KiB; reserving 2 KiB for
-both workers would save 4 KiB per endpoint, but that smaller-stack configuration
-is not validated by these runs. Local scratch, such as the sender's 250 B packet
-buffer, is already inside the stack reservation.
+The 6,216 B construction cost breaks down as follows on this ESP32 ABI:
+
+| Allocation | Requested storage | Purpose |
+| --- | ---: | --- |
+| TX window: eight `OutBuffer` slots | 2,176 B | 272 B per slot, including payload/header, flags, retry timer/counter and padding |
+| RX window: eight `InBuffer` slots | 2,048 B | 256 B per slot, including payload, type/size and padding |
+| `ReliableSerialX` object | 856 B | Channel state, synchronization, adapters, callbacks and buffer ownership |
+| Three framing buffers | 768 B | 256 B each for TX encoding, RX packet assembly and RX read scratch |
+| **Requested total** | **5,848 B** | **Six heap allocations** |
+| Allocator overhead | 368 B | Size-class rounding, heap-poisoning guards and block headers |
+| **Measured heap decrease** | **6,216 B** | **Construction only; tasks and UART driver are separate** |
+
+The allocator's light-poisoning configuration and size classes explain the
+difference: 272 B of rounding, six 12 B guard/size records and six 4 B block
+headers. This allocation model matches the measured aggregate; individual blocks
+were not heap-traced. Object sizes alone therefore understate heap consumption.
+
+The **856 B object does not contain the window or framing arrays**: it owns
+pointers to them. Its embedded state is:
+
+| Embedded state | Bytes |
+| --- | ---: |
+| Four mutexes and five condition variables | 544 B |
+| Remaining channel state: protocol/window controllers, timers, thread handle, names, disconnect callback and padding | 216 B |
+| UART adapters, framing objects, packet callback, references and padding outside the channel | 96 B |
+| **Object total** | **856 B** |
+
+Synchronization state is inline, including the mutexes' FreeRTOS control blocks;
+its 544 B is already included in the object. The sender's thread/task allocations are separate.
+The two window arrays occupy 4,224 B for 3,968 B of application capacity; headers,
+slot metadata and ABI padding account for the difference. The
+[TX](../../src/roo_transport/link/internal/out_buffer.h) and
+[RX](../../src/roo_transport/link/internal/in_buffer.h) slot declarations show
+these fields.
+
+### What framing means
+
+A UART supplies bytes without packet boundaries. Framing lets the receiver find
+each packet's end and check its integrity. For a full data packet:
+
+```text
+248 application bytes + 2 reliable-link header bytes
+  + 4 checksum bytes + 2 COBS framing bytes = 256 wire bytes
+```
+
+The checksum is a 32-bit Murmur3 hash. COBS encodes the packet so its contents
+contain no zero bytes; a trailing zero then marks the boundary unambiguously.
+The receiver can recover packet boundaries after lost or damaged bytes. This
+packet framing is additional to UART's 8N1 framing, which uses ten wire bits per
+byte.
+
+The three **heap-allocated** framing buffers have distinct jobs:
+
+- TX encoding, 256 B: copy, checksum and encode a packet while preserving the
+  original window data for possible retransmission.
+- RX assembly, 256 B: retain a partial packet across UART reads.
+- RX scratch, 256 B: read a UART chunk and process packet boundaries within it.
+
+They are temporary encode/decode workspace, independent of window size. See the
+[sender](../../src/roo_transport/packets/over_stream/packet_sender_over_stream.cpp)
+and [receiver](../../src/roo_transport/packets/over_stream/packet_receiver_over_stream.cpp).
+
+### Task stacks and deeper paths
+
+Each worker reserves its full **4,096 B** stack. Measured high-water usage was
+**1,176 B for the sender** and **1,012–1,044 B for the UART receive-event task**.
+The sender's one fixed 250 B packet scratch buffer is inside that reservation.
+Larger windows, longer transfers, full queues, retransmissions and damaged COBS
+or checksum frames do not introduce larger automatic arrays or recursion: the
+buffers are on the heap and the processing is iterative.
+
+**A 2 KiB stack is nevertheless insufficient for some diagnostic paths.** In
+this native build, logging's nested prefix/`vsnprintf` formatting frames alone
+reserve 1,296 B. The message's 1,025 B text buffer is on the heap; the large stack
+cost comes from the formatter, including an 800 B `_svfprintf_r` frame.
+
+The [compiled stack audit](results/2026-11-06-stack-audit.json) identifies two
+concrete paths. If an interrupt arrives at the deepest formatting point:
+
+| Path | Active function frames | CPU save areas | Minimum stack extent |
+| --- | ---: | ---: | ---: |
+| Sender handshake, connection logging enabled | 1,824 B | 288 B | **2,112 B** |
+| Receive-side cross-talk ACK warning, enabled by default | 1,856 B | 288 B | **2,144 B** |
+
+The 288 B comprises a permanent 96 B coprocessor save area and a 192 B interrupt
+frame saved on the interrupted task's stack before switching to the ISR stack.
+These are lower bounds for particular call paths, excluding further helper
+frames; they are not measured worst-case watermarks or universal upper bounds.
+Malformed COBS/checksum frames are silently dropped; the warning above requires
+a checksum-valid packet with an unexpected ACK control bit.
+
+Peer reset can also execute a disconnect callback on the UART task, including
+the fatal logging path installed by `connectOrDie()`. Custom callbacks, log sinks,
+logging wall clocks and alternative synchronous I/O backends can add their own
+stack use. Ordinary application serialization and reads run on the caller's
+stack rather than either worker's stack.
+
+**3 KiB is a reasonable candidate for the examined built-in paths**, consistent
+with the receive adapter's logging guidance, but is not a certified upper bound
+or a hardware-validated smaller-stack configuration. **4 KiB remains the default
+and the benchmark setting.** Reducing both workers to 3 KiB would save 2 KiB per
+endpoint; reducing both to 2 KiB would save 4 KiB but would not cover the paths
+above. Stack watermarks from a clean run cannot establish their safety.
+
+### Application buffers and measurement scope
 
 The benchmark has additional application costs:
 
