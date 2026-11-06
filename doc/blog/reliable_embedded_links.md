@@ -46,15 +46,15 @@ stack at once.
 
 When you are ready for the full API surface, extension points, and lifecycle
 details, the reference document is the
-[programming guide](programming_guide.md).
+[programming guide](../programming_guide.md).
 
 If you prefer to jump directly into runnable code, the most relevant examples
 in the repository are:
 
-- [Packets](../examples/Packets/Packets.ino)
-- [ReliableSerial loopback](../examples/ReliableSerial/Loopback/Loopback.ino)
-- [Messaging simple](../examples/Messaging/Simple/Simple.ino)
-- [Messaging multiplexing](../examples/Messaging/Multiplexing/Multiplexing.ino)
-- [RPC simple](../examples/Rpc/Simple/Simple.ino)
-- [RPC serialization](../examples/Rpc/Serialization/Serialization.ino)
-- [RPC asynchronous](../examples/Rpc/Asynchronous/Asynchronous.ino)
+- [Packets](../../examples/Packets/Packets.ino)
+- [ReliableSerial loopback](../../examples/ReliableSerial/Loopback/Loopback.ino)
+- [Messaging simple](../../examples/Messaging/Simple/Simple.ino)
+- [Messaging multiplexing](../../examples/Messaging/Multiplexing/Multiplexing.ino)
+- [RPC simple](../../examples/Rpc/Simple/Simple.ino)
+- [RPC serialization](../../examples/Rpc/Serialization/Serialization.ino)
+- [RPC asynchronous](../../examples/Rpc/Asynchronous/Asynchronous.ino)

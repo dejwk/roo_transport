@@ -127,11 +127,11 @@ transport benchmark leaves available to moving bytes.
 ## Where to start
 
 If this is your use case, start with the
-[ReliableSerial loopback example](../examples/ReliableSerial/Loopback/Loopback.ino).
+[ReliableSerial loopback example](../../examples/ReliableSerial/Loopback/Loopback.ino).
 It is the cleanest demonstration of the link layer by itself.
 
 Then read the reliable-link section of the
-[programming guide](programming_guide.md).
+[programming guide](../programming_guide.md).
 
 If you find yourself adding delimiters or length prefixes above the link, that
 is the sign you should move one layer up to

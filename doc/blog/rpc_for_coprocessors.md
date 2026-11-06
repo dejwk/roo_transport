@@ -116,15 +116,15 @@ up event-driven application structure.
 ## Where to start
 
 Start with the
-[RPC simple example](../examples/Rpc/Simple/Simple.ino).
+[RPC simple example](../../examples/Rpc/Simple/Simple.ino).
 It shows the key operational promise very clearly: if the server resets during
 a request, that call fails, but the system as a whole keeps going.
 
 Then move to:
 
-- [RPC serialization](../examples/Rpc/Serialization/Serialization.ino) for
+- [RPC serialization](../../examples/Rpc/Serialization/Serialization.ino) for
   real request and response types;
-- [RPC asynchronous](../examples/Rpc/Asynchronous/Asynchronous.ino) when work
+- [RPC asynchronous](../../examples/Rpc/Asynchronous/Asynchronous.ino) when work
   does not finish immediately.
 
 If your protocol does not really need request/response semantics and is closer

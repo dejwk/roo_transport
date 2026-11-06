@@ -109,13 +109,13 @@ allocation surprises. That is the right shape for embedded work.
 
 If you later want several logical protocols over one physical link, you do not
 need to open separate transports. Use
-[Messaging multiplexing](../examples/Messaging/Multiplexing/Multiplexing.ino)
+[Messaging multiplexing](../../examples/Messaging/Multiplexing/Multiplexing.ino)
 and add `MuxMessaging` channels on top of the same messaging transport.
 
 ## Where to start
 
 Start with the
-[Messaging simple example](../examples/Messaging/Simple/Simple.ino).
+[Messaging simple example](../../examples/Messaging/Simple/Simple.ino).
 It demonstrates the intended model clearly: both sides exchange small messages,
 and reconnects are treated as part of the system's reality rather than as an
 edge case to ignore.

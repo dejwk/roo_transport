@@ -108,6 +108,6 @@ Those are the cases for higher layers.
 
 ## Where to start
 
-Start with the [Packets example](../examples/Packets/Packets.ino).
+Start with the [Packets example](../../examples/Packets/Packets.ino).
 It is a realistic demonstration of the intended use case: lightweight,
 integrity-checked telemetry where occasional packet loss is acceptable.
