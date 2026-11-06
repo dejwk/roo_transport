@@ -1,9 +1,9 @@
 # ESP32 UART throughput and hardware validation
 
-The current [standalone benchmark example](../../examples/ReliableSerial/Benchmark/README.md)
-uses 2 KiB protocol windows, 256-byte RX / 1024-byte TX rings and application/sender
-priority 1. With integer retry scheduling, ten consecutive 1 MiB transfers
-delivered **3.813356–3.827941 Mbit/s**, mean **3.818552 Mbit/s**. The [November 5–6 follow-up](#november-56-resource-and-scheduling-follow-up)
+The November 5–6 [standalone benchmark example](../../examples/ReliableSerial/Benchmark/README.md)
+measurements used 2 KiB protocol windows, 256-byte RX / 1024-byte TX rings and
+application/sender priority 1. With integer retry scheduling, ten consecutive
+1 MiB transfers delivered **3.813356–3.827941 Mbit/s**, mean **3.818552 Mbit/s**. The [November 5–6 follow-up](#november-56-resource-and-scheduling-follow-up)
 separates those example measurements from the diagnostic harness and its smaller-buffer
 screens. [Follow-up records and transcripts](results/2026-11-06-minimum.json) retain
 both source versions and all configurations.
@@ -180,12 +180,13 @@ but at 3.648584–3.662914 Mbit/s, so 2 KiB remains the practical default. UART 
 tasks retain the SDK priority 24. The final canonical default completed all ten
 1 MiB cycles with exact payloads, response EOF, worker shutdown and `DONE`.
 
-Current host validation passes all 12 transport test targets and 38 offline
-runner checks. Native ESP32 builds also compile both `MODE_SERVER` and
-`MODE_CLIENT`; a guarded public-header smoke check passes with the standard C++
+The November 5–6 validation passed all 12 transport test targets and 38 offline
+runner checks. Native ESP32 server and client example builds also compiled. The
+teaching sketch now selects those roles with `kMode` (`Mode::kServer` or
+`Mode::kClient`). A guarded public-header smoke check passed with the standard C++
 thread backend. The updated diagnostic harness also compiled against legacy
-transport source `74564ea`. These compile checks cover those entry points, while
-the throughput numbers come from the real loopback.
+transport source `74564ea`. These compile checks covered those entry points,
+while the throughput numbers came from the real loopback.
 
 The final current-source diagnostic also recovered from a forced 50 ms receive
 break over two 1 MiB transfers. It reported `FAULT fired=1 restored=1`, complete
@@ -305,7 +306,7 @@ delivered progress. Task watchdog settings are not changed.
 
 This runner controls the diagnostic harness. To build the standalone example,
 pass `--sketch examples/ReliableSerial/Benchmark/Benchmark.ino` to the builder;
-that sketch starts after reset and uses compile-time settings instead of `run`.
+that sketch starts after reset and uses editable constants instead of `run`.
 
 The host rejects incomplete runs, wrong command/configuration echoes, payload
 mismatches, truncated transfers, unexpected sample numbers and observed raw UART

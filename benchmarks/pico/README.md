@@ -272,10 +272,11 @@ It does not coexist with Arduino SerialUART on the same hardware UART.
 This backend currently supports native Arduino-Pico FreeRTOS builds. Host DMA
 emulation is not implemented. All twelve shared transport host test targets pass
 under the ESP32 profile, and all 38 offline benchmark runner checks pass. Native
-Pico `MODE_SERVER` and `MODE_CLIENT` example builds also pass compilation. An
-earlier Pico FreeRTOS host run exposed pre-existing
-ESP32-only dependencies/random-source assumptions in roo_transport's Bazel setup;
-those are not part of this hardware-performance change. Real RP2040 hardware is
+Pico server and client example builds passed compilation in the November 5–6
+snapshot; the teaching sketch now selects those roles with `kMode`
+(`Mode::kServer` or `Mode::kClient`). An earlier Pico FreeRTOS host run exposed
+pre-existing ESP32-only dependencies/random-source assumptions in roo_transport's
+Bazel setup; those are not part of this hardware-performance change. Real RP2040 hardware is
 the validation source for the DMA backend and the stock UART affinity fix.
 
 ## Additional hardware checks
