@@ -1,0 +1,475 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-06",
+  "analysis": "ESP32 worker stack reassessment with direct non-floating logging formatters",
+  "unit": "bytes",
+  "supersedes_operational_logging_assessment": "2026-11-06-stack-audit.json",
+  "platform": "Classic ESP32, Arduino-ESP32 3.3.7, ESP-IDF 87912cd291, Xtensa GCC 14.2.0",
+  "repositories": {
+    "roo_transport": "f91e77e2802ea7d774ca3a0c16e71a2821ffeadc",
+    "roo_io": "5346cb5c5aa75e21045fc5b58d15368c0c714c01",
+    "roo_collections": "d2ff5ae6a652afcc2cf5445858ca01e936dc5611",
+    "roo_threads": "52fd9c44cc0878eaf0782d8b981dcbec9e17a3a6",
+    "roo_logging": "eb1e2d588cb292cb79d2fb984e15598385706feb",
+    "roo_time": "0f235f6cfa81a35ec4091b4c73235bd819473f25",
+    "roo_flags": "10615db8cfb68a9099843f32241e711968483ecc",
+    "roo_backport": "77aa81a729a40b21c4bd5a69e8abba09863cc281"
+  },
+  "build_flags": [
+    "-fno-exceptions",
+    "-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096",
+    "-fstack-usage",
+    "-DMLOG_roo_transport_reliable_channel_connection=1"
+  ],
+  "elf_sha256": "ff2001031b28cba209289821838ae2c9c9017426b530eff32b002b539555d4ce",
+  "firmware_sha256": "0d8165d34a31922c6ef490674f60bcc0441e5f01ca78d07ddf22987b75095ada",
+  "snapshot_source_sha256": {
+    "roo_transport/src/roo_transport/link/internal/thread_safe/channel.cpp": "c6f2fd04c151e664e2ccc70a8344557510bce86a8dbbb238ed3009eec275122c",
+    "roo_transport/src/roo_transport/link/internal/transmitter.cpp": "feea0c38315bfe9a77eada7580065765d40f3b9665eeb9802ba9e27512430445",
+    "roo_transport/src/roo_transport/link/arduino/esp32/reliable_serial.h": "d73f896374bb9f8d12cd868c15d9e0b3a13233ae8e6a303fdc6166b844dd6b08",
+    "roo_logging/src/roo_logging/stream.h": "de21b4d4561951c2184c96cc9a8663c89ed192d3b0039b4d1f698dbe2363e8f7",
+    "roo_logging/src/roo_logging/stream.cpp": "059ad6918baf6d47669cf747253a185fa8336fe62ab68b8032a8ed519d5ec7cd",
+    "roo_logging/src/roo_logging/log_message.cpp": "7b395a0ee2de4d1eb34290366265376974e5c4344cb805fe8d449806aac3bde8",
+    "roo_logging/src/roo_logging/stderr.cpp": "70e8e3ab9adba2bab1393217e132dd181ce6096cae27a204b54e71b0cd3994fb",
+    "roo_time/src/roo_time/format.cpp": "8905e73c768daf4c21a3b6a9d39596121277e4c314dd4f2804eddb9acff4c99d"
+  },
+  "rom_elf_sha256": {
+    "esp32_rev0_rom.elf": "bef39889393de40d7ae8dcf1cfe0bba32435a96a0b6ec35839724a9fddd6049f",
+    "esp32_rev300_rom.elf": "920b70635440517866aab2230964a570d2cf2b676658d93c52fbac108c1cca31"
+  },
+  "method": [
+    "Build the recorded memory-probe server source with current local Roo snapshots, connection MLOG enabled and -fstack-usage. Inspect linked Xtensa entry a1,N instructions and reachable synchronous call paths.",
+    "Read the installed ESP32 revision0 and revision300 ROM ELFs for leaf division and console write wrappers omitted from the linked application ELF.",
+    "No firmware was uploaded and no smaller-stack hardware run or new runtime watermark measurement was performed."
+  ],
+  "log_operand_audit": "Built-in Channel sender/UART receive LOG, MLOG and CHECK operands contain no floating-point values. Pointer, time and diagnostic output avoid printf; float/double overloads remain available.",
+  "cpu_save_allowance": {
+    "permanent_coprocessor": 96,
+    "interrupt_or_exception_frame": 192,
+    "total": 288
+  },
+  "uptime_prefix": {
+    "frames": [
+      {
+        "function": "LogMessage constructor",
+        "bytes": 48
+      },
+      {
+        "function": "LogMessage::Init",
+        "bytes": 112
+      },
+      {
+        "function": "DefaultLogStream::formatUptime",
+        "bytes": 48
+      },
+      {
+        "function": "roo_time::FormatUptime",
+        "bytes": 48
+      },
+      {
+        "function": "roo_time::FormatDuration",
+        "bytes": 128
+      },
+      {
+        "function": "Writer::putUnsigned",
+        "bytes": 80
+      },
+      {
+        "function": "Writer::putChar or ROM division leaf",
+        "bytes": 32
+      }
+    ],
+    "simultaneous_function_frames": 496,
+    "rom_division_helpers": "__udivdi3 at 0x4000cff8 and __umoddi3 at 0x4000d280 each reserve 32 bytes and are leaf functions in both ROM revisions."
+  },
+  "prefix_paths": {
+    "sender_handshake": {
+      "callers": [
+        {
+          "function": "vPortTaskWrapper",
+          "bytes": 32
+        },
+        {
+          "function": "run_thread",
+          "bytes": 48
+        },
+        {
+          "function": "DynamicCallable::call",
+          "bytes": 32
+        },
+        {
+          "function": "Channel::sendLoop",
+          "bytes": 48
+        },
+        {
+          "function": "Channel::trySend",
+          "bytes": 288
+        },
+        {
+          "function": "Channel::conn",
+          "bytes": 80
+        }
+      ],
+      "total_including_cpu_save_areas": 1312
+    },
+    "receive_bad_ack": {
+      "callers": [
+        {
+          "function": "vPortTaskWrapper",
+          "bytes": 32
+        },
+        {
+          "function": "HardwareSerial::_uartEventTask",
+          "bytes": 64
+        },
+        {
+          "function": "receive callback _M_invoke",
+          "bytes": 32
+        },
+        {
+          "function": "receiveAvailable",
+          "bytes": 32
+        },
+        {
+          "function": "tryReceive",
+          "bytes": 32
+        },
+        {
+          "function": "processIncoming",
+          "bytes": 32
+        },
+        {
+          "function": "processPacket",
+          "bytes": 64
+        },
+        {
+          "function": "packet callback _M_invoke",
+          "bytes": 32
+        },
+        {
+          "function": "LinkTransport::processIncomingPacket",
+          "bytes": 32
+        },
+        {
+          "function": "Channel::packetReceived",
+          "bytes": 80
+        },
+        {
+          "function": "ThreadSafeTransmitter::ack",
+          "bytes": 48
+        },
+        {
+          "function": "Transmitter::ack",
+          "bytes": 80
+        }
+      ],
+      "total_including_cpu_save_areas": 1344
+    },
+    "receive_handshake": {
+      "callers": [
+        {
+          "function": "vPortTaskWrapper",
+          "bytes": 32
+        },
+        {
+          "function": "HardwareSerial::_uartEventTask",
+          "bytes": 64
+        },
+        {
+          "function": "receive callback _M_invoke",
+          "bytes": 32
+        },
+        {
+          "function": "receiveAvailable",
+          "bytes": 32
+        },
+        {
+          "function": "tryReceive",
+          "bytes": 32
+        },
+        {
+          "function": "processIncoming",
+          "bytes": 32
+        },
+        {
+          "function": "processPacket",
+          "bytes": 64
+        },
+        {
+          "function": "packet callback _M_invoke",
+          "bytes": 32
+        },
+        {
+          "function": "LinkTransport::processIncomingPacket",
+          "bytes": 32
+        },
+        {
+          "function": "Channel::packetReceived",
+          "bytes": 80
+        },
+        {
+          "function": "Channel::handleHandshakePacket",
+          "bytes": 208
+        }
+      ],
+      "total_including_cpu_save_areas": 1424
+    },
+    "interpretation": "Specific reachable paths, not whole-worker maximum bounds."
+  },
+  "stderr_output": {
+    "common_log_flush_frames": [
+      {
+        "function": "LogMessage destructor",
+        "bytes": 32
+      },
+      {
+        "function": "LogMessage::Flush",
+        "bytes": 32
+      },
+      {
+        "function": "LogMessage::SendToLog",
+        "bytes": 64
+      },
+      {
+        "function": "MaybeLogToStderr",
+        "bytes": 32
+      },
+      {
+        "function": "WriteToStderr",
+        "bytes": 32
+      }
+    ],
+    "contended_uart_write_chain": [
+      {
+        "function": "fwrite",
+        "bytes": 32
+      },
+      {
+        "function": "_fwrite_r",
+        "bytes": 64
+      },
+      {
+        "function": "__sfvwrite_r",
+        "bytes": 48
+      },
+      {
+        "function": "__swrite",
+        "bytes": 32
+      },
+      {
+        "function": "native VFS _write_r",
+        "bytes": 32
+      },
+      {
+        "function": "console_write",
+        "bytes": 32
+      },
+      {
+        "function": "ROM write",
+        "bytes": 32
+      },
+      {
+        "function": "ROM _write_r",
+        "bytes": 32
+      },
+      {
+        "function": "native VFS _write_r (underlying console)",
+        "bytes": 32
+      },
+      {
+        "function": "uart_write",
+        "bytes": 48
+      },
+      {
+        "function": "_lock_acquire_recursive",
+        "bytes": 32
+      },
+      {
+        "function": "lock_acquire_generic",
+        "bytes": 48
+      },
+      {
+        "function": "xQueueTakeMutexRecursive",
+        "bytes": 32
+      },
+      {
+        "function": "xQueueSemaphoreTake",
+        "bytes": 64
+      },
+      {
+        "function": "xTaskPriorityInherit",
+        "bytes": 32
+      },
+      {
+        "function": "xPortEnterCriticalTimeout",
+        "bytes": 48
+      },
+      {
+        "function": "esp_cpu_compare_and_set",
+        "bytes": 32
+      }
+    ],
+    "sender_handshake_padded_estimate": 1680,
+    "receive_handshake_padded_estimate": 1792,
+    "receive_remaining_nominal_space_in_2048": 256,
+    "interpretation": "Conservative padding for the examined stderr route, not a certified global upper bound. The 192-byte interrupt allowance overlaps deepest critical-section frames where RTOS interrupts are masked."
+  },
+  "fatal_core_dump": {
+    "condition": "Peer reset invokes connectOrDie FATAL callback on UART task; SDK flash ELF core dump enabled with no dedicated stack and a usable core-dump partition.",
+    "CONFIG_ESP_COREDUMP_ENABLE_TO_FLASH": 1,
+    "CONFIG_ESP_COREDUMP_DATA_FORMAT_ELF": 1,
+    "CONFIG_ESP_COREDUMP_STACK_SIZE": 0,
+    "compiled_partition": {
+      "label": "coredump",
+      "offset": 4128768,
+      "size": 65536
+    },
+    "frames": [
+      {
+        "function": "vPortTaskWrapper",
+        "bytes": 32
+      },
+      {
+        "function": "HardwareSerial::_uartEventTask",
+        "bytes": 64
+      },
+      {
+        "function": "receive callback _M_invoke",
+        "bytes": 32
+      },
+      {
+        "function": "receiveAvailable",
+        "bytes": 32
+      },
+      {
+        "function": "tryReceive",
+        "bytes": 32
+      },
+      {
+        "function": "processIncoming",
+        "bytes": 32
+      },
+      {
+        "function": "processPacket",
+        "bytes": 64
+      },
+      {
+        "function": "packet callback _M_invoke",
+        "bytes": 32
+      },
+      {
+        "function": "LinkTransport::processIncomingPacket",
+        "bytes": 32
+      },
+      {
+        "function": "Channel::packetReceived",
+        "bytes": 80
+      },
+      {
+        "function": "Channel::handleHandshakePacket",
+        "bytes": 208
+      },
+      {
+        "function": "std::function<void()>::operator()",
+        "bytes": 32
+      },
+      {
+        "function": "connectOrDie callback _M_invoke",
+        "bytes": 48
+      },
+      {
+        "function": "LogMessageFatal destructor",
+        "bytes": 32
+      },
+      {
+        "function": "LogMessage::Flush",
+        "bytes": 32
+      },
+      {
+        "function": "LogMessage::SendToLog",
+        "bytes": 64
+      },
+      {
+        "function": "Fail",
+        "bytes": 32
+      },
+      {
+        "function": "DumpStackTraceAndExit",
+        "bytes": 32
+      },
+      {
+        "function": "abort",
+        "bytes": 128
+      },
+      {
+        "function": "esp_system_abort",
+        "bytes": 32
+      },
+      {
+        "function": "panic_abort",
+        "bytes": 32
+      },
+      {
+        "function": "permanent coprocessor storage",
+        "bytes": 96
+      },
+      {
+        "function": "exception context",
+        "bytes": 192
+      },
+      {
+        "function": "xt_unhandled_exception",
+        "bytes": 32
+      },
+      {
+        "function": "panic_handler",
+        "bytes": 80
+      },
+      {
+        "function": "esp_panic_handler",
+        "bytes": 48
+      },
+      {
+        "function": "esp_core_dump_write",
+        "bytes": 32
+      },
+      {
+        "function": "esp_core_dump_write_elf_and_check",
+        "bytes": 32
+      },
+      {
+        "function": "esp_core_dump_store",
+        "bytes": 208
+      },
+      {
+        "function": "esp_core_dump_do_write_elf_pass",
+        "bytes": 160
+      },
+      {
+        "function": "elf_add_regs",
+        "bytes": 48
+      },
+      {
+        "function": "elf_add_note",
+        "bytes": 64
+      },
+      {
+        "function": "elf_write_note_header",
+        "bytes": 48
+      },
+      {
+        "function": "esp_core_dump_write_data",
+        "bytes": 48
+      }
+    ],
+    "minimum_stack_extent": 2192,
+    "interpretation": "A post-fatal crash-reporting path that exceeds 2048 bytes before further flash-writer calls. Exception and core-dump handling keep the task stack in this configuration.",
+    "primary_source": "https://github.com/espressif/esp-idf/blob/v5.5.2/components/espcoredump/src/core_dump_common.c#L142-L174"
+  },
+  "assessment": [
+    "2048 bytes is now a credible operational candidate for both built-in workers, including ordinary non-floating Roo connection logging and warnings.",
+    "The inspected receive stderr path leaves about 256 bytes, so callbacks, wall-clock implementations, log sinks, floats, SDK verbosity and different compiler/SDK configurations require their own budget.",
+    "Preserving the examined fatal core dump needs more task stack or a dedicated SDK core-dump stack. A short connect() disconnect callback can instead notify application code to handle peer reset outside the UART task.",
+    "The library and benchmark retain 4096-byte reservations; no 2048-byte hardware validation is implied. Changing both reservations to 2048 saves 4096 nominal stack bytes per endpoint, with allocator effects requiring measurement."
+  ]
+}

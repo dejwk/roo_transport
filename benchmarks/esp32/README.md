@@ -207,38 +207,55 @@ Larger windows, longer transfers, full queues, retransmissions and damaged COBS
 or checksum frames do not introduce larger automatic arrays or recursion: the
 buffers are on the heap and the processing is iterative.
 
-**A 2 KiB stack is nevertheless insufficient for some diagnostic paths.** In
-this native build, logging's nested prefix/`vsnprintf` formatting frames alone
-reserve 1,296 B. The message's 1,025 B text buffer is on the heap; the large stack
-cost comes from the formatter, including an 800 B `_svfprintf_r` frame.
+**2 KiB is a viable candidate for ordinary transport operation with the
+current non-floating-point logging implementation.** The built-in sender and
+UART receive log statements use integer IDs, counters, sequence numbers and
+strings. Pointer, timestamp and diagnostic output use direct formatting; they
+do not enter the floating-point `printf` overloads. The 1,025 B log text buffer
+remains heap allocated.
 
-The [compiled stack audit](results/2026-11-06-stack-audit.json) identifies two
-concrete paths. If an interrupt arrives at the deepest formatting point:
+The [native stack reassessment](results/2026-11-06-stack-audit-direct-formatting.json)
+rebuilds the ESP32 firmware with connection logging enabled. The deepest
+examined uptime-prefix formatting branch reserves 496 B of simultaneous
+function frames. Specific complete paths include:
 
-| Path | Active function frames | CPU save areas | Minimum stack extent |
-| --- | ---: | ---: | ---: |
-| Sender handshake, connection logging enabled | 1,824 B | 288 B | **2,112 B** |
-| Receive-side cross-talk ACK warning, enabled by default | 1,856 B | 288 B | **2,144 B** |
+| Formatting path, connection logging enabled | Function frames plus CPU save areas |
+| --- | ---: |
+| Sender handshake prefix | 1,312 B |
+| Receive-side bad-ACK warning prefix | 1,344 B |
+| Receive-side handshake prefix | 1,424 B |
 
-The 288 B comprises a permanent 96 B coprocessor save area and a 192 B interrupt
-frame saved on the interrupted task's stack before switching to the ISR stack.
-These are lower bounds for particular call paths, excluding further helper
-frames; they are not measured worst-case watermarks or universal upper bounds.
-Malformed COBS/checksum frames are silently dropped; the warning above requires
-a checksum-valid packet with an unexpected ACK control bit.
+The CPU allowance comprises a permanent 96 B coprocessor save area and a
+possible 192 B interrupt frame. These path sums are not whole-worker upper
+bounds. Log allocation and output are separate paths. The examined stderr
+route, including contended UART locking, gives padded estimates of
+**1,680 B for the sender** and **1,792 B for the receive task**. The latter leaves
+about **256 B** within a 2 KiB reservation. These estimates conservatively include
+interrupt storage even at deep critical-section points where RTOS interrupts
+are masked; other configurations and hooks can have different depths.
 
-Peer reset can also execute a disconnect callback on the UART task, including
-the fatal logging path installed by `connectOrDie()`. Custom callbacks, log sinks,
-logging wall clocks and alternative synchronous I/O backends can add their own
-stack use. Ordinary application serialization and reads run on the caller's
-stack rather than either worker's stack.
+There is a separate **fatal crash-reporting exception**. The installed SDK
+enables flash ELF core dumps with `CONFIG_ESP_COREDUMP_STACK_SIZE=0`, and the
+firmware includes a core-dump partition. A peer reset handled by
+`connectOrDie()` invokes FATAL logging and `abort()` on the receive task. The
+examined path into core-dump generation already reserves **at least 2,192 B**,
+before further flash-writer calls. It uses the crashing task's stack because
+this SDK configuration provides no dedicated core-dump stack.
 
-**3 KiB is a reasonable candidate for the examined built-in paths**, consistent
-with the receive adapter's logging guidance, but is not a certified upper bound
-or a hardware-validated smaller-stack configuration. **4 KiB remains the default
-and the benchmark setting.** Reducing both workers to 3 KiB would save 2 KiB per
-endpoint; reducing both to 2 KiB would save 4 KiB but would not cover the paths
-above. Stack watermarks from a clean run cannot establish their safety.
+Thus a 2 KiB worker budget can suit ordinary operation while still being too
+small to preserve this fatal report. A dedicated core-dump stack requires an
+SDK rebuild. Alternatively, `connect()` can install a short disconnect callback
+that notifies application code to handle peer reset outside the UART task.
+Custom callbacks, logging sinks, wall clocks, floating-point logging and SDK
+diagnostic verbosity also need their own stack budget. Ordinary application
+serialization and reads run on the caller's stack.
+
+**4 KiB remains the library default and benchmark setting.** The smaller
+configuration has native code analysis but no hardware stress validation here.
+Reducing both workers to 2 KiB would save **4 KiB of nominal stack reservations
+per endpoint**; allocator rounding can change the actual heap saving. Validation
+at that size needs connection logging, warning/reconnect paths and the chosen
+fatal-reporting policy, rather than only a clean throughput run.
 
 ### Application buffers and measurement scope
 
