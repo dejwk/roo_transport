@@ -72,6 +72,56 @@ fingerprints identify the exact measured implementation; the setup above
 describes the configuration to reproduce. Raw packet counter differences are
 diagnostics and are not an exact estimate of wire loss.
 
+## 2 KiB worker stack validation
+
+**2 KiB stacks pass native RP2040 DMA loopback with real USB log output,
+warnings and reconnection.** Both sender workers and both DMA receive workers
+reserve 2,048 B. The test uses the wiring above, 8,312,500 baud, 8 KiB protocol
+windows, priority-1 application/sender tasks, and separate 8 KiB application
+stacks.
+
+The [hardware record](../stack/results/2026-11-07-stack-validation.json) contains
+ten byte-checked transfers of **1 MiB + 1 B**, each preceded by 100 one-byte
+round trips and a 4,099 B phase using 1–7-byte application reads/writes. The
+additional diagnostic phase sends short protocol packets and checksum-valid
+bogus ACKs, confirms colored receive warnings, destroys/recreates the peer DMA
+endpoint, detects its new stream, reconnects, exchanges 17-byte patterns in both
+directions, then verifies EOF and worker shutdown.
+
+| Worker | Maximum observed usage across all phases | Minimum unused stack |
+| --- | ---: | ---: |
+| Sender | 1,016 B | **1,032 B** |
+| DMA receive | 1,048 B | **1,000 B** |
+
+There are no DMA ring overruns. The initial UART error latch is recorded
+separately; it does not increase during the tested workload. FreeRTOS watermarks
+are normalized from RP2040 words to bytes using `sizeof(StackType_t)`.
+
+The validation enables connection logging and routes stderr through USB:
+
+```text
+-DMLOG_roo_transport_reliable_channel_connection=1
+-DDEBUG_RP2040_PORT=Serial
+-DROO_LOGGING_COLORLOGTOSTDERR=true
+-DROO_THREADS_FREERTOS_DEFAULT_THREAD_STACK_SIZE=2048
+```
+
+Sender attributes explicitly request 2,048 B. The default-thread-size define
+sets the receive workers, which otherwise inherit 3 KiB. It affects all Roo
+FreeRTOS threads using default attributes; this probe explicitly reserves larger
+application stacks. `begin(sender_attributes)` alone changes only the sender.
+The core's debug-port setting is needed for actual stderr transmission; a
+configuration that discards stderr does not test the full USB output path.
+
+The shipped sender default remains 4 KiB and the DMA receive default remains
+3 KiB. Reducing both to 2 KiB saves **3 KiB of nominal stack reservations per
+endpoint**. These results cover the recorded native build and callbacks;
+additional user hooks, floating-point logging and SDK debug output require
+their own stack budget. Fatal handling is not exercised, and the ESP32-specific
+flash-core-dump analysis does not apply to Pico. The generated-pattern stack
+probe also differs from the throughput workload, so its rates do not replace
+the throughput table.
+
 ## Driver lifetime and resources
 
 Configure each SDK UART's pins, framing and baud before constructing

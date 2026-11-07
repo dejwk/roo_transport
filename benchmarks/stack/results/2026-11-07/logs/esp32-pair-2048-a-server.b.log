@@ -1,0 +1,62 @@
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:4640
+load:0x40078000,len:15660
+load:0x40080400,len:3164
+entry 0x4008059c
+READY stack_probe=1 command=run_ROLE_BAUD_WINDOW_LOG_BYTES_RUNS
+CONFIG role=2 topology=two_board baud=5000000 actual=5000000 actual2=0 window=3 bytes=1048577 runs=10 sender_stack=2048 receiver_stack=2048 app_stack=8192 server_stack=8192 unit_bytes=1 owner_core=1 mlog=1 primary_tx=4 primary_rx=2 secondary_tx=17 secondary_rx=16 configured_primary_rx=2 configured_secondary_rx=16
+STACK stage=started name=probe-tx0 number=11 free=1128 used=920 stack=2048 raw=1128 unit_bytes=1
+STACK stage=started name=uart_event_task number=12 free=1452 used=596 stack=2048 raw=1452 unit_bytes=1
+STACK_SNAPSHOT stage=started workers=2 expected=2
+IS+00:00:00.380408 probe-app(0x3ffb8c60) channel.cpp:170] (serial1) Transmitter and receiver are now connecting.
+IS+00:00:00.385214 probe-tx0(0x3ffae89c) channel.cpp:336] (serial1) Handshake packet sent: CONN 3820761152:2570
+IS+00:00:00.395822 uart_event_task(0x3ffaf324) channel.cpp:355] (serial1) Handshake packet received: CONN 1723061695:3315
+IS+00:00:00.405241 uart_event_task(0x3ffaf324) channel.cpp:404] (serial1) Receiver is now connected.
+IS+00:00:00.414049 probe-tx0(0x3ffae89c) channel.cpp:336] (serial1) Handshake packet sent: CONN/ACK 3820761152:2570/1723061695
+IS+00:00:00.425145 probe-tx0(0x3ffae89c) channel.cpp:336] (serial1) Handshake packet sent: CONN/ACK 3820761152:2570/1723061695
+IS+00:00:00.436072 uart_event_task(0x3ffaf324) channel.cpp:355] (serial1) Handshake packet received: CONN/ACK 1723061695:3315/3820761152
+IS+00:00:00.448003 uart_event_task(0x3ffaf324) channel.cpp:459] (serial1) Transmitter is now connected.
+IS+00:00:00.457294 probe-tx0(0x3ffae89c) channel.cpp:336] (serial1) Handshake packet sent: ACK 3820761152:2570/1723061695
+IS+00:00:00.467648 uart_event_task(0x3ffaf324) channel.cpp:355] (serial1) Handshake packet received: ACK 1723061695:3315/3820761152
+IS+00:00:00.480108 uart_event_task(0x3ffaf324) channel.cpp:355] (serial1) Handshake packet received: ACK 1723061695:3315/3820761152
+LATENCY sample=0 samples=100 min_us=555 p50_us=580 p90_us=601 p99_us=35036 max_us=35036
+RESULT kind=tiny sample=0 bytes=4099 us=10698 bad=0
+RESULT kind=bulk sample=0 bytes=1048577 us=2167897 bad=0
+LATENCY sample=1 samples=100 min_us=564 p50_us=582 p90_us=592 p99_us=792 max_us=792
+RESULT kind=tiny sample=1 bytes=4099 us=10414 bad=0
+RESULT kind=bulk sample=1 bytes=1048577 us=2168205 bad=0
+LATENCY sample=2 samples=100 min_us=550 p50_us=583 p90_us=594 p99_us=787 max_us=787
+RESULT kind=tiny sample=2 bytes=4099 us=10310 bad=0
+RESULT kind=bulk sample=2 bytes=1048577 us=2168205 bad=0
+LATENCY sample=3 samples=100 min_us=571 p50_us=581 p90_us=592 p99_us=779 max_us=779
+RESULT kind=tiny sample=3 bytes=4099 us=10873 bad=0
+RESULT kind=bulk sample=3 bytes=1048577 us=2168407 bad=0
+LATENCY sample=4 samples=100 min_us=565 p50_us=582 p90_us=595 p99_us=800 max_us=800
+RESULT kind=tiny sample=4 bytes=4099 us=10237 bad=0
+RESULT kind=bulk sample=4 bytes=1048577 us=2167872 bad=0
+LATENCY sample=5 samples=100 min_us=562 p50_us=580 p90_us=591 p99_us=771 max_us=771
+RESULT kind=tiny sample=5 bytes=4099 us=10304 bad=0
+RESULT kind=bulk sample=5 bytes=1048577 us=2168146 bad=0
+LATENCY sample=6 samples=100 min_us=559 p50_us=579 p90_us=591 p99_us=787 max_us=787
+RESULT kind=tiny sample=6 bytes=4099 us=10408 bad=0
+RESULT kind=bulk sample=6 bytes=1048577 us=2168384 bad=0
+LATENCY sample=7 samples=100 min_us=534 p50_us=581 p90_us=592 p99_us=814 max_us=814
+RESULT kind=tiny sample=7 bytes=4099 us=10751 bad=0
+RESULT kind=bulk sample=7 bytes=1048577 us=2168352 bad=0
+LATENCY sample=8 samples=100 min_us=544 p50_us=579 p90_us=591 p99_us=784 max_us=784
+RESULT kind=tiny sample=8 bytes=4099 us=10603 bad=0
+RESULT kind=bulk sample=8 bytes=1048577 us=2167826 bad=0
+LATENCY sample=9 samples=100 min_us=568 p50_us=581 p90_us=590 p99_us=813 max_us=813
+RESULT kind=tiny sample=9 bytes=4099 us=10521 bad=0
+RESULT kind=bulk sample=9 bytes=1048577 us=2168118 bad=0
+CLIENT request_closed=1 response_eof=1
+STACK stage=finished name=probe-tx0 number=11 free=504 used=1544 stack=2048 raw=504 unit_bytes=1
+STACK stage=finished name=uart_event_task number=12 free=380 used=1668 stack=2048 raw=380 unit_bytes=1
+STACK_SNAPSHOT stage=finished workers=2 expected=2
+LIFECYCLE stream_eof_and_stop=PASS callbacks=0
+DONE

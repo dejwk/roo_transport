@@ -1,0 +1,2768 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-07",
+  "objective": "Hardware validation of 2048-byte transport sender and receive-worker stacks",
+  "accepted": true,
+  "unit": "bytes",
+  "firmware": {
+    "esp32-probe-2048": {
+      "path": "2026-11-07/esp32-probe-2048-manifest.json",
+      "sha256": "d4e9891bef9f929a64d581e90a22b1dcf148d207f27bd998c3cada8b0f2740c2",
+      "firmware_sha256": "696d5a813219bcaa5215b7f05a876ed902d7cbe1d4a00506420ddee59cb48073",
+      "source": "2026-11-07/probe.cpp"
+    },
+    "pico-probe-2048-preliminary": {
+      "path": "2026-11-07/pico-probe-2048-preliminary-manifest.json",
+      "sha256": "4691e18d074b8d4b7ed4cd637cb8142c8535a97460ffbd082f8dd58b2f32395a",
+      "firmware_sha256": "beb479acf59442b71d72dd40de03f82cdfcc732985dfa243e4cfbd29a2ce44bd",
+      "source": "2026-11-07/probe.cpp"
+    },
+    "pico-diagnostics-2048": {
+      "path": "2026-11-07/pico-diagnostics-2048-manifest.json",
+      "sha256": "d63d498f9b61e22c288c0e5b74857b8c5046a004e7a605683a0f93e44bed0206",
+      "firmware_sha256": "6ac7edbcb6ef25a852c5044e81d2c3349af7a88985a89b35a895a23d7e2634df",
+      "source": "2026-11-07/pico-diagnostics.cpp"
+    }
+  },
+  "source_files": {
+    "probe.cpp": {
+      "path": "2026-11-07/probe.cpp",
+      "sha256": "a8412c0016ad9f59590b67401bcd5ece822fd565fb8a54cc827e9ebdcff56762"
+    },
+    "pico-diagnostics.cpp": {
+      "path": "2026-11-07/pico-diagnostics.cpp",
+      "sha256": "57fa3fe54806c892d4e0a06ad47633df75d4d9680f0304368cafce9abb1bdcf1"
+    }
+  },
+  "primary_summary": [
+    {
+      "group": "esp32_two_board",
+      "cases": [
+        "esp32-pair-2048-a-server",
+        "esp32-pair-2048-b-server"
+      ],
+      "boards": [
+        "a",
+        "b"
+      ],
+      "minimum_free_bytes": 380,
+      "maximum_used_bytes": 1668,
+      "stack_bytes": 2048,
+      "by_worker_type": {
+        "sender": {
+          "minimum_free_bytes": 456,
+          "maximum_used_bytes": 1592,
+          "stack_bytes": 2048
+        },
+        "receiver": {
+          "minimum_free_bytes": 380,
+          "maximum_used_bytes": 1668,
+          "stack_bytes": 2048
+        }
+      }
+    },
+    {
+      "group": "esp32_internal_matrix",
+      "cases": [
+        "esp32-a-matrix-2048",
+        "esp32-b-matrix-2048"
+      ],
+      "boards": [
+        "a",
+        "b"
+      ],
+      "minimum_free_bytes": 240,
+      "maximum_used_bytes": 1808,
+      "stack_bytes": 2048,
+      "by_worker_type": {
+        "sender": {
+          "minimum_free_bytes": 452,
+          "maximum_used_bytes": 1596,
+          "stack_bytes": 2048
+        },
+        "receiver": {
+          "minimum_free_bytes": 240,
+          "maximum_used_bytes": 1808,
+          "stack_bytes": 2048
+        }
+      }
+    },
+    {
+      "group": "pico_dma_full_logging",
+      "cases": [
+        "pico-usb-logging-diagnostics-2048"
+      ],
+      "boards": [
+        "pico"
+      ],
+      "minimum_free_bytes": 1000,
+      "maximum_used_bytes": 1048,
+      "stack_bytes": 2048,
+      "by_worker_type": {
+        "sender": {
+          "minimum_free_bytes": 1032,
+          "maximum_used_bytes": 1016,
+          "stack_bytes": 2048
+        },
+        "receiver": {
+          "minimum_free_bytes": 1000,
+          "maximum_used_bytes": 1048,
+          "stack_bytes": 2048
+        }
+      }
+    }
+  ],
+  "primary_totals": {
+    "bulk_payload_bytes": 37748772,
+    "tiny_payload_bytes": 147564,
+    "latency_payload_bytes": 3600,
+    "all_verified_response_bytes": 37899936,
+    "bulk_transfers": 36,
+    "primary_cases": 5,
+    "excluded_preliminary_cases": 1
+  },
+  "cases": [
+    {
+      "id": "esp32-pair-2048-a-server",
+      "accepted": true,
+      "settings": {
+        "label": "esp32-pair-2048-a-server",
+        "boards": [
+          "a",
+          "b"
+        ],
+        "roles": [
+          1,
+          2
+        ],
+        "baud": 5000000,
+        "window": 3,
+        "bytes": 1048577,
+        "runs": 10,
+        "stack": 2048,
+        "timeout": 100
+      },
+      "primary_evidence": true,
+      "logging_claim": "connection logging visible from sender and receive workers",
+      "input_record_sha256": "29a80d31314132a21ad2fb083aaf62b55c566130935a78190f418c0cb296534d",
+      "endpoints": {
+        "a": {
+          "configuration": {
+            "role": 1,
+            "topology": "two_board",
+            "baud": 5000000,
+            "actual": 5000000,
+            "actual2": 0,
+            "window": 3,
+            "bytes": 1048577,
+            "runs": 10,
+            "sender_stack": 2048,
+            "receiver_stack": 2048,
+            "app_stack": 8192,
+            "server_stack": 8192,
+            "unit_bytes": 1,
+            "owner_core": 1,
+            "mlog": 1,
+            "primary_tx": 4,
+            "primary_rx": 2,
+            "secondary_tx": 17,
+            "secondary_rx": 16,
+            "configured_primary_rx": 2,
+            "configured_secondary_rx": 16
+          },
+          "worker_watermarks_all_stages": [
+            {
+              "stage": "started",
+              "name": "probe-tx0",
+              "number": 11,
+              "free": 1128,
+              "used": 920,
+              "stack": 2048,
+              "raw": 1128,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "started",
+              "name": "uart_event_task",
+              "number": 12,
+              "free": 1452,
+              "used": 596,
+              "stack": 2048,
+              "raw": 1452,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "finished",
+              "name": "probe-tx0",
+              "number": 11,
+              "free": 504,
+              "used": 1544,
+              "stack": 2048,
+              "raw": 504,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "finished",
+              "name": "uart_event_task",
+              "number": 12,
+              "free": 380,
+              "used": 1668,
+              "stack": 2048,
+              "raw": 380,
+              "unit_bytes": 1
+            }
+          ],
+          "worker_stack_summary": {
+            "minimum_free_bytes": 380,
+            "maximum_used_bytes": 1668,
+            "stack_bytes": 2048,
+            "by_worker_type": {
+              "sender": {
+                "minimum_free_bytes": 504,
+                "maximum_used_bytes": 1544,
+                "stack_bytes": 2048
+              },
+              "receiver": {
+                "minimum_free_bytes": 380,
+                "maximum_used_bytes": 1668,
+                "stack_bytes": 2048
+              }
+            },
+            "minima_by_task_number": [
+              {
+                "stage": "finished",
+                "name": "probe-tx0",
+                "number": 11,
+                "free": 504,
+                "used": 1544,
+                "stack": 2048,
+                "raw": 504,
+                "unit_bytes": 1
+              },
+              {
+                "stage": "finished",
+                "name": "uart_event_task",
+                "number": 12,
+                "free": 380,
+                "used": 1668,
+                "stack": 2048,
+                "raw": 380,
+                "unit_bytes": 1
+              }
+            ]
+          },
+          "bulk_results": [],
+          "tiny_results": [],
+          "latency_us": [],
+          "payload_mbit_s": null,
+          "bulk_payload_bytes": 0,
+          "tiny_payload_bytes": 0,
+          "latency_payload_bytes": 0,
+          "worker_logs_visible": true,
+          "dma": null,
+          "diagnostics": null,
+          "board_model": "ESP32-D0WDQ6 revision v1.1",
+          "firmware": "esp32-probe-2048",
+          "raw_log": {
+            "path": "2026-11-07/logs/esp32-pair-2048-a-server.a.log",
+            "sha256": "414da30f13548570d53652bd0165d395e1a4ba50d7338f181aa64a5c0d8a8bee",
+            "bytes": 2768,
+            "ansi_preserved": true
+          }
+        },
+        "b": {
+          "configuration": {
+            "role": 2,
+            "topology": "two_board",
+            "baud": 5000000,
+            "actual": 5000000,
+            "actual2": 0,
+            "window": 3,
+            "bytes": 1048577,
+            "runs": 10,
+            "sender_stack": 2048,
+            "receiver_stack": 2048,
+            "app_stack": 8192,
+            "server_stack": 8192,
+            "unit_bytes": 1,
+            "owner_core": 1,
+            "mlog": 1,
+            "primary_tx": 4,
+            "primary_rx": 2,
+            "secondary_tx": 17,
+            "secondary_rx": 16,
+            "configured_primary_rx": 2,
+            "configured_secondary_rx": 16
+          },
+          "worker_watermarks_all_stages": [
+            {
+              "stage": "started",
+              "name": "probe-tx0",
+              "number": 11,
+              "free": 1128,
+              "used": 920,
+              "stack": 2048,
+              "raw": 1128,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "started",
+              "name": "uart_event_task",
+              "number": 12,
+              "free": 1452,
+              "used": 596,
+              "stack": 2048,
+              "raw": 1452,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "finished",
+              "name": "probe-tx0",
+              "number": 11,
+              "free": 504,
+              "used": 1544,
+              "stack": 2048,
+              "raw": 504,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "finished",
+              "name": "uart_event_task",
+              "number": 12,
+              "free": 380,
+              "used": 1668,
+              "stack": 2048,
+              "raw": 380,
+              "unit_bytes": 1
+            }
+          ],
+          "worker_stack_summary": {
+            "minimum_free_bytes": 380,
+            "maximum_used_bytes": 1668,
+            "stack_bytes": 2048,
+            "by_worker_type": {
+              "sender": {
+                "minimum_free_bytes": 504,
+                "maximum_used_bytes": 1544,
+                "stack_bytes": 2048
+              },
+              "receiver": {
+                "minimum_free_bytes": 380,
+                "maximum_used_bytes": 1668,
+                "stack_bytes": 2048
+              }
+            },
+            "minima_by_task_number": [
+              {
+                "stage": "finished",
+                "name": "probe-tx0",
+                "number": 11,
+                "free": 504,
+                "used": 1544,
+                "stack": 2048,
+                "raw": 504,
+                "unit_bytes": 1
+              },
+              {
+                "stage": "finished",
+                "name": "uart_event_task",
+                "number": 12,
+                "free": 380,
+                "used": 1668,
+                "stack": 2048,
+                "raw": 380,
+                "unit_bytes": 1
+              }
+            ]
+          },
+          "bulk_results": [
+            {
+              "kind": "bulk",
+              "sample": 0,
+              "bytes": 1048577,
+              "us": 2167897,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 1,
+              "bytes": 1048577,
+              "us": 2168205,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 2,
+              "bytes": 1048577,
+              "us": 2168205,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 3,
+              "bytes": 1048577,
+              "us": 2168407,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 4,
+              "bytes": 1048577,
+              "us": 2167872,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 5,
+              "bytes": 1048577,
+              "us": 2168146,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 6,
+              "bytes": 1048577,
+              "us": 2168384,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 7,
+              "bytes": 1048577,
+              "us": 2168352,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 8,
+              "bytes": 1048577,
+              "us": 2167826,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 9,
+              "bytes": 1048577,
+              "us": 2168118,
+              "bad": 0
+            }
+          ],
+          "tiny_results": [
+            {
+              "kind": "tiny",
+              "sample": 0,
+              "bytes": 4099,
+              "us": 10698,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 1,
+              "bytes": 4099,
+              "us": 10414,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 2,
+              "bytes": 4099,
+              "us": 10310,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 3,
+              "bytes": 4099,
+              "us": 10873,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 4,
+              "bytes": 4099,
+              "us": 10237,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 5,
+              "bytes": 4099,
+              "us": 10304,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 6,
+              "bytes": 4099,
+              "us": 10408,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 7,
+              "bytes": 4099,
+              "us": 10751,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 8,
+              "bytes": 4099,
+              "us": 10603,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 9,
+              "bytes": 4099,
+              "us": 10521,
+              "bad": 0
+            }
+          ],
+          "latency_us": [
+            {
+              "sample": 0,
+              "samples": 100,
+              "min_us": 555,
+              "p50_us": 580,
+              "p90_us": 601,
+              "p99_us": 35036,
+              "max_us": 35036
+            },
+            {
+              "sample": 1,
+              "samples": 100,
+              "min_us": 564,
+              "p50_us": 582,
+              "p90_us": 592,
+              "p99_us": 792,
+              "max_us": 792
+            },
+            {
+              "sample": 2,
+              "samples": 100,
+              "min_us": 550,
+              "p50_us": 583,
+              "p90_us": 594,
+              "p99_us": 787,
+              "max_us": 787
+            },
+            {
+              "sample": 3,
+              "samples": 100,
+              "min_us": 571,
+              "p50_us": 581,
+              "p90_us": 592,
+              "p99_us": 779,
+              "max_us": 779
+            },
+            {
+              "sample": 4,
+              "samples": 100,
+              "min_us": 565,
+              "p50_us": 582,
+              "p90_us": 595,
+              "p99_us": 800,
+              "max_us": 800
+            },
+            {
+              "sample": 5,
+              "samples": 100,
+              "min_us": 562,
+              "p50_us": 580,
+              "p90_us": 591,
+              "p99_us": 771,
+              "max_us": 771
+            },
+            {
+              "sample": 6,
+              "samples": 100,
+              "min_us": 559,
+              "p50_us": 579,
+              "p90_us": 591,
+              "p99_us": 787,
+              "max_us": 787
+            },
+            {
+              "sample": 7,
+              "samples": 100,
+              "min_us": 534,
+              "p50_us": 581,
+              "p90_us": 592,
+              "p99_us": 814,
+              "max_us": 814
+            },
+            {
+              "sample": 8,
+              "samples": 100,
+              "min_us": 544,
+              "p50_us": 579,
+              "p90_us": 591,
+              "p99_us": 784,
+              "max_us": 784
+            },
+            {
+              "sample": 9,
+              "samples": 100,
+              "min_us": 568,
+              "p50_us": 581,
+              "p90_us": 590,
+              "p99_us": 813,
+              "max_us": 813
+            }
+          ],
+          "payload_mbit_s": {
+            "samples": 10,
+            "min": 3.8685615753869085,
+            "mean": 3.8690358699490894,
+            "max": 3.8695983902767104,
+            "aggregate": 3.869035835857923
+          },
+          "bulk_payload_bytes": 10485770,
+          "tiny_payload_bytes": 40990,
+          "latency_payload_bytes": 1000,
+          "worker_logs_visible": true,
+          "dma": null,
+          "diagnostics": null,
+          "board_model": "ESP32-D0WD-V3 revision v3.1",
+          "firmware": "esp32-probe-2048",
+          "raw_log": {
+            "path": "2026-11-07/logs/esp32-pair-2048-a-server.b.log",
+            "sha256": "1c8b31c68239d20a625f26154d70ce91e51b7764879276cfc091a913b76cc1a5",
+            "bytes": 4528,
+            "ansi_preserved": true
+          }
+        }
+      }
+    },
+    {
+      "id": "esp32-pair-2048-b-server",
+      "accepted": true,
+      "settings": {
+        "label": "esp32-pair-2048-b-server",
+        "boards": [
+          "a",
+          "b"
+        ],
+        "roles": [
+          2,
+          1
+        ],
+        "baud": 5000000,
+        "window": 3,
+        "bytes": 1048577,
+        "runs": 10,
+        "stack": 2048,
+        "timeout": 100
+      },
+      "primary_evidence": true,
+      "logging_claim": "connection logging visible from sender and receive workers",
+      "input_record_sha256": "4b5a70ddf35e30be4e4c6f83b7bb072a612ef28dc931ae443bab6b46a99fd22f",
+      "endpoints": {
+        "a": {
+          "configuration": {
+            "role": 2,
+            "topology": "two_board",
+            "baud": 5000000,
+            "actual": 5000000,
+            "actual2": 0,
+            "window": 3,
+            "bytes": 1048577,
+            "runs": 10,
+            "sender_stack": 2048,
+            "receiver_stack": 2048,
+            "app_stack": 8192,
+            "server_stack": 8192,
+            "unit_bytes": 1,
+            "owner_core": 1,
+            "mlog": 1,
+            "primary_tx": 4,
+            "primary_rx": 2,
+            "secondary_tx": 17,
+            "secondary_rx": 16,
+            "configured_primary_rx": 2,
+            "configured_secondary_rx": 16
+          },
+          "worker_watermarks_all_stages": [
+            {
+              "stage": "started",
+              "name": "probe-tx0",
+              "number": 11,
+              "free": 1128,
+              "used": 920,
+              "stack": 2048,
+              "raw": 1128,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "started",
+              "name": "uart_event_task",
+              "number": 12,
+              "free": 1452,
+              "used": 596,
+              "stack": 2048,
+              "raw": 1452,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "finished",
+              "name": "probe-tx0",
+              "number": 11,
+              "free": 504,
+              "used": 1544,
+              "stack": 2048,
+              "raw": 504,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "finished",
+              "name": "uart_event_task",
+              "number": 12,
+              "free": 380,
+              "used": 1668,
+              "stack": 2048,
+              "raw": 380,
+              "unit_bytes": 1
+            }
+          ],
+          "worker_stack_summary": {
+            "minimum_free_bytes": 380,
+            "maximum_used_bytes": 1668,
+            "stack_bytes": 2048,
+            "by_worker_type": {
+              "sender": {
+                "minimum_free_bytes": 504,
+                "maximum_used_bytes": 1544,
+                "stack_bytes": 2048
+              },
+              "receiver": {
+                "minimum_free_bytes": 380,
+                "maximum_used_bytes": 1668,
+                "stack_bytes": 2048
+              }
+            },
+            "minima_by_task_number": [
+              {
+                "stage": "finished",
+                "name": "probe-tx0",
+                "number": 11,
+                "free": 504,
+                "used": 1544,
+                "stack": 2048,
+                "raw": 504,
+                "unit_bytes": 1
+              },
+              {
+                "stage": "finished",
+                "name": "uart_event_task",
+                "number": 12,
+                "free": 380,
+                "used": 1668,
+                "stack": 2048,
+                "raw": 380,
+                "unit_bytes": 1
+              }
+            ]
+          },
+          "bulk_results": [
+            {
+              "kind": "bulk",
+              "sample": 0,
+              "bytes": 1048577,
+              "us": 2167796,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 1,
+              "bytes": 1048577,
+              "us": 2167578,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 2,
+              "bytes": 1048577,
+              "us": 2168696,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 3,
+              "bytes": 1048577,
+              "us": 2167589,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 4,
+              "bytes": 1048577,
+              "us": 2169971,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 5,
+              "bytes": 1048577,
+              "us": 2168371,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 6,
+              "bytes": 1048577,
+              "us": 2169039,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 7,
+              "bytes": 1048577,
+              "us": 2170801,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 8,
+              "bytes": 1048577,
+              "us": 2167496,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 9,
+              "bytes": 1048577,
+              "us": 2169011,
+              "bad": 0
+            }
+          ],
+          "tiny_results": [
+            {
+              "kind": "tiny",
+              "sample": 0,
+              "bytes": 4099,
+              "us": 10767,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 1,
+              "bytes": 4099,
+              "us": 10631,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 2,
+              "bytes": 4099,
+              "us": 10449,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 3,
+              "bytes": 4099,
+              "us": 10587,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 4,
+              "bytes": 4099,
+              "us": 10737,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 5,
+              "bytes": 4099,
+              "us": 10656,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 6,
+              "bytes": 4099,
+              "us": 10680,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 7,
+              "bytes": 4099,
+              "us": 10714,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 8,
+              "bytes": 4099,
+              "us": 10896,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 9,
+              "bytes": 4099,
+              "us": 10597,
+              "bad": 0
+            }
+          ],
+          "latency_us": [
+            {
+              "sample": 0,
+              "samples": 100,
+              "min_us": 568,
+              "p50_us": 591,
+              "p90_us": 606,
+              "p99_us": 12539,
+              "max_us": 12539
+            },
+            {
+              "sample": 1,
+              "samples": 100,
+              "min_us": 559,
+              "p50_us": 593,
+              "p90_us": 605,
+              "p99_us": 819,
+              "max_us": 819
+            },
+            {
+              "sample": 2,
+              "samples": 100,
+              "min_us": 551,
+              "p50_us": 594,
+              "p90_us": 601,
+              "p99_us": 780,
+              "max_us": 780
+            },
+            {
+              "sample": 3,
+              "samples": 100,
+              "min_us": 581,
+              "p50_us": 596,
+              "p90_us": 606,
+              "p99_us": 860,
+              "max_us": 860
+            },
+            {
+              "sample": 4,
+              "samples": 100,
+              "min_us": 580,
+              "p50_us": 594,
+              "p90_us": 601,
+              "p99_us": 794,
+              "max_us": 794
+            },
+            {
+              "sample": 5,
+              "samples": 100,
+              "min_us": 573,
+              "p50_us": 588,
+              "p90_us": 597,
+              "p99_us": 786,
+              "max_us": 786
+            },
+            {
+              "sample": 6,
+              "samples": 100,
+              "min_us": 569,
+              "p50_us": 592,
+              "p90_us": 610,
+              "p99_us": 772,
+              "max_us": 772
+            },
+            {
+              "sample": 7,
+              "samples": 100,
+              "min_us": 573,
+              "p50_us": 592,
+              "p90_us": 605,
+              "p99_us": 787,
+              "max_us": 787
+            },
+            {
+              "sample": 8,
+              "samples": 100,
+              "min_us": 578,
+              "p50_us": 591,
+              "p90_us": 610,
+              "p99_us": 777,
+              "max_us": 777
+            },
+            {
+              "sample": 9,
+              "samples": 100,
+              "min_us": 570,
+              "p50_us": 592,
+              "p90_us": 605,
+              "p99_us": 783,
+              "max_us": 783
+            }
+          ],
+          "payload_mbit_s": {
+            "samples": 10,
+            "min": 3.8642952532268042,
+            "mean": 3.8681561198477596,
+            "max": 3.870187534371459,
+            "aggregate": 3.868155209904406
+          },
+          "bulk_payload_bytes": 10485770,
+          "tiny_payload_bytes": 40990,
+          "latency_payload_bytes": 1000,
+          "worker_logs_visible": true,
+          "dma": null,
+          "diagnostics": null,
+          "board_model": "ESP32-D0WDQ6 revision v1.1",
+          "firmware": "esp32-probe-2048",
+          "raw_log": {
+            "path": "2026-11-07/logs/esp32-pair-2048-b-server.a.log",
+            "sha256": "9c6a93830dd0dc1e3aec4f6969a13768db20d0655eb3440e39d4182e107642b7",
+            "bytes": 4797,
+            "ansi_preserved": true
+          }
+        },
+        "b": {
+          "configuration": {
+            "role": 1,
+            "topology": "two_board",
+            "baud": 5000000,
+            "actual": 5000000,
+            "actual2": 0,
+            "window": 3,
+            "bytes": 1048577,
+            "runs": 10,
+            "sender_stack": 2048,
+            "receiver_stack": 2048,
+            "app_stack": 8192,
+            "server_stack": 8192,
+            "unit_bytes": 1,
+            "owner_core": 1,
+            "mlog": 1,
+            "primary_tx": 4,
+            "primary_rx": 2,
+            "secondary_tx": 17,
+            "secondary_rx": 16,
+            "configured_primary_rx": 2,
+            "configured_secondary_rx": 16
+          },
+          "worker_watermarks_all_stages": [
+            {
+              "stage": "started",
+              "name": "probe-tx0",
+              "number": 11,
+              "free": 1128,
+              "used": 920,
+              "stack": 2048,
+              "raw": 1128,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "started",
+              "name": "uart_event_task",
+              "number": 12,
+              "free": 1452,
+              "used": 596,
+              "stack": 2048,
+              "raw": 1452,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "finished",
+              "name": "probe-tx0",
+              "number": 11,
+              "free": 456,
+              "used": 1592,
+              "stack": 2048,
+              "raw": 456,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "finished",
+              "name": "uart_event_task",
+              "number": 12,
+              "free": 380,
+              "used": 1668,
+              "stack": 2048,
+              "raw": 380,
+              "unit_bytes": 1
+            }
+          ],
+          "worker_stack_summary": {
+            "minimum_free_bytes": 380,
+            "maximum_used_bytes": 1668,
+            "stack_bytes": 2048,
+            "by_worker_type": {
+              "sender": {
+                "minimum_free_bytes": 456,
+                "maximum_used_bytes": 1592,
+                "stack_bytes": 2048
+              },
+              "receiver": {
+                "minimum_free_bytes": 380,
+                "maximum_used_bytes": 1668,
+                "stack_bytes": 2048
+              }
+            },
+            "minima_by_task_number": [
+              {
+                "stage": "finished",
+                "name": "probe-tx0",
+                "number": 11,
+                "free": 456,
+                "used": 1592,
+                "stack": 2048,
+                "raw": 456,
+                "unit_bytes": 1
+              },
+              {
+                "stage": "finished",
+                "name": "uart_event_task",
+                "number": 12,
+                "free": 380,
+                "used": 1668,
+                "stack": 2048,
+                "raw": 380,
+                "unit_bytes": 1
+              }
+            ]
+          },
+          "bulk_results": [],
+          "tiny_results": [],
+          "latency_us": [],
+          "payload_mbit_s": null,
+          "bulk_payload_bytes": 0,
+          "tiny_payload_bytes": 0,
+          "latency_payload_bytes": 0,
+          "worker_logs_visible": true,
+          "dma": null,
+          "diagnostics": null,
+          "board_model": "ESP32-D0WD-V3 revision v3.1",
+          "firmware": "esp32-probe-2048",
+          "raw_log": {
+            "path": "2026-11-07/logs/esp32-pair-2048-b-server.b.log",
+            "sha256": "439796e263f827c1c1a4fba536d8b8bba758504df128a6ef2428f477d0a7374d",
+            "bytes": 2698,
+            "ansi_preserved": true
+          }
+        }
+      }
+    },
+    {
+      "id": "esp32-a-matrix-2048",
+      "accepted": true,
+      "settings": {
+        "label": "esp32-a-matrix-2048",
+        "boards": [
+          "a"
+        ],
+        "roles": [
+          3
+        ],
+        "baud": 5000000,
+        "window": 3,
+        "bytes": 1048577,
+        "runs": 3,
+        "stack": 2048,
+        "timeout": 60
+      },
+      "primary_evidence": true,
+      "logging_claim": "connection logging visible from sender and receive workers",
+      "input_record_sha256": "765c4c1b4ae17cafb46cea47ace3772b7a29c15ff714a3e3ae8b0a5124d042a0",
+      "endpoints": {
+        "a": {
+          "configuration": {
+            "role": 3,
+            "topology": "internal_matrix",
+            "baud": 5000000,
+            "actual": 5000000,
+            "actual2": 5000000,
+            "window": 3,
+            "bytes": 1048577,
+            "runs": 3,
+            "sender_stack": 2048,
+            "receiver_stack": 2048,
+            "app_stack": 8192,
+            "server_stack": 8192,
+            "unit_bytes": 1,
+            "owner_core": 1,
+            "mlog": 1,
+            "primary_tx": 4,
+            "primary_rx": 17,
+            "secondary_tx": 17,
+            "secondary_rx": 4,
+            "configured_primary_rx": 2,
+            "configured_secondary_rx": 16
+          },
+          "worker_watermarks_all_stages": [
+            {
+              "stage": "started",
+              "name": "probe-tx1",
+              "number": 13,
+              "free": 1128,
+              "used": 920,
+              "stack": 2048,
+              "raw": 1128,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "started",
+              "name": "probe-tx0",
+              "number": 11,
+              "free": 1124,
+              "used": 924,
+              "stack": 2048,
+              "raw": 1124,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "started",
+              "name": "uart_event_task",
+              "number": 12,
+              "free": 1452,
+              "used": 596,
+              "stack": 2048,
+              "raw": 1452,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "started",
+              "name": "uart_event_task",
+              "number": 14,
+              "free": 1456,
+              "used": 592,
+              "stack": 2048,
+              "raw": 1456,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "finished",
+              "name": "probe-tx0",
+              "number": 11,
+              "free": 452,
+              "used": 1596,
+              "stack": 2048,
+              "raw": 452,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "finished",
+              "name": "probe-tx1",
+              "number": 13,
+              "free": 456,
+              "used": 1592,
+              "stack": 2048,
+              "raw": 456,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "finished",
+              "name": "uart_event_task",
+              "number": 14,
+              "free": 384,
+              "used": 1664,
+              "stack": 2048,
+              "raw": 384,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "finished",
+              "name": "uart_event_task",
+              "number": 12,
+              "free": 332,
+              "used": 1716,
+              "stack": 2048,
+              "raw": 332,
+              "unit_bytes": 1
+            }
+          ],
+          "worker_stack_summary": {
+            "minimum_free_bytes": 332,
+            "maximum_used_bytes": 1716,
+            "stack_bytes": 2048,
+            "by_worker_type": {
+              "sender": {
+                "minimum_free_bytes": 452,
+                "maximum_used_bytes": 1596,
+                "stack_bytes": 2048
+              },
+              "receiver": {
+                "minimum_free_bytes": 332,
+                "maximum_used_bytes": 1716,
+                "stack_bytes": 2048
+              }
+            },
+            "minima_by_task_number": [
+              {
+                "stage": "finished",
+                "name": "probe-tx0",
+                "number": 11,
+                "free": 452,
+                "used": 1596,
+                "stack": 2048,
+                "raw": 452,
+                "unit_bytes": 1
+              },
+              {
+                "stage": "finished",
+                "name": "uart_event_task",
+                "number": 12,
+                "free": 332,
+                "used": 1716,
+                "stack": 2048,
+                "raw": 332,
+                "unit_bytes": 1
+              },
+              {
+                "stage": "finished",
+                "name": "probe-tx1",
+                "number": 13,
+                "free": 456,
+                "used": 1592,
+                "stack": 2048,
+                "raw": 456,
+                "unit_bytes": 1
+              },
+              {
+                "stage": "finished",
+                "name": "uart_event_task",
+                "number": 14,
+                "free": 384,
+                "used": 1664,
+                "stack": 2048,
+                "raw": 384,
+                "unit_bytes": 1
+              }
+            ]
+          },
+          "bulk_results": [
+            {
+              "kind": "bulk",
+              "sample": 0,
+              "bytes": 1048577,
+              "us": 2331873,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 1,
+              "bytes": 1048577,
+              "us": 2338941,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 2,
+              "bytes": 1048577,
+              "us": 2331540,
+              "bad": 0
+            }
+          ],
+          "tiny_results": [
+            {
+              "kind": "tiny",
+              "sample": 0,
+              "bytes": 4099,
+              "us": 13929,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 1,
+              "bytes": 4099,
+              "us": 12956,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 2,
+              "bytes": 4099,
+              "us": 13910,
+              "bad": 0
+            }
+          ],
+          "latency_us": [
+            {
+              "sample": 0,
+              "samples": 100,
+              "min_us": 659,
+              "p50_us": 1133,
+              "p90_us": 1389,
+              "p99_us": 55899,
+              "max_us": 55899
+            },
+            {
+              "sample": 1,
+              "samples": 100,
+              "min_us": 668,
+              "p50_us": 1133,
+              "p90_us": 1327,
+              "p99_us": 1479,
+              "max_us": 1479
+            },
+            {
+              "sample": 2,
+              "samples": 100,
+              "min_us": 651,
+              "p50_us": 1120,
+              "p90_us": 1280,
+              "p99_us": 1461,
+              "max_us": 1461
+            }
+          ],
+          "payload_mbit_s": {
+            "samples": 3,
+            "min": 3.586501754426469,
+            "mean": 3.593920238046521,
+            "max": 3.5978863755286206,
+            "aggregate": 3.5939125614043506
+          },
+          "bulk_payload_bytes": 3145731,
+          "tiny_payload_bytes": 12297,
+          "latency_payload_bytes": 300,
+          "worker_logs_visible": true,
+          "dma": null,
+          "diagnostics": null,
+          "board_model": "ESP32-D0WDQ6 revision v1.1",
+          "firmware": "esp32-probe-2048",
+          "raw_log": {
+            "path": "2026-11-07/logs/esp32-a-matrix-2048.a.log",
+            "sha256": "b88e39075990e5d99c498b828a3998070e26039e570b7c92543003436da68a86",
+            "bytes": 5046,
+            "ansi_preserved": true
+          }
+        }
+      }
+    },
+    {
+      "id": "esp32-b-matrix-2048",
+      "accepted": true,
+      "settings": {
+        "label": "esp32-b-matrix-2048",
+        "boards": [
+          "b"
+        ],
+        "roles": [
+          3
+        ],
+        "baud": 5000000,
+        "window": 3,
+        "bytes": 1048577,
+        "runs": 3,
+        "stack": 2048,
+        "timeout": 60
+      },
+      "primary_evidence": true,
+      "logging_claim": "connection logging visible from sender and receive workers",
+      "input_record_sha256": "a396c32e9589bf07315e981651a713cefdeae0d1a10a5ed60e8f4fa9fbee0a1a",
+      "endpoints": {
+        "b": {
+          "configuration": {
+            "role": 3,
+            "topology": "internal_matrix",
+            "baud": 5000000,
+            "actual": 5000000,
+            "actual2": 5000000,
+            "window": 3,
+            "bytes": 1048577,
+            "runs": 3,
+            "sender_stack": 2048,
+            "receiver_stack": 2048,
+            "app_stack": 8192,
+            "server_stack": 8192,
+            "unit_bytes": 1,
+            "owner_core": 1,
+            "mlog": 1,
+            "primary_tx": 4,
+            "primary_rx": 17,
+            "secondary_tx": 17,
+            "secondary_rx": 4,
+            "configured_primary_rx": 2,
+            "configured_secondary_rx": 16
+          },
+          "worker_watermarks_all_stages": [
+            {
+              "stage": "started",
+              "name": "probe-tx1",
+              "number": 13,
+              "free": 1128,
+              "used": 920,
+              "stack": 2048,
+              "raw": 1128,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "started",
+              "name": "probe-tx0",
+              "number": 11,
+              "free": 1124,
+              "used": 924,
+              "stack": 2048,
+              "raw": 1124,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "started",
+              "name": "uart_event_task",
+              "number": 12,
+              "free": 1452,
+              "used": 596,
+              "stack": 2048,
+              "raw": 1452,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "started",
+              "name": "uart_event_task",
+              "number": 14,
+              "free": 1456,
+              "used": 592,
+              "stack": 2048,
+              "raw": 1456,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "finished",
+              "name": "probe-tx0",
+              "number": 11,
+              "free": 452,
+              "used": 1596,
+              "stack": 2048,
+              "raw": 452,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "finished",
+              "name": "probe-tx1",
+              "number": 13,
+              "free": 456,
+              "used": 1592,
+              "stack": 2048,
+              "raw": 456,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "finished",
+              "name": "uart_event_task",
+              "number": 14,
+              "free": 336,
+              "used": 1712,
+              "stack": 2048,
+              "raw": 336,
+              "unit_bytes": 1
+            },
+            {
+              "stage": "finished",
+              "name": "uart_event_task",
+              "number": 12,
+              "free": 240,
+              "used": 1808,
+              "stack": 2048,
+              "raw": 240,
+              "unit_bytes": 1
+            }
+          ],
+          "worker_stack_summary": {
+            "minimum_free_bytes": 240,
+            "maximum_used_bytes": 1808,
+            "stack_bytes": 2048,
+            "by_worker_type": {
+              "sender": {
+                "minimum_free_bytes": 452,
+                "maximum_used_bytes": 1596,
+                "stack_bytes": 2048
+              },
+              "receiver": {
+                "minimum_free_bytes": 240,
+                "maximum_used_bytes": 1808,
+                "stack_bytes": 2048
+              }
+            },
+            "minima_by_task_number": [
+              {
+                "stage": "finished",
+                "name": "probe-tx0",
+                "number": 11,
+                "free": 452,
+                "used": 1596,
+                "stack": 2048,
+                "raw": 452,
+                "unit_bytes": 1
+              },
+              {
+                "stage": "finished",
+                "name": "uart_event_task",
+                "number": 12,
+                "free": 240,
+                "used": 1808,
+                "stack": 2048,
+                "raw": 240,
+                "unit_bytes": 1
+              },
+              {
+                "stage": "finished",
+                "name": "probe-tx1",
+                "number": 13,
+                "free": 456,
+                "used": 1592,
+                "stack": 2048,
+                "raw": 456,
+                "unit_bytes": 1
+              },
+              {
+                "stage": "finished",
+                "name": "uart_event_task",
+                "number": 14,
+                "free": 336,
+                "used": 1712,
+                "stack": 2048,
+                "raw": 336,
+                "unit_bytes": 1
+              }
+            ]
+          },
+          "bulk_results": [
+            {
+              "kind": "bulk",
+              "sample": 0,
+              "bytes": 1048577,
+              "us": 2336393,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 1,
+              "bytes": 1048577,
+              "us": 2331534,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 2,
+              "bytes": 1048577,
+              "us": 2335979,
+              "bad": 0
+            }
+          ],
+          "tiny_results": [
+            {
+              "kind": "tiny",
+              "sample": 0,
+              "bytes": 4099,
+              "us": 13771,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 1,
+              "bytes": 4099,
+              "us": 13220,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 2,
+              "bytes": 4099,
+              "us": 12567,
+              "bad": 0
+            }
+          ],
+          "latency_us": [
+            {
+              "sample": 0,
+              "samples": 100,
+              "min_us": 659,
+              "p50_us": 1120,
+              "p90_us": 1408,
+              "p99_us": 55799,
+              "max_us": 55799
+            },
+            {
+              "sample": 1,
+              "samples": 100,
+              "min_us": 673,
+              "p50_us": 1098,
+              "p90_us": 1254,
+              "p99_us": 1427,
+              "max_us": 1427
+            },
+            {
+              "sample": 2,
+              "samples": 100,
+              "min_us": 673,
+              "p50_us": 1102,
+              "p90_us": 1259,
+              "p99_us": 1695,
+              "max_us": 1695
+            }
+          ],
+          "payload_mbit_s": {
+            "samples": 3,
+            "min": 3.5904130854697818,
+            "mean": 3.5931193752280333,
+            "max": 3.5978956343763375,
+            "aggregate": 3.593116184026456
+          },
+          "bulk_payload_bytes": 3145731,
+          "tiny_payload_bytes": 12297,
+          "latency_payload_bytes": 300,
+          "worker_logs_visible": true,
+          "dma": null,
+          "diagnostics": null,
+          "board_model": "ESP32-D0WD-V3 revision v3.1",
+          "firmware": "esp32-probe-2048",
+          "raw_log": {
+            "path": "2026-11-07/logs/esp32-b-matrix-2048.b.log",
+            "sha256": "f15e14452daf05019240039204d09516e69bd1298b778947f8698ae3334e00ea",
+            "bytes": 4922,
+            "ansi_preserved": true
+          }
+        }
+      }
+    },
+    {
+      "id": "pico-loopback-2048",
+      "accepted": true,
+      "settings": {
+        "label": "pico-loopback-2048",
+        "baud": 8312500,
+        "window": 5,
+        "bytes": 1048577,
+        "runs": 10,
+        "stack": 2048,
+        "timeout": 100
+      },
+      "primary_evidence": false,
+      "logging_claim": "excluded: Pico stderr was discarded; connection logging compiled in but full output path was not exercised",
+      "input_record_sha256": "aa945ed121b7690d3c144d9557ceb28841456430290cfd21604fa186555b622b",
+      "endpoints": {
+        "pico": {
+          "configuration": {
+            "role": 0,
+            "topology": "crossed_wires",
+            "baud": 8312500,
+            "actual": 8312500,
+            "actual2": 8312500,
+            "window": 5,
+            "bytes": 1048577,
+            "runs": 10,
+            "sender_stack": 2048,
+            "receiver_stack": 2048,
+            "app_stack": 8192,
+            "server_stack": 8192,
+            "unit_bytes": 4,
+            "owner_core": 0,
+            "mlog": 1,
+            "primary_tx": 12,
+            "primary_rx": 13,
+            "secondary_tx": 4,
+            "secondary_rx": 5,
+            "configured_primary_rx": 13,
+            "configured_secondary_rx": 5
+          },
+          "worker_watermarks_all_stages": [
+            {
+              "stage": "started",
+              "name": "dma-recv",
+              "number": 10,
+              "free": 1888,
+              "used": 160,
+              "stack": 2048,
+              "raw": 472,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "started",
+              "name": "dma-recv",
+              "number": 12,
+              "free": 1888,
+              "used": 160,
+              "stack": 2048,
+              "raw": 472,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "started",
+              "name": "probe-tx0",
+              "number": 9,
+              "free": 1464,
+              "used": 584,
+              "stack": 2048,
+              "raw": 366,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "started",
+              "name": "probe-tx1",
+              "number": 11,
+              "free": 1456,
+              "used": 592,
+              "stack": 2048,
+              "raw": 364,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "finished",
+              "name": "dma-recv",
+              "number": 12,
+              "free": 1160,
+              "used": 888,
+              "stack": 2048,
+              "raw": 290,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "finished",
+              "name": "dma-recv",
+              "number": 10,
+              "free": 1196,
+              "used": 852,
+              "stack": 2048,
+              "raw": 299,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "finished",
+              "name": "probe-tx0",
+              "number": 9,
+              "free": 1180,
+              "used": 868,
+              "stack": 2048,
+              "raw": 295,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "finished",
+              "name": "probe-tx1",
+              "number": 11,
+              "free": 1120,
+              "used": 928,
+              "stack": 2048,
+              "raw": 280,
+              "unit_bytes": 4
+            }
+          ],
+          "worker_stack_summary": {
+            "minimum_free_bytes": 1120,
+            "maximum_used_bytes": 928,
+            "stack_bytes": 2048,
+            "by_worker_type": {
+              "sender": {
+                "minimum_free_bytes": 1120,
+                "maximum_used_bytes": 928,
+                "stack_bytes": 2048
+              },
+              "receiver": {
+                "minimum_free_bytes": 1160,
+                "maximum_used_bytes": 888,
+                "stack_bytes": 2048
+              }
+            },
+            "minima_by_task_number": [
+              {
+                "stage": "finished",
+                "name": "probe-tx0",
+                "number": 9,
+                "free": 1180,
+                "used": 868,
+                "stack": 2048,
+                "raw": 295,
+                "unit_bytes": 4
+              },
+              {
+                "stage": "finished",
+                "name": "dma-recv",
+                "number": 10,
+                "free": 1196,
+                "used": 852,
+                "stack": 2048,
+                "raw": 299,
+                "unit_bytes": 4
+              },
+              {
+                "stage": "finished",
+                "name": "probe-tx1",
+                "number": 11,
+                "free": 1120,
+                "used": 928,
+                "stack": 2048,
+                "raw": 280,
+                "unit_bytes": 4
+              },
+              {
+                "stage": "finished",
+                "name": "dma-recv",
+                "number": 12,
+                "free": 1160,
+                "used": 888,
+                "stack": 2048,
+                "raw": 290,
+                "unit_bytes": 4
+              }
+            ]
+          },
+          "bulk_results": [
+            {
+              "kind": "bulk",
+              "sample": 0,
+              "bytes": 1048577,
+              "us": 1978546,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 1,
+              "bytes": 1048577,
+              "us": 1961129,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 2,
+              "bytes": 1048577,
+              "us": 1976889,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 3,
+              "bytes": 1048577,
+              "us": 1969313,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 4,
+              "bytes": 1048577,
+              "us": 1966622,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 5,
+              "bytes": 1048577,
+              "us": 1984968,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 6,
+              "bytes": 1048577,
+              "us": 1979024,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 7,
+              "bytes": 1048577,
+              "us": 1963352,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 8,
+              "bytes": 1048577,
+              "us": 1978934,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 9,
+              "bytes": 1048577,
+              "us": 2006059,
+              "bad": 0
+            }
+          ],
+          "tiny_results": [
+            {
+              "kind": "tiny",
+              "sample": 0,
+              "bytes": 4099,
+              "us": 21963,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 1,
+              "bytes": 4099,
+              "us": 23189,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 2,
+              "bytes": 4099,
+              "us": 20838,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 3,
+              "bytes": 4099,
+              "us": 20203,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 4,
+              "bytes": 4099,
+              "us": 21377,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 5,
+              "bytes": 4099,
+              "us": 21392,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 6,
+              "bytes": 4099,
+              "us": 19616,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 7,
+              "bytes": 4099,
+              "us": 20273,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 8,
+              "bytes": 4099,
+              "us": 19155,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 9,
+              "bytes": 4099,
+              "us": 20577,
+              "bad": 0
+            }
+          ],
+          "latency_us": [
+            {
+              "sample": 0,
+              "samples": 100,
+              "min_us": 1941,
+              "p50_us": 2267,
+              "p90_us": 2857,
+              "p99_us": 7663,
+              "max_us": 7663
+            },
+            {
+              "sample": 1,
+              "samples": 100,
+              "min_us": 1858,
+              "p50_us": 2355,
+              "p90_us": 2887,
+              "p99_us": 3634,
+              "max_us": 3634
+            },
+            {
+              "sample": 2,
+              "samples": 100,
+              "min_us": 1832,
+              "p50_us": 2407,
+              "p90_us": 2885,
+              "p99_us": 3110,
+              "max_us": 3110
+            },
+            {
+              "sample": 3,
+              "samples": 100,
+              "min_us": 1941,
+              "p50_us": 2307,
+              "p90_us": 2878,
+              "p99_us": 2998,
+              "max_us": 2998
+            },
+            {
+              "sample": 4,
+              "samples": 100,
+              "min_us": 1974,
+              "p50_us": 2357,
+              "p90_us": 2848,
+              "p99_us": 3040,
+              "max_us": 3040
+            },
+            {
+              "sample": 5,
+              "samples": 100,
+              "min_us": 1900,
+              "p50_us": 2249,
+              "p90_us": 2842,
+              "p99_us": 3055,
+              "max_us": 3055
+            },
+            {
+              "sample": 6,
+              "samples": 100,
+              "min_us": 1951,
+              "p50_us": 2312,
+              "p90_us": 2883,
+              "p99_us": 3023,
+              "max_us": 3023
+            },
+            {
+              "sample": 7,
+              "samples": 100,
+              "min_us": 1822,
+              "p50_us": 2344,
+              "p90_us": 2822,
+              "p99_us": 2912,
+              "max_us": 2912
+            },
+            {
+              "sample": 8,
+              "samples": 100,
+              "min_us": 1939,
+              "p50_us": 2311,
+              "p90_us": 2864,
+              "p99_us": 3678,
+              "max_us": 3678
+            },
+            {
+              "sample": 9,
+              "samples": 100,
+              "min_us": 1926,
+              "p50_us": 2288,
+              "p90_us": 2846,
+              "p99_us": 2987,
+              "max_us": 2987
+            }
+          ],
+          "payload_mbit_s": {
+            "samples": 10,
+            "min": 4.181639722460805,
+            "mean": 4.24437644770233,
+            "max": 4.277442228430664,
+            "aggregate": 4.244212297030949
+          },
+          "bulk_payload_bytes": 10485770,
+          "tiny_payload_bytes": 40990,
+          "latency_payload_bytes": 1000,
+          "worker_logs_visible": false,
+          "dma": {
+            "overruns1": 0,
+            "errors1": 1,
+            "startup_errors1": 1,
+            "overruns2": 0,
+            "errors2": 0,
+            "startup_errors2": 0
+          },
+          "diagnostics": null,
+          "board_model": "Waveshare RP2040-Zero",
+          "firmware": "pico-probe-2048-preliminary",
+          "raw_log": {
+            "path": "2026-11-07/logs/pico-loopback-2048.pico.log",
+            "sha256": "9d3819abbc2df2752fca4854a98d2b877e0ae6472896f05c10002daf3dc52777",
+            "bytes": 3841,
+            "ansi_preserved": true
+          }
+        }
+      }
+    },
+    {
+      "id": "pico-usb-logging-diagnostics-2048",
+      "accepted": true,
+      "settings": {
+        "label": "pico-usb-logging-diagnostics-2048",
+        "baud": 8312500,
+        "window": 5,
+        "bytes": 1048577,
+        "runs": 10,
+        "stack": 2048,
+        "timeout": 100
+      },
+      "primary_evidence": true,
+      "logging_claim": "connection logging visible from sender and receive workers",
+      "input_record_sha256": "f251689b24ead3b39efe53f34701db288b7f5e08c318ea87701eba9ddf180d57",
+      "endpoints": {
+        "pico": {
+          "configuration": {
+            "role": 0,
+            "topology": "crossed_wires",
+            "baud": 8312500,
+            "actual": 8312500,
+            "actual2": 8312500,
+            "window": 5,
+            "bytes": 1048577,
+            "runs": 10,
+            "sender_stack": 2048,
+            "receiver_stack": 2048,
+            "app_stack": 8192,
+            "server_stack": 8192,
+            "unit_bytes": 4,
+            "owner_core": 0,
+            "mlog": 1,
+            "primary_tx": 12,
+            "primary_rx": 13,
+            "secondary_tx": 4,
+            "secondary_rx": 5,
+            "configured_primary_rx": 13,
+            "configured_secondary_rx": 5
+          },
+          "worker_watermarks_all_stages": [
+            {
+              "stage": "started",
+              "name": "dma-recv",
+              "number": 10,
+              "free": 1888,
+              "used": 160,
+              "stack": 2048,
+              "raw": 472,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "started",
+              "name": "dma-recv",
+              "number": 12,
+              "free": 1888,
+              "used": 160,
+              "stack": 2048,
+              "raw": 472,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "started",
+              "name": "probe-tx0",
+              "number": 9,
+              "free": 1480,
+              "used": 568,
+              "stack": 2048,
+              "raw": 370,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "started",
+              "name": "probe-tx1",
+              "number": 11,
+              "free": 1464,
+              "used": 584,
+              "stack": 2048,
+              "raw": 366,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "finished",
+              "name": "dma-recv",
+              "number": 12,
+              "free": 1048,
+              "used": 1000,
+              "stack": 2048,
+              "raw": 262,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "finished",
+              "name": "dma-recv",
+              "number": 10,
+              "free": 1048,
+              "used": 1000,
+              "stack": 2048,
+              "raw": 262,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "finished",
+              "name": "probe-tx0",
+              "number": 9,
+              "free": 1032,
+              "used": 1016,
+              "stack": 2048,
+              "raw": 258,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "finished",
+              "name": "probe-tx1",
+              "number": 11,
+              "free": 1032,
+              "used": 1016,
+              "stack": 2048,
+              "raw": 258,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "diagnostic_connected",
+              "name": "probe-tx1",
+              "number": 11,
+              "free": 1032,
+              "used": 1016,
+              "stack": 2048,
+              "raw": 258,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "diagnostic_connected",
+              "name": "dma-recv",
+              "number": 12,
+              "free": 1048,
+              "used": 1000,
+              "stack": 2048,
+              "raw": 262,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "diagnostic_connected",
+              "name": "dma-recv",
+              "number": 10,
+              "free": 1048,
+              "used": 1000,
+              "stack": 2048,
+              "raw": 262,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "diagnostic_connected",
+              "name": "probe-tx0",
+              "number": 9,
+              "free": 1032,
+              "used": 1016,
+              "stack": 2048,
+              "raw": 258,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "diagnostic_warnings",
+              "name": "dma-recv",
+              "number": 10,
+              "free": 1048,
+              "used": 1000,
+              "stack": 2048,
+              "raw": 262,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "diagnostic_warnings",
+              "name": "probe-tx0",
+              "number": 9,
+              "free": 1032,
+              "used": 1016,
+              "stack": 2048,
+              "raw": 258,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "diagnostic_recovered",
+              "name": "dma-recv",
+              "number": 18,
+              "free": 1040,
+              "used": 1008,
+              "stack": 2048,
+              "raw": 260,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "diagnostic_recovered",
+              "name": "dma-recv",
+              "number": 10,
+              "free": 1000,
+              "used": 1048,
+              "stack": 2048,
+              "raw": 250,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "diagnostic_recovered",
+              "name": "probe-tx0",
+              "number": 9,
+              "free": 1032,
+              "used": 1016,
+              "stack": 2048,
+              "raw": 258,
+              "unit_bytes": 4
+            },
+            {
+              "stage": "diagnostic_recovered",
+              "name": "probe-tx1",
+              "number": 17,
+              "free": 1032,
+              "used": 1016,
+              "stack": 2048,
+              "raw": 258,
+              "unit_bytes": 4
+            }
+          ],
+          "worker_stack_summary": {
+            "minimum_free_bytes": 1000,
+            "maximum_used_bytes": 1048,
+            "stack_bytes": 2048,
+            "by_worker_type": {
+              "sender": {
+                "minimum_free_bytes": 1032,
+                "maximum_used_bytes": 1016,
+                "stack_bytes": 2048
+              },
+              "receiver": {
+                "minimum_free_bytes": 1000,
+                "maximum_used_bytes": 1048,
+                "stack_bytes": 2048
+              }
+            },
+            "minima_by_task_number": [
+              {
+                "stage": "finished",
+                "name": "probe-tx0",
+                "number": 9,
+                "free": 1032,
+                "used": 1016,
+                "stack": 2048,
+                "raw": 258,
+                "unit_bytes": 4
+              },
+              {
+                "stage": "diagnostic_recovered",
+                "name": "dma-recv",
+                "number": 10,
+                "free": 1000,
+                "used": 1048,
+                "stack": 2048,
+                "raw": 250,
+                "unit_bytes": 4
+              },
+              {
+                "stage": "finished",
+                "name": "probe-tx1",
+                "number": 11,
+                "free": 1032,
+                "used": 1016,
+                "stack": 2048,
+                "raw": 258,
+                "unit_bytes": 4
+              },
+              {
+                "stage": "finished",
+                "name": "dma-recv",
+                "number": 12,
+                "free": 1048,
+                "used": 1000,
+                "stack": 2048,
+                "raw": 262,
+                "unit_bytes": 4
+              },
+              {
+                "stage": "diagnostic_recovered",
+                "name": "probe-tx1",
+                "number": 17,
+                "free": 1032,
+                "used": 1016,
+                "stack": 2048,
+                "raw": 258,
+                "unit_bytes": 4
+              },
+              {
+                "stage": "diagnostic_recovered",
+                "name": "dma-recv",
+                "number": 18,
+                "free": 1040,
+                "used": 1008,
+                "stack": 2048,
+                "raw": 260,
+                "unit_bytes": 4
+              }
+            ]
+          },
+          "bulk_results": [
+            {
+              "kind": "bulk",
+              "sample": 0,
+              "bytes": 1048577,
+              "us": 2100626,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 1,
+              "bytes": 1048577,
+              "us": 2081187,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 2,
+              "bytes": 1048577,
+              "us": 2108950,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 3,
+              "bytes": 1048577,
+              "us": 2082322,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 4,
+              "bytes": 1048577,
+              "us": 2081373,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 5,
+              "bytes": 1048577,
+              "us": 2087188,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 6,
+              "bytes": 1048577,
+              "us": 2104207,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 7,
+              "bytes": 1048577,
+              "us": 2075452,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 8,
+              "bytes": 1048577,
+              "us": 2096750,
+              "bad": 0
+            },
+            {
+              "kind": "bulk",
+              "sample": 9,
+              "bytes": 1048577,
+              "us": 2102036,
+              "bad": 0
+            }
+          ],
+          "tiny_results": [
+            {
+              "kind": "tiny",
+              "sample": 0,
+              "bytes": 4099,
+              "us": 24351,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 1,
+              "bytes": 4099,
+              "us": 23366,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 2,
+              "bytes": 4099,
+              "us": 24533,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 3,
+              "bytes": 4099,
+              "us": 23056,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 4,
+              "bytes": 4099,
+              "us": 25058,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 5,
+              "bytes": 4099,
+              "us": 23101,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 6,
+              "bytes": 4099,
+              "us": 24726,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 7,
+              "bytes": 4099,
+              "us": 25632,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 8,
+              "bytes": 4099,
+              "us": 24084,
+              "bad": 0
+            },
+            {
+              "kind": "tiny",
+              "sample": 9,
+              "bytes": 4099,
+              "us": 24063,
+              "bad": 0
+            }
+          ],
+          "latency_us": [
+            {
+              "sample": 0,
+              "samples": 100,
+              "min_us": 1945,
+              "p50_us": 2634,
+              "p90_us": 2910,
+              "p99_us": 6869,
+              "max_us": 6869
+            },
+            {
+              "sample": 1,
+              "samples": 100,
+              "min_us": 1844,
+              "p50_us": 2639,
+              "p90_us": 2916,
+              "p99_us": 3157,
+              "max_us": 3157
+            },
+            {
+              "sample": 2,
+              "samples": 100,
+              "min_us": 1902,
+              "p50_us": 2358,
+              "p90_us": 2883,
+              "p99_us": 3101,
+              "max_us": 3101
+            },
+            {
+              "sample": 3,
+              "samples": 100,
+              "min_us": 1896,
+              "p50_us": 2635,
+              "p90_us": 2908,
+              "p99_us": 3054,
+              "max_us": 3054
+            },
+            {
+              "sample": 4,
+              "samples": 100,
+              "min_us": 1838,
+              "p50_us": 2367,
+              "p90_us": 2875,
+              "p99_us": 3042,
+              "max_us": 3042
+            },
+            {
+              "sample": 5,
+              "samples": 100,
+              "min_us": 1900,
+              "p50_us": 2419,
+              "p90_us": 2864,
+              "p99_us": 3030,
+              "max_us": 3030
+            },
+            {
+              "sample": 6,
+              "samples": 100,
+              "min_us": 1909,
+              "p50_us": 2386,
+              "p90_us": 2881,
+              "p99_us": 3035,
+              "max_us": 3035
+            },
+            {
+              "sample": 7,
+              "samples": 100,
+              "min_us": 1969,
+              "p50_us": 2609,
+              "p90_us": 2889,
+              "p99_us": 3110,
+              "max_us": 3110
+            },
+            {
+              "sample": 8,
+              "samples": 100,
+              "min_us": 1901,
+              "p50_us": 2703,
+              "p90_us": 2972,
+              "p99_us": 3137,
+              "max_us": 3137
+            },
+            {
+              "sample": 9,
+              "samples": 100,
+              "min_us": 1871,
+              "p50_us": 2389,
+              "p90_us": 2931,
+              "p99_us": 3052,
+              "max_us": 3052
+            }
+          ],
+          "payload_mbit_s": {
+            "samples": 10,
+            "min": 3.977626781099599,
+            "mean": 4.009952170410879,
+            "max": 4.0418260696946975,
+            "aggregate": 4.0098372421037745
+          },
+          "bulk_payload_bytes": 10485770,
+          "tiny_payload_bytes": 40990,
+          "latency_payload_bytes": 1000,
+          "worker_logs_visible": true,
+          "dma": {
+            "overruns1": 0,
+            "errors1": 1,
+            "startup_errors1": 1,
+            "overruns2": 0,
+            "errors2": 0,
+            "startup_errors2": 0
+          },
+          "diagnostics": {
+            "warnings_checksum_frames": 2,
+            "malformed_frames": 2,
+            "reconnect_ping": "PASS"
+          },
+          "board_model": "Waveshare RP2040-Zero",
+          "firmware": "pico-diagnostics-2048",
+          "raw_log": {
+            "path": "2026-11-07/logs/pico-usb-logging-diagnostics-2048.pico.log",
+            "sha256": "019a7c5f4c326566e3d72eeee1611672f3c6bdf5497f7c6173577ac1965ddfba",
+            "bytes": 13378,
+            "ansi_preserved": true
+          }
+        }
+      }
+    }
+  ],
+  "scope": {
+    "connection_mlog_enabled": true,
+    "sdk_global_verbose_logging_enabled": false,
+    "application_io": "100 one-byte replies, 4099-byte response using 1\u20137-byte operations, and 1,048,577-byte response per cycle; buffers remain the roo_io 64-byte defaults",
+    "worker_reservations": "Sender and RX worker each 2048 bytes; application/producer tasks each 8192 bytes",
+    "watermark_units": "ESP32 raw watermark units are bytes (StackType_t 1 byte); RP2040 units are words (StackType_t 4 bytes). All free/used fields are normalized to bytes.",
+    "esp32_pair": "Two physical boards, GPIO4 TX to peer GPIO2 RX in each direction, common ground; both server/client role assignments exercised",
+    "esp32_loopback": "Internal GPIO input-matrix routing samples TX4 as UART2 RX and TX17 as UART1 RX; this is not a physical wire loopback",
+    "pico_loopback": "RP2040-Zero physical loopback GP12 TX\u2192GP5 RX and GP4 TX\u2192GP13 RX, native UART DMA",
+    "protocol_windows": "ESP32 nominal 2 KiB; RP2040 nominal 8 KiB, each direction",
+    "fatal_core_dump_hardware_validation": false,
+    "fatal_attempt": "Fatal-test firmware was compiled only. ESP32 console/device acquisition failed before any firmware write; no hardware fatal/core-dump test occurred.",
+    "esp32_pico_cross_communication": "Skipped at user request",
+    "device_access_complete": "ESP32 boards and Pico released; packaging performs no device access"
+  },
+  "caveats": [
+    "This is operational validation of the named firmware/SDK/logging route, not a universal upper bound on callback or crash-reporting stack usage.",
+    "The final Pico evidence includes visible USB stderr output, ANSI-colored warnings from checksum-valid injected frames, malformed frames, reconnect and verified ping.",
+    "Preliminary Pico results are retained for provenance but excluded from full-logging claims and primary totals because stderr output was discarded.",
+    "All-stage stack minima include diagnostic warnings/reconnect and different task lifetimes; task numbers disambiguate duplicate RX names within each stage.",
+    "Raw logs preserve ANSI escapes and pre-READY boot messages. Fatal/reset rejection applies to the active run beginning at READY; pre-existing boot/core-dump checks are not new probe failures.",
+    "Throughput rates are observations for this stack-stress harness with absolute-index pattern validation; they do not replace published headline benchmark rates.",
+    "No request was made to back up board flash for this run; no backup or restoration is claimed."
+  ]
+}

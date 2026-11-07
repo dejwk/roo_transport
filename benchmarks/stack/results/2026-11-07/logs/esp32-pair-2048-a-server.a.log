@@ -1,0 +1,37 @@
+ets Jun  8 2016 00:22:57
+
+rst:0x1 (POWER\xffets Jun  8 2016 00:22:57
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:4640
+load:0x40078000,len:15660
+load:0x40080400,len:3164
+entry 0x4008059c
+E (278) esp_core_dump_flash: Cor\xe5\x00\x18VW\x0b\x81data check failed:
+Calculated checksum='84eb2547'
+Image checksum='ffffffff'
+READY stack_probe=1 command=run_ROLE_BAUD_WINDOW_LOG_BYTES_RUNS
+CONFIG role=1 topology=two_board baud=5000000 actual=5000000 actual2=0 window=3 bytes=1048577 runs=10 sender_stack=2048 receiver_stack=2048 app_stack=8192 server_stack=8192 unit_bytes=1 owner_core=1 mlog=1 primary_tx=4 primary_rx=2 secondary_tx=17 secondary_rx=16 configured_primary_rx=2 configured_secondary_rx=16
+STACK stage=started name=probe-tx0 number=11 free=1128 used=920 stack=2048 raw=1128 unit_bytes=1
+STACK stage=started name=uart_event_task number=12 free=1452 used=596 stack=2048 raw=1452 unit_bytes=1
+STACK_SNAPSHOT stage=started workers=2 expected=2
+IS+00:00:00.381908 probe-app(0x3ffb8c60) channel.cpp:170] (serial1) Transmitter and receiver are now connecting.
+IS+00:00:00.386716 probe-tx0(0x3ffae89c) channel.cpp:336] (serial1) Handshake packet sent: CONN 1723061695:3315
+IS+00:00:00.396683 uart_event_task(0x3ffaf324) channel.cpp:355] (serial1) Handshake packet received: CONN 3820761152:2570
+IS+00:00:00.406745 uart_event_task(0x3ffaf324) channel.cpp:404] (serial1) Receiver is now connected.
+IS+00:00:00.415552 probe-tx0(0x3ffae89c) channel.cpp:336] (serial1) Handshake packet sent: CONN/ACK 1723061695:3315/3820761152
+IS+00:00:00.426544 uart_event_task(0x3ffaf324) channel.cpp:355] (serial1) Handshake packet received: CONN/ACK 3820761152:2570/1723061695
+IS+00:00:00.438467 uart_event_task(0x3ffaf324) channel.cpp:459] (serial1) Transmitter is now connected.
+IS+00:00:00.447951 probe-tx0(0x3ffae89c) channel.cpp:336] (serial1) Handshake packet sent: ACK 1723061695:3315/3820761152
+IS+00:00:00.458124 uart_event_task(0x3ffaf324) channel.cpp:355] (serial1) Handshake packet received: CONN/ACK 3820761152:2570/1723061695
+IS+00:00:00.470074 probe-tx0(0x3ffae89c) channel.cpp:336] (serial1) Handshake packet sent: ACK 1723061695:3315/3820761152
+IS+00:00:00.480623 uart_event_task(0x3ffaf324) channel.cpp:355] (serial1) Handshake packet received: ACK 3820761152:2570/1723061695
+SERVER request_eof=1 response_closed=1
+STACK stage=finished name=probe-tx0 number=11 free=504 used=1544 stack=2048 raw=504 unit_bytes=1
+STACK stage=finished name=uart_event_task number=12 free=380 used=1668 stack=2048 raw=380 unit_bytes=1
+STACK_SNAPSHOT stage=finished workers=2 expected=2
+LIFECYCLE stream_eof_and_stop=PASS callbacks=0
+DONE

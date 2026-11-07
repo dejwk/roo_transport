@@ -1,0 +1,49 @@
+READY stack_probe=1 command=run_ROLE_BAUD_WINDOW_LOG_BYTES_RUNS
+#< CLIXML
+CONFIG role=0 topology=crossed_wires baud=8312500 actual=8312500 actual2=8312500 window=5 bytes=1048577 runs=10 sender_stack=2048 receiver_stack=2048 app_stack=8192 server_stack=8192 unit_bytes=4 owner_core=0 mlog=1 primary_tx=12 primary_rx=13 secondary_tx=4 secondary_rx=5 configured_primary_rx=13 configured_secondary_rx=5
+STACK stage=started name=dma-recv number=10 free=1888 used=160 stack=2048 raw=472 unit_bytes=4
+STACK stage=started name=dma-recv number=12 free=1888 used=160 stack=2048 raw=472 unit_bytes=4
+STACK stage=started name=probe-tx0 number=9 free=1464 used=584 stack=2048 raw=366 unit_bytes=4
+STACK stage=started name=probe-tx1 number=11 free=1456 used=592 stack=2048 raw=364 unit_bytes=4
+STACK_SNAPSHOT stage=started workers=4 expected=4
+LATENCY sample=0 samples=100 min_us=1941 p50_us=2267 p90_us=2857 p99_us=7663 max_us=7663
+RESULT kind=tiny sample=0 bytes=4099 us=21963 bad=0
+RESULT kind=bulk sample=0 bytes=1048577 us=1978546 bad=0
+LATENCY sample=1 samples=100 min_us=1858 p50_us=2355 p90_us=2887 p99_us=3634 max_us=3634
+RESULT kind=tiny sample=1 bytes=4099 us=23189 bad=0
+RESULT kind=bulk sample=1 bytes=1048577 us=1961129 bad=0
+LATENCY sample=2 samples=100 min_us=1832 p50_us=2407 p90_us=2885 p99_us=3110 max_us=3110
+RESULT kind=tiny sample=2 bytes=4099 us=20838 bad=0
+RESULT kind=bulk sample=2 bytes=1048577 us=1976889 bad=0
+LATENCY sample=3 samples=100 min_us=1941 p50_us=2307 p90_us=2878 p99_us=2998 max_us=2998
+RESULT kind=tiny sample=3 bytes=4099 us=20203 bad=0
+RESULT kind=bulk sample=3 bytes=1048577 us=1969313 bad=0
+LATENCY sample=4 samples=100 min_us=1974 p50_us=2357 p90_us=2848 p99_us=3040 max_us=3040
+RESULT kind=tiny sample=4 bytes=4099 us=21377 bad=0
+RESULT kind=bulk sample=4 bytes=1048577 us=1966622 bad=0
+LATENCY sample=5 samples=100 min_us=1900 p50_us=2249 p90_us=2842 p99_us=3055 max_us=3055
+RESULT kind=tiny sample=5 bytes=4099 us=21392 bad=0
+RESULT kind=bulk sample=5 bytes=1048577 us=1984968 bad=0
+LATENCY sample=6 samples=100 min_us=1951 p50_us=2312 p90_us=2883 p99_us=3023 max_us=3023
+RESULT kind=tiny sample=6 bytes=4099 us=19616 bad=0
+RESULT kind=bulk sample=6 bytes=1048577 us=1979024 bad=0
+LATENCY sample=7 samples=100 min_us=1822 p50_us=2344 p90_us=2822 p99_us=2912 max_us=2912
+RESULT kind=tiny sample=7 bytes=4099 us=20273 bad=0
+RESULT kind=bulk sample=7 bytes=1048577 us=1963352 bad=0
+LATENCY sample=8 samples=100 min_us=1939 p50_us=2311 p90_us=2864 p99_us=3678 max_us=3678
+RESULT kind=tiny sample=8 bytes=4099 us=19155 bad=0
+RESULT kind=bulk sample=8 bytes=1048577 us=1978934 bad=0
+LATENCY sample=9 samples=100 min_us=1926 p50_us=2288 p90_us=2846 p99_us=2987 max_us=2987
+RESULT kind=tiny sample=9 bytes=4099 us=20577 bad=0
+RESULT kind=bulk sample=9 bytes=1048577 us=2006059 bad=0
+CLIENT request_closed=1 response_eof=1
+SERVER request_eof=1 response_closed=1
+STACK stage=finished name=dma-recv number=12 free=1160 used=888 stack=2048 raw=290 unit_bytes=4
+STACK stage=finished name=dma-recv number=10 free=1196 used=852 stack=2048 raw=299 unit_bytes=4
+STACK stage=finished name=probe-tx0 number=9 free=1180 used=868 stack=2048 raw=295 unit_bytes=4
+STACK stage=finished name=probe-tx1 number=11 free=1120 used=928 stack=2048 raw=280 unit_bytes=4
+STACK_SNAPSHOT stage=finished workers=4 expected=4
+DMA overruns1=0 errors1=1 startup_errors1=1 overruns2=0 errors2=0 startup_errors2=0
+LIFECYCLE stream_eof_and_stop=PASS callbacks=0
+DONE
+<Objs Version="1.1.0.1" xmlns="http://schemas.microsoft.com/powershell/2004/04"><Obj S="progress" RefId="0"><TN RefId="0"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N="SourceId">1</I64><PR N="Record"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>

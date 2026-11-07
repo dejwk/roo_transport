@@ -200,62 +200,61 @@ and [receiver](../../src/roo_transport/packets/over_stream/packet_receiver_over_
 
 ### Task stacks and deeper paths
 
-Each worker reserves its full **4,096 B** stack. Measured high-water usage was
-**1,176 B for the sender** and **1,012–1,044 B for the UART receive-event task**.
-The sender's one fixed 250 B packet scratch buffer is inside that reservation.
-Larger windows, longer transfers, full queues, retransmissions and damaged COBS
-or checksum frames do not introduce larger automatic arrays or recursion: the
-buffers are on the heap and the processing is iterative.
+The RAM profile above reserves **4,096 B per worker**, including its benchmark
+override for the Arduino receive-event task. The transport sender defaults to
+4 KiB; Arduino's own receive-event default is 2 KiB. The recorded clean-transfer
+watermarks for the 4 KiB profile are 1,176 B sender and 1,012–1,044 B receive.
 
-**2 KiB is a viable candidate for ordinary transport operation with the
-current non-floating-point logging implementation.** The built-in sender and
-UART receive log statements use integer IDs, counters, sequence numbers and
-strings. Pointer, timestamp and diagnostic output use direct formatting; they
-do not enter the floating-point `printf` overloads. The 1,025 B log text buffer
-remains heap allocated.
+**2 KiB sender and receive stacks pass the tested ESP32 hardware workloads with
+connection logging enabled.** The
+[hardware validation record](../stack/results/2026-11-07-stack-validation.json)
+includes both classic ESP32 revisions, byte-checked transfers, tiny I/O,
+handshakes, partial final packets, EOF and worker shutdown:
 
-The [native stack reassessment](results/2026-11-06-stack-audit-direct-formatting.json)
-rebuilds the ESP32 firmware with connection logging enabled. The deepest
-examined uptime-prefix formatting branch reserves 496 B of simultaneous
-function frames. Specific complete paths include:
+| Topology | Bulk transfers | Maximum observed worker usage | Minimum observed unused stack |
+| --- | ---: | ---: | ---: |
+| Two boards, 10 transfers each direction | 20 × (1 MiB + 1 B) total | 1,668 B | **380 B** |
+| One-board UART/GPIO-matrix loopback, revision 1.1 | 3 × (1 MiB + 1 B) | 1,716 B | **332 B** |
+| One-board UART/GPIO-matrix loopback, revision 3.1 | 3 × (1 MiB + 1 B) | 1,808 B | **240 B** |
 
-| Formatting path, connection logging enabled | Function frames plus CPU save areas |
-| --- | ---: |
-| Sender handshake prefix | 1,312 B |
-| Receive-side bad-ACK warning prefix | 1,344 B |
-| Receive-side handshake prefix | 1,424 B |
+Every cycle also checks 100 one-byte round trips and 4,099 B through 1–7-byte
+application reads/writes. All four transport workers in each loopback run
+reserve 2,048 B; the separate application/server tasks reserve 8 KiB. The
+loopback connects the two real UARTs through the ESP32 GPIO input matrix; the
+two-board runs use the external GPIO4/GPIO2 wires described above.
 
-The CPU allowance comprises a permanent 96 B coprocessor save area and a
-possible 192 B interrupt frame. These path sums are not whole-worker upper
-bounds. Log allocation and output are separate paths. The examined stderr
-route, including contended UART locking, gives padded estimates of
-**1,680 B for the sender** and **1,792 B for the receive task**. The latter leaves
-about **256 B** within a 2 KiB reservation. These estimates conservatively include
-interrupt storage even at deep critical-section points where RTOS interrupts
-are masked; other configurations and hooks can have different depths.
+`MLOG_roo_transport_reliable_channel_connection=1` enables the detailed Roo
+handshake logs, including timestamps and IDs, and the captured ESP32 console
+contains their output. Global ESP-IDF/Arduino debug or verbose logging is not
+enabled. The test uses 2 KiB protocol windows, 5 Mbaud, 256/1,024 B UART RX/TX
+rings, and priority-1 application/sender work. Its generated-pattern workload
+differs from the throughput tables, so those rates remain separate measurements.
 
-There is a separate **fatal crash-reporting exception**. The installed SDK
-enables flash ELF core dumps with `CONFIG_ESP_COREDUMP_STACK_SIZE=0`, and the
-firmware includes a core-dump partition. A peer reset handled by
-`connectOrDie()` invokes FATAL logging and `abort()` on the receive task. The
-examined path into core-dump generation already reserves **at least 2,192 B**,
-before further flash-writer calls. It uses the crashing task's stack because
-this SDK configuration provides no dedicated core-dump stack.
+These watermarks establish a tested configuration rather than a universal
+upper bound. The sender's fixed 250 B packet scratch is inside its stack;
+window and framing arrays are on the heap. Larger windows, longer transfers
+and retransmissions do not introduce variable-size automatic arrays or
+recursive processing. The
+[native analysis](results/2026-11-06-stack-audit-direct-formatting.json)
+documents the non-floating logging paths and ESP32 CPU save areas. Custom
+callbacks, log sinks, wall clocks, floating-point logs and additional SDK
+diagnostics can change the required stack.
 
-Thus a 2 KiB worker budget can suit ordinary operation while still being too
-small to preserve this fatal report. A dedicated core-dump stack requires an
-SDK rebuild. Alternatively, `connect()` can install a short disconnect callback
-that notifies application code to handle peer reset outside the UART task.
-Custom callbacks, logging sinks, wall clocks, floating-point logging and SDK
-diagnostic verbosity also need their own stack budget. Ordinary application
-serialization and reads run on the caller's stack.
+**Fatal core-dump generation is not covered by these hardware results.** With
+flash ELF dumps enabled and `CONFIG_ESP_COREDUMP_STACK_SIZE=0`, the SDK generates
+the dump on the crashing task's stack. Native analysis identifies a
+`connectOrDie()` peer-reset path of at least 2,192 B before further flash-writer
+calls. This is post-fatal diagnostic work, rather than ordinary streaming.
+A dedicated core-dump stack requires an SDK rebuild. A short `connect()`
+disconnect callback can instead notify application code to handle peer reset
+outside the UART task.
 
-**4 KiB remains the library default and benchmark setting.** The smaller
-configuration has native code analysis but no hardware stress validation here.
-Reducing both workers to 2 KiB would save **4 KiB of nominal stack reservations
-per endpoint**; allocator rounding can change the actual heap saving. Validation
-at that size needs connection logging, warning/reconnect paths and the chosen
-fatal-reporting policy, rather than only a clean throughput run.
+The illustrative benchmark retains 4 KiB worker reservations. Selecting 2 KiB
+for both workers saves **4 KiB of nominal stack reservations per endpoint**;
+actual heap savings depend on allocation rounding. The narrowest measured
+headroom is 240 B, so applications adding synchronous worker callbacks or
+diagnostics need their own validation. The measurement record contains the
+exact probe sources, flags, manifests and transcripts.
 
 ### Application buffers and measurement scope
 

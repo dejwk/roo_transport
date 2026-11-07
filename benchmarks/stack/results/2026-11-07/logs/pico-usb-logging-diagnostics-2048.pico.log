@@ -1,0 +1,142 @@
+READY stack_probe=1 command=run_ROLE_BAUD_WINDOW_LOG_BYTES_RUNS
+CONFIG role=0 topology=crossed_wires baud=8312500 actual=8312500 actual2=8312500 window=5 bytes=1048577 runs=10 sender_stack=2048 receiver_stack=2048 app_stack=8192 server_stack=8192 unit_bytes=4 owner_core=0 mlog=1 primary_tx=12 primary_rx=13 secondary_tx=4 secondary_rx=5 configured_primary_rx=13 configured_secondary_rx=5
+STACK stage=started name=dma-recv number=10 free=1888 used=160 stack=2048 raw=472 unit_bytes=4
+STACK stage=started name=dma-recv number=12 free=1888 used=160 stack=2048 raw=472 unit_bytes=4
+STACK stage=started name=probe-tx0 number=9 free=1480 used=568 stack=2048 raw=370 unit_bytes=4
+STACK stage=started name=probe-tx1 number=11 free=1464 used=584 stack=2048 raw=366 unit_bytes=4
+STACK_SNAPSHOT stage=started workers=4 expected=4
+IS+00:00:01.277429 probe-srv(0x2001efe0) channel.cpp:170] Transmitter and receiver are now connecting.
+IS+00:00:01.280045 probe-app(0x2000d7c8) channel.cpp:170] Transmitter and receiver are now connecting.
+IS+00:00:01.281061 probe-tx0(0x2001b140) channel.cpp:336] Handshake packet sent: CONN 3834759462:2006
+IS+00:00:01.283810 dma-recv(0x2001ce38) channel.cpp:355] Handshake packet received: CONN 3834759462:2006
+IS+00:00:01.285067 probe-tx0(0x2001b140) channel.cpp:336] Handshake packet sent: CONN 3834759462:2006
+IS+00:00:01.285695 dma-recv(0x2001ce38) channel.cpp:404] Receiver is now connected.
+IS+00:00:01.287747 dma-recv(0x2001ce38) channel.cpp:355] Handshake packet received: CONN 3834759462:2006
+IS+00:00:01.289452 probe-tx0(0x2001b140) channel.cpp:336] Handshake packet sent: CONN 3834759462:2006
+IS+00:00:01.290042 probe-tx1(0x2001c490) channel.cpp:336] Handshake packet sent: CONN/ACK 3915782412:893/3834759462
+IS+00:00:01.292567 dma-recv(0x2001ce38) channel.cpp:355] Handshake packet received: CONN 3834759462:2006
+IS+00:00:01.292524 dma-recv(0x2001bae8) channel.cpp:355] Handshake packet received: CONN/ACK 3915782412:893/3834759462
+IS+00:00:01.294205 probe-tx1(0x2001c490) channel.cpp:336] Handshake packet sent: CONN/ACK 3915782412:893/3834759462
+IS+00:00:01.295114 dma-recv(0x2001bae8) channel.cpp:404] Receiver is now connected.
+IS+00:00:01.296923 dma-recv(0x2001bae8) channel.cpp:410] Transmitter is now connected.
+IS+00:00:01.298756 dma-recv(0x2001bae8) channel.cpp:355] Handshake packet received: CONN/ACK 3915782412:893/3834759462
+IS+00:00:01.299895 probe-tx1(0x2001c490) channel.cpp:336] Handshake packet sent: CONN/ACK 3915782412:893/3834759462
+IS+00:00:01.301784 probe-tx0(0x2001b140) channel.cpp:336] Handshake packet sent: ACK 3834759462:2006/3915782412
+IS+00:00:01.303658 dma-recv(0x2001bae8) channel.cpp:355] Handshake packet received: CONN/ACK 3915782412:893/3834759462
+IS+00:00:01.305120 probe-tx1(0x2001c490) channel.cpp:336] Handshake packet sent: CONN/ACK 3915782412:893/3834759462
+IS+00:00:01.306195 probe-tx0(0x2001b140) channel.cpp:336] Handshake packet sent: ACK 3834759462:2006/3915782412
+IS+00:00:01.307136 dma-recv(0x2001ce38) channel.cpp:355] Handshake packet received: ACK 3834759462:2006/3915782412
+IS+00:00:01.308989 dma-recv(0x2001bae8) channel.cpp:355] Handshake packet received: CONN/ACK 3915782412:893/3834759462
+IS+00:00:01.309758 dma-recv(0x2001ce38) channel.cpp:459] Transmitter is now connected.
+IS+00:00:01.312507 dma-recv(0x2001ce38) channel.cpp:355] Handshake packet received: ACK 3834759462:2006/3915782412
+IS+00:00:01.317386 probe-tx0(0x2001b140) channel.cpp:336] Handshake packet sent: ACK 3834759462:2006/3915782412
+IS+00:00:01.319527 dma-recv(0x2001ce38) channel.cpp:355] Handshake packet received: ACK 3834759462:2006/3915782412
+LATENCY sample=0 samples=100 min_us=1945 p50_us=2634 p90_us=2910 p99_us=6869 max_us=6869
+RESULT kind=tiny sample=0 bytes=4099 us=24351 bad=0
+RESULT kind=bulk sample=0 bytes=1048577 us=2100626 bad=0
+LATENCY sample=1 samples=100 min_us=1844 p50_us=2639 p90_us=2916 p99_us=3157 max_us=3157
+RESULT kind=tiny sample=1 bytes=4099 us=23366 bad=0
+RESULT kind=bulk sample=1 bytes=1048577 us=2081187 bad=0
+LATENCY sample=2 samples=100 min_us=1902 p50_us=2358 p90_us=2883 p99_us=3101 max_us=3101
+RESULT kind=tiny sample=2 bytes=4099 us=24533 bad=0
+RESULT kind=bulk sample=2 bytes=1048577 us=2108950 bad=0
+LATENCY sample=3 samples=100 min_us=1896 p50_us=2635 p90_us=2908 p99_us=3054 max_us=3054
+RESULT kind=tiny sample=3 bytes=4099 us=23056 bad=0
+RESULT kind=bulk sample=3 bytes=1048577 us=2082322 bad=0
+LATENCY sample=4 samples=100 min_us=1838 p50_us=2367 p90_us=2875 p99_us=3042 max_us=3042
+RESULT kind=tiny sample=4 bytes=4099 us=25058 bad=0
+RESULT kind=bulk sample=4 bytes=1048577 us=2081373 bad=0
+LATENCY sample=5 samples=100 min_us=1900 p50_us=2419 p90_us=2864 p99_us=3030 max_us=3030
+RESULT kind=tiny sample=5 bytes=4099 us=23101 bad=0
+RESULT kind=bulk sample=5 bytes=1048577 us=2087188 bad=0
+LATENCY sample=6 samples=100 min_us=1909 p50_us=2386 p90_us=2881 p99_us=3035 max_us=3035
+RESULT kind=tiny sample=6 bytes=4099 us=24726 bad=0
+RESULT kind=bulk sample=6 bytes=1048577 us=2104207 bad=0
+LATENCY sample=7 samples=100 min_us=1969 p50_us=2609 p90_us=2889 p99_us=3110 max_us=3110
+RESULT kind=tiny sample=7 bytes=4099 us=25632 bad=0
+RESULT kind=bulk sample=7 bytes=1048577 us=2075452 bad=0
+LATENCY sample=8 samples=100 min_us=1901 p50_us=2703 p90_us=2972 p99_us=3137 max_us=3137
+RESULT kind=tiny sample=8 bytes=4099 us=24084 bad=0
+RESULT kind=bulk sample=8 bytes=1048577 us=2096750 bad=0
+LATENCY sample=9 samples=100 min_us=1871 p50_us=2389 p90_us=2931 p99_us=3052 max_us=3052
+RESULT kind=tiny sample=9 bytes=4099 us=24063 bad=0
+RESULT kind=bulk sample=9 bytes=1048577 us=2102036 bad=0
+CLIENT request_closed=1 response_eof=1
+SERVER request_eof=1 response_closed=1
+STACK stage=finished name=dma-recv number=12 free=1048 used=1000 stack=2048 raw=262 unit_bytes=4
+STACK stage=finished name=dma-recv number=10 free=1048 used=1000 stack=2048 raw=262 unit_bytes=4
+STACK stage=finished name=probe-tx0 number=9 free=1032 used=1016 stack=2048 raw=258 unit_bytes=4
+STACK stage=finished name=probe-tx1 number=11 free=1032 used=1016 stack=2048 raw=258 unit_bytes=4
+STACK_SNAPSHOT stage=finished workers=4 expected=4
+IS+00:00:25.047497 probe-app(0x2000d7c8) channel.cpp:170] Transmitter and receiver are now connecting.
+IS+00:00:25.049644 probe-app(0x2000d7c8) channel.cpp:170] Transmitter and receiver are now connecting.
+IS+00:00:25.049836 probe-tx0(0x2001b140) channel.cpp:336] Handshake packet sent: CONN 2152297501:3476
+IS+00:00:25.052256 probe-tx1(0x2001c490) channel.cpp:336] Handshake packet sent: CONN 1908171961:1076
+IS+00:00:25.054094 dma-recv(0x2001ce38) channel.cpp:355] Handshake packet received: CONN 2152297501:3476
+IS+00:00:25.054834 probe-tx0(0x2001b140) channel.cpp:336] Handshake packet sent: CONN 2152297501:3476
+IS+00:00:25.055803 dma-recv(0x2001ce38) channel.cpp:404] Receiver is now connected.
+IS+00:00:25.056231 dma-recv(0x2001bae8) channel.cpp:355] Handshake packet received: CONN 1908171961:1076
+IS+00:00:25.057528 dma-recv(0x2001bae8) channel.cpp:404] Receiver is now connected.
+IS+00:00:25.058951 probe-tx1(0x2001c490) channel.cpp:336] Handshake packet sent: CONN/ACK 1908171961:1076/2152297501
+IS+00:00:25.060523 dma-recv(0x2001ce38) channel.cpp:355] Handshake packet received: CONN 2152297501:3476
+IS+00:00:25.059966 probe-tx0(0x2001b140) channel.cpp:336] Handshake packet sent: CONN/ACK 2152297501:3476/1908171961
+IS+00:00:25.062889 dma-recv(0x2001bae8) channel.cpp:355] Handshake packet received: CONN/ACK 1908171961:1076/2152297501
+IS+00:00:25.063625 dma-recv(0x2001ce38) channel.cpp:355] Handshake packet received: CONN/ACK 2152297501:3476/1908171961
+IS+00:00:25.064567 dma-recv(0x2001bae8) channel.cpp:459] Transmitter is now connected.
+IS+00:00:25.064886 dma-recv(0x2001ce38) channel.cpp:459] Transmitter is now connected.
+IS+00:00:25.066132 probe-tx0(0x2001b140) channel.cpp:336] Handshake packet sent: ACK 2152297501:3476/1908171961
+IS+00:00:25.067734 probe-tx1(0x2001c490) channel.cpp:336] Handshake packet sent: ACK 1908171961:1076/2152297501
+IS+00:00:25.069862 dma-recv(0x2001ce38) channel.cpp:355] Handshake packet received: ACK 2152297501:3476/1908171961
+IS+00:00:25.070595 dma-recv(0x2001bae8) channel.cpp:355] Handshake packet received: ACK 1908171961:1076/2152297501
+STACK stage=diagnostic_connected name=probe-tx1 number=11 free=1032 used=1016 stack=2048 raw=258 unit_bytes=4
+STACK stage=diagnostic_connected name=dma-recv number=12 free=1048 used=1000 stack=2048 raw=262 unit_bytes=4
+STACK stage=diagnostic_connected name=dma-recv number=10 free=1048 used=1000 stack=2048 raw=262 unit_bytes=4
+STACK stage=diagnostic_connected name=probe-tx0 number=9 free=1032 used=1016 stack=2048 raw=258 unit_bytes=4
+STACK_SNAPSHOT stage=diagnostic_connected workers=4 expected=4
+[0;33mWS+00:00:25.080569 dma-recv(0x2001bae8) transmitter.cpp:237] Bogus ack received, ignoring: 0 -> 4096; current: 3476
+[m[0;33mWS+00:00:25.082167 dma-recv(0x2001bae8) transmitter.cpp:230] Cross-talk detected. Check wiring and power.
+[mSTACK stage=diagnostic_warnings name=dma-recv number=10 free=1048 used=1000 stack=2048 raw=262 unit_bytes=4
+STACK stage=diagnostic_warnings name=probe-tx0 number=9 free=1032 used=1016 stack=2048 raw=258 unit_bytes=4
+STACK_SNAPSHOT stage=diagnostic_warnings workers=2 expected=2
+IS+00:00:25.608605 probe-app(0x2000d7c8) channel.cpp:170] Transmitter and receiver are now connecting.
+IS+00:00:25.610525 probe-tx1(0x2001f2b8) channel.cpp:336] Handshake packet sent: CONN 3743271655:526
+IS+00:00:25.612527 dma-recv(0x2001bae8) channel.cpp:355] Handshake packet received: CONN 3743271655:526
+IS+00:00:25.613999 dma-recv(0x2001bae8) channel.cpp:428] Disconnection detected: 1908171961, 3743271655
+IS+00:00:25.613862 probe-tx1(0x2001f2b8) channel.cpp:336] Handshake packet sent: CONN 3743271655:526
+IS+00:00:25.615079 dma-recv(0x2001bae8) channel.cpp:434] Transmitter is now broken.
+IS+00:00:25.616450 dma-recv(0x2001bae8) channel.cpp:444] Receiver is now broken.
+IS+00:00:25.617611 dma-recv(0x2001bae8) channel.cpp:355] Handshake packet received: CONN 3743271655:526
+IS+00:00:25.618126 probe-tx1(0x2001f2b8) channel.cpp:336] Handshake packet sent: CONN 3743271655:526
+IS+00:00:25.619402 dma-recv(0x2001bae8) channel.cpp:472] Ignoring the handshake, since the receiver is not connecting.
+IS+00:00:25.621200 dma-recv(0x2001bae8) channel.cpp:355] Handshake packet received: CONN 3743271655:526
+IS+00:00:25.622808 dma-recv(0x2001bae8) channel.cpp:472] Ignoring the handshake, since the receiver is not connecting.
+IS+00:00:25.622953 probe-tx1(0x2001f2b8) channel.cpp:336] Handshake packet sent: CONN 3743271655:526
+IS+00:00:25.624507 probe-app(0x2000d7c8) channel.cpp:170] Transmitter and receiver are now connecting.
+IS+00:00:25.626270 dma-recv(0x2001bae8) channel.cpp:355] Handshake packet received: CONN 3743271655:526
+IS+00:00:25.627032 probe-tx1(0x2001f2b8) channel.cpp:336] Handshake packet sent: CONN 3743271655:526
+IS+00:00:25.627893 dma-recv(0x2001bae8) channel.cpp:404] Receiver is now connected.
+IS+00:00:25.629849 dma-recv(0x2001bae8) channel.cpp:355] Handshake packet received: CONN 3743271655:526
+IS+00:00:25.631647 probe-tx0(0x2001b140) channel.cpp:336] Handshake packet sent: CONN/ACK 2814634653:546/3743271655
+IS+00:00:25.633090 probe-tx1(0x2001f2b8) channel.cpp:336] Handshake packet sent: CONN 3743271655:526
+IS+00:00:25.634911 dma-recv(0x20019380) channel.cpp:355] Handshake packet received: CONN/ACK 2814634653:546/3743271655
+IS+00:00:25.635244 probe-tx0(0x2001b140) channel.cpp:336] Handshake packet sent: CONN/ACK 2814634653:546/3743271655
+IS+00:00:25.636911 dma-recv(0x20019380) channel.cpp:404] Receiver is now connected.
+IS+00:00:25.637854 dma-recv(0x2001bae8) channel.cpp:355] Handshake packet received: CONN 3743271655:526
+IS+00:00:25.638509 dma-recv(0x20019380) channel.cpp:410] Transmitter is now connected.
+IS+00:00:25.640515 dma-recv(0x20019380) channel.cpp:355] Handshake packet received: CONN/ACK 2814634653:546/3743271655
+IS+00:00:25.642084 probe-tx0(0x2001b140) channel.cpp:336] Handshake packet sent: CONN/ACK 2814634653:546/3743271655
+IS+00:00:25.642736 probe-tx1(0x2001f2b8) channel.cpp:336] Handshake packet sent: ACK 3743271655:526/2814634653
+IS+00:00:25.644535 dma-recv(0x2001bae8) channel.cpp:355] Handshake packet received: ACK 3743271655:526/2814634653
+IS+00:00:25.644636 dma-recv(0x20019380) channel.cpp:355] Handshake packet received: CONN/ACK 2814634653:546/3743271655
+IS+00:00:25.645933 dma-recv(0x2001bae8) channel.cpp:459] Transmitter is now connected.
+IS+00:00:25.651716 probe-tx1(0x2001f2b8) channel.cpp:336] Handshake packet sent: ACK 3743271655:526/2814634653
+IS+00:00:25.653568 dma-recv(0x2001bae8) channel.cpp:355] Handshake packet received: ACK 3743271655:526/2814634653
+STACK stage=diagnostic_recovered name=dma-recv number=18 free=1040 used=1008 stack=2048 raw=260 unit_bytes=4
+STACK stage=diagnostic_recovered name=dma-recv number=10 free=1000 used=1048 stack=2048 raw=250 unit_bytes=4
+STACK stage=diagnostic_recovered name=probe-tx0 number=9 free=1032 used=1016 stack=2048 raw=258 unit_bytes=4
+STACK stage=diagnostic_recovered name=probe-tx1 number=17 free=1032 used=1016 stack=2048 raw=258 unit_bytes=4
+STACK_SNAPSHOT stage=diagnostic_recovered workers=4 expected=4
+DIAGNOSTIC warnings_checksum_frames=2 malformed_frames=2 reconnect_ping=PASS
+DMA overruns1=0 errors1=1 startup_errors1=1 overruns2=0 errors2=0 startup_errors2=0
+LIFECYCLE stream_eof_and_stop=PASS callbacks=3
+DONE
