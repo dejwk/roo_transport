@@ -240,14 +240,31 @@ documents the non-floating logging paths and ESP32 CPU save areas. Custom
 callbacks, log sinks, wall clocks, floating-point logs and additional SDK
 diagnostics can change the required stack.
 
-**Fatal core-dump generation is not covered by these hardware results.** With
-flash ELF dumps enabled and `CONFIG_ESP_COREDUMP_STACK_SIZE=0`, the SDK generates
-the dump on the crashing task's stack. Native analysis identifies a
-`connectOrDie()` peer-reset path of at least 2,192 B before further flash-writer
-calls. This is post-fatal diagnostic work, rather than ordinary streaming.
-A dedicated core-dump stack requires an SDK rebuild. A short `connect()`
-disconnect callback can instead notify application code to handle peer reset
-outside the UART task.
+**2 KiB does not preserve a usable core dump on the tested ESP32 fatal path.**
+The [fatal-path hardware record](../stack/results/2026-11-07-fatal-validation.json)
+tests an intentional peer-reset FATAL on the real UART receive worker, with
+connection logging enabled. Both ESP32 revisions produce the same results:
+
+| Sender / receive stack reservations | Panic and reboot | Flash core dump after reboot |
+| --- | --- | --- |
+| 2 KiB / 2 KiB | Double exception during dump generation; reboots | No valid image; both SDK validation APIs return `ESP_ERR_INVALID_SIZE` |
+| 4 KiB / 4 KiB | Intentional abort; clean reboot | Valid **18,148 B** ELF image; both SDK validation APIs return `ESP_OK` |
+
+The firmware source snapshots match; only the stack reservations change. Each
+run erases the old dump before the trigger, then checks image integrity and
+address/size after the matching panic reboot. See the
+[probe and reproduction steps](../stack/results/2026-11-07-fatal/README.md).
+
+This SDK enables flash ELF dumps with `CONFIG_ESP_COREDUMP_STACK_SIZE=0`, so dump
+generation uses the crashing task's stack. The 2 KiB failure occurs after an
+intentional FATAL, and loses the crash report; the normal-transfer results above
+remain valid. No explicit stack-canary warning appears, and these observations
+do not measure the exact minimum stack size for panic handling.
+
+Retain a 4 KiB UART event stack for this tested fatal policy. Alternatively, a
+short `connect()` disconnect callback can notify application code to handle
+peer reset outside the UART task. A dedicated core-dump stack requires an SDK
+rebuild. Custom fatal paths and logging configurations still need validation.
 
 The illustrative benchmark retains 4 KiB worker reservations. Selecting 2 KiB
 for both workers saves **4 KiB of nominal stack reservations per endpoint**;

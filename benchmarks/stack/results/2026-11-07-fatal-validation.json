@@ -1,0 +1,389 @@
+{
+  "schema_version": 1,
+  "date": "2026-11-07",
+  "objective": "Observe ESP32 receive-worker peer-reset FATAL, flash core dump and reboot with 2 KiB and 4 KiB stacks",
+  "observation_complete": true,
+  "source": {
+    "path": "2026-11-07-fatal/probe-source.txt",
+    "sha256": "84f25ff5881de33e8a584eee28d2731bc210f79f568b714c923785f13cadae80",
+    "format": "Verbatim C++ build input preserved as a text artifact"
+  },
+  "firmware": {
+    "2048": {
+      "path": "2026-11-07-fatal/esp32-2048-manifest.json",
+      "sha256": "939e94b2d5c5b96c5aead982c5c4af17852842ab17b14ca37b75bdd3765807ea",
+      "firmware_sha256": "2ed284de208b8bf2485cde642c6129b90111b0aa37dcf2b76620c21dc427f05c"
+    },
+    "4096": {
+      "path": "2026-11-07-fatal/esp32-4096-manifest.json",
+      "sha256": "ecdd893e49a4f858fdd6fdcb6a65bcc834647cf11b3a01140daa58fd903a4f5e",
+      "firmware_sha256": "af34a8b4cc1d3c2a5089c17a6f8d35d3907fdd13d6288b590cb5d5734f9d85af"
+    }
+  },
+  "sdk": {
+    "arduino_esp32": "3.3.7",
+    "esp_idf_package": "5.5.0+sha.87912cd291",
+    "xtensa_gcc": "14.2.0",
+    "sdkconfig_sha256": "fc4161f5f308f1830d363aac1d8512ae420706ad34956031e99b98761c65e242",
+    "configuration": {
+      "CONFIG_ESP_COREDUMP_ENABLE_TO_FLASH": 1,
+      "CONFIG_ESP_COREDUMP_DATA_FORMAT_ELF": 1,
+      "CONFIG_ESP_COREDUMP_CHECKSUM_CRC32": 1,
+      "CONFIG_ESP_COREDUMP_STACK_SIZE": 0
+    }
+  },
+  "method": {
+    "identical_source_snapshots": true,
+    "only_configuration_difference": "Sender and Arduino UART event task stack reservations: 2048 versus 4096 bytes",
+    "topology": "Two real UARTs on each ESP32, linked through the GPIO input matrix; the other physical board is not the active peer",
+    "trigger": "A checksum-valid new-peer handshake invokes a FATAL disconnect callback through the real UART receive, framing and channel path; callback mirrors connectOrDie policy",
+    "logging": "Roo connection MLOG enabled; global ESP-IDF/Arduino verbose logging disabled",
+    "stale_dump_exclusion": "esp_core_dump_image_erase returned ESP_OK before each trigger; RTC noinit cookie ties the captured panic reboot to the run",
+    "dump_validation": "After reboot, esp_core_dump_image_check checks image integrity and esp_core_dump_image_get returns its address/size",
+    "backups": "No backups or restoration requested or performed",
+    "device_access_complete": true
+  },
+  "cases": [
+    {
+      "configuration": {
+        "role": 3,
+        "topology": "internal_matrix",
+        "baud": 5000000,
+        "actual": 5000000,
+        "actual2": 5000000,
+        "window": 3,
+        "bytes": 1048577,
+        "runs": 1,
+        "sender_stack": 2048,
+        "receiver_stack": 2048,
+        "app_stack": 8192,
+        "server_stack": 8192,
+        "unit_bytes": 1,
+        "owner_core": 1,
+        "mlog": 1,
+        "primary_tx": 4,
+        "primary_rx": 17,
+        "secondary_tx": 17,
+        "secondary_rx": 4,
+        "configured_primary_rx": 2,
+        "configured_secondary_rx": 16
+      },
+      "pre_fatal_warning_phase_watermarks": [
+        {
+          "stage": "warnings_finished",
+          "name": "probe-tx0",
+          "number": 11,
+          "free": 452,
+          "used": 1596,
+          "stack": 2048,
+          "raw": 452,
+          "unit_bytes": 1
+        },
+        {
+          "stage": "warnings_finished",
+          "name": "uart_event_task",
+          "number": 12,
+          "free": 332,
+          "used": 1716,
+          "stack": 2048,
+          "raw": 332,
+          "unit_bytes": 1
+        },
+        {
+          "stage": "warnings_finished",
+          "name": "uart_event_task",
+          "number": 14,
+          "free": 336,
+          "used": 1712,
+          "stack": 2048,
+          "raw": 336,
+          "unit_bytes": 1
+        }
+      ],
+      "fatal_observed_on": "uart_event_task",
+      "double_exception": true,
+      "core_dump_reentered": true,
+      "post_fatal_boot": {
+        "cookie": 1398031952,
+        "expected_cookie": 1398031952,
+        "post_fatal": 1,
+        "reset_reason": 4,
+        "check": 260,
+        "image": 260,
+        "address": 0,
+        "size": 0,
+        "stack": 2048
+      },
+      "outcome": "rebooted_without_valid_dump",
+      "id": "esp32-fatal-2048-a",
+      "board_model": "ESP32-D0WDQ6 revision v1.1",
+      "worker_stack_bytes": 2048,
+      "firmware": "2048",
+      "observation_complete": true,
+      "explicit_stack_canary_report": false,
+      "console_transcript": {
+        "path": "2026-11-07-fatal/esp32-fatal-2048-a.log",
+        "sha256": "c1ee2df92987a0f2769b4f2b562f428d61806d1909e0c99b77a34340761e6b61"
+      }
+    },
+    {
+      "configuration": {
+        "role": 3,
+        "topology": "internal_matrix",
+        "baud": 5000000,
+        "actual": 5000000,
+        "actual2": 5000000,
+        "window": 3,
+        "bytes": 1048577,
+        "runs": 1,
+        "sender_stack": 2048,
+        "receiver_stack": 2048,
+        "app_stack": 8192,
+        "server_stack": 8192,
+        "unit_bytes": 1,
+        "owner_core": 1,
+        "mlog": 1,
+        "primary_tx": 4,
+        "primary_rx": 17,
+        "secondary_tx": 17,
+        "secondary_rx": 4,
+        "configured_primary_rx": 2,
+        "configured_secondary_rx": 16
+      },
+      "pre_fatal_warning_phase_watermarks": [
+        {
+          "stage": "warnings_finished",
+          "name": "probe-tx0",
+          "number": 11,
+          "free": 452,
+          "used": 1596,
+          "stack": 2048,
+          "raw": 452,
+          "unit_bytes": 1
+        },
+        {
+          "stage": "warnings_finished",
+          "name": "uart_event_task",
+          "number": 12,
+          "free": 332,
+          "used": 1716,
+          "stack": 2048,
+          "raw": 332,
+          "unit_bytes": 1
+        },
+        {
+          "stage": "warnings_finished",
+          "name": "uart_event_task",
+          "number": 14,
+          "free": 336,
+          "used": 1712,
+          "stack": 2048,
+          "raw": 336,
+          "unit_bytes": 1
+        }
+      ],
+      "fatal_observed_on": "uart_event_task",
+      "double_exception": true,
+      "core_dump_reentered": true,
+      "post_fatal_boot": {
+        "cookie": 1398031952,
+        "expected_cookie": 1398031952,
+        "post_fatal": 1,
+        "reset_reason": 4,
+        "check": 260,
+        "image": 260,
+        "address": 0,
+        "size": 0,
+        "stack": 2048
+      },
+      "outcome": "rebooted_without_valid_dump",
+      "id": "esp32-fatal-2048-b",
+      "board_model": "ESP32-D0WD-V3 revision v3.1",
+      "worker_stack_bytes": 2048,
+      "firmware": "2048",
+      "observation_complete": true,
+      "explicit_stack_canary_report": false,
+      "console_transcript": {
+        "path": "2026-11-07-fatal/esp32-fatal-2048-b.log",
+        "sha256": "a2948089a002bd2d8675da2886da461021932635cffc8e1ebdcdd74714852bce"
+      }
+    },
+    {
+      "configuration": {
+        "role": 3,
+        "topology": "internal_matrix",
+        "baud": 5000000,
+        "actual": 5000000,
+        "actual2": 5000000,
+        "window": 3,
+        "bytes": 1048577,
+        "runs": 1,
+        "sender_stack": 4096,
+        "receiver_stack": 4096,
+        "app_stack": 8192,
+        "server_stack": 8192,
+        "unit_bytes": 1,
+        "owner_core": 1,
+        "mlog": 1,
+        "primary_tx": 4,
+        "primary_rx": 17,
+        "secondary_tx": 17,
+        "secondary_rx": 4,
+        "configured_primary_rx": 2,
+        "configured_secondary_rx": 16
+      },
+      "pre_fatal_warning_phase_watermarks": [
+        {
+          "stage": "warnings_finished",
+          "name": "probe-tx0",
+          "number": 11,
+          "free": 2492,
+          "used": 1604,
+          "stack": 4096,
+          "raw": 2492,
+          "unit_bytes": 1
+        },
+        {
+          "stage": "warnings_finished",
+          "name": "uart_event_task",
+          "number": 12,
+          "free": 2392,
+          "used": 1704,
+          "stack": 4096,
+          "raw": 2392,
+          "unit_bytes": 1
+        },
+        {
+          "stage": "warnings_finished",
+          "name": "uart_event_task",
+          "number": 14,
+          "free": 2384,
+          "used": 1712,
+          "stack": 4096,
+          "raw": 2384,
+          "unit_bytes": 1
+        }
+      ],
+      "fatal_observed_on": "uart_event_task",
+      "double_exception": false,
+      "core_dump_reentered": false,
+      "post_fatal_boot": {
+        "cookie": 1398031952,
+        "expected_cookie": 1398031952,
+        "post_fatal": 1,
+        "reset_reason": 4,
+        "check": 0,
+        "image": 0,
+        "address": 4128768,
+        "size": 18148,
+        "stack": 4096
+      },
+      "outcome": "rebooted_with_valid_dump",
+      "id": "esp32-fatal-4096-a",
+      "board_model": "ESP32-D0WDQ6 revision v1.1",
+      "worker_stack_bytes": 4096,
+      "firmware": "4096",
+      "observation_complete": true,
+      "explicit_stack_canary_report": false,
+      "console_transcript": {
+        "path": "2026-11-07-fatal/esp32-fatal-4096-a.log",
+        "sha256": "1d9ba814a8044bc3d7b06e49c802ec4ec90a87a38ee3857b24a8375c28454efb"
+      }
+    },
+    {
+      "configuration": {
+        "role": 3,
+        "topology": "internal_matrix",
+        "baud": 5000000,
+        "actual": 5000000,
+        "actual2": 5000000,
+        "window": 3,
+        "bytes": 1048577,
+        "runs": 1,
+        "sender_stack": 4096,
+        "receiver_stack": 4096,
+        "app_stack": 8192,
+        "server_stack": 8192,
+        "unit_bytes": 1,
+        "owner_core": 1,
+        "mlog": 1,
+        "primary_tx": 4,
+        "primary_rx": 17,
+        "secondary_tx": 17,
+        "secondary_rx": 4,
+        "configured_primary_rx": 2,
+        "configured_secondary_rx": 16
+      },
+      "pre_fatal_warning_phase_watermarks": [
+        {
+          "stage": "warnings_finished",
+          "name": "probe-tx0",
+          "number": 11,
+          "free": 2492,
+          "used": 1604,
+          "stack": 4096,
+          "raw": 2492,
+          "unit_bytes": 1
+        },
+        {
+          "stage": "warnings_finished",
+          "name": "uart_event_task",
+          "number": 12,
+          "free": 2440,
+          "used": 1656,
+          "stack": 4096,
+          "raw": 2440,
+          "unit_bytes": 1
+        },
+        {
+          "stage": "warnings_finished",
+          "name": "uart_event_task",
+          "number": 14,
+          "free": 2432,
+          "used": 1664,
+          "stack": 4096,
+          "raw": 2432,
+          "unit_bytes": 1
+        }
+      ],
+      "fatal_observed_on": "uart_event_task",
+      "double_exception": false,
+      "core_dump_reentered": false,
+      "post_fatal_boot": {
+        "cookie": 1398031952,
+        "expected_cookie": 1398031952,
+        "post_fatal": 1,
+        "reset_reason": 4,
+        "check": 0,
+        "image": 0,
+        "address": 4128768,
+        "size": 18148,
+        "stack": 4096
+      },
+      "outcome": "rebooted_with_valid_dump",
+      "id": "esp32-fatal-4096-b",
+      "board_model": "ESP32-D0WD-V3 revision v3.1",
+      "worker_stack_bytes": 4096,
+      "firmware": "4096",
+      "observation_complete": true,
+      "explicit_stack_canary_report": false,
+      "console_transcript": {
+        "path": "2026-11-07-fatal/esp32-fatal-4096-b.log",
+        "sha256": "b1263f3219872d26e075b33e82d278423d41f8908a7f2b0bab8ba1f4a7e255a9"
+      }
+    }
+  ],
+  "interpretation": {
+    "normal_operation": "The separate normal-workload validation is unchanged; this test exercises intentional post-fatal diagnostic handling",
+    "two_kib": "Both revisions reboot after a double exception during core-dump generation and leave no valid image; SDK APIs return ESP_ERR_INVALID_SIZE (0x104)",
+    "four_kib": "Both revisions reboot with a validated 18148-byte flash ELF core dump; SDK APIs return ESP_OK",
+    "practical_scope": "With this SDK using the crashing worker stack for dump generation, 2 KiB does not preserve a usable core dump on the tested fatal path; 4 KiB does"
+  },
+  "limitations": [
+    "One intentional fatal per stack size per ESP32 revision; not a stress repetition or exhaustive panic-path bound.",
+    "The failure is a double exception/dump reentry, without an explicit stack-canary report; no direct fatal-time high-water mark or exact minimum stack size is measured.",
+    "Pre-fatal watermarks measure only handshake/warning processing, not panic handling.",
+    "Successful 4 KiB dumping does not prove all diagnostic paths stay within that stack reservation.",
+    "No Pico fatal/core-dump test or new throughput test is included."
+  ]
+}

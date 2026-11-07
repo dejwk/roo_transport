@@ -50,8 +50,10 @@ and latency.
 
 The measured ESP32 RAM profile uses about **19.2 KiB of additional heap per
 endpoint**, including the UART driver and two 4 KiB worker stacks. Separate
-hardware checks pass with **2 KiB transport workers** on ESP32 and RP2040, with
-connection logging enabled. See the [RAM breakdown](benchmarks/esp32/README.md#ram-footprint)
+hardware tests verify normal operation with **2 KiB transport workers** on
+ESP32 and RP2040, with connection logging enabled. The tested ESP32 fatal path
+produces a valid core dump with **4 KiB worker stacks**, and fails with 2 KiB.
+See the [RAM breakdown](benchmarks/esp32/README.md#ram-footprint)
 and [Pico stack validation](benchmarks/pico/README.md#2-kib-worker-stack-validation)
 for configurations, measured headroom and scope.
 

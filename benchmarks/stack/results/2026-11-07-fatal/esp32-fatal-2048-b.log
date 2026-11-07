@@ -1,0 +1,106 @@
+ets Jul 29 2019 12:21:46
+
+rst:0x1 (POWERON_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:4640
+load:0x40078000,len:15660
+load:0x40080400,len:3164
+entry 0x4008059c
+COREDUMP_BOOT cookie=2610284291 expected_cookie=1398031952 post_fatal=0 reset_reason=1 check=0 image=0 address=4128768 size=15780 stack=2048
+READY fatal_probe=1 command=run_3_BAUD_WINDOW_LOG_BYTES_RUNS
+COREDUMP_ERASE result=0
+CONFIG role=3 topology=internal_matrix baud=5000000 actual=5000000 actual2=5000000 window=3 bytes=1048577 runs=1 sender_stack=2048 receiver_stack=2048 app_stack=8192 server_stack=8192 unit_bytes=1 owner_core=1 mlog=1 primary_tx=4 primary_rx=17 secondary_tx=17 secondary_rx=4 configured_primary_rx=2 configured_secondary_rx=16
+STACK stage=started name=probe-tx1 number=13 free=1128 used=920 stack=2048 raw=1128 unit_bytes=1
+STACK stage=started name=probe-tx0 number=11 free=1124 used=924 stack=2048 raw=1124 unit_bytes=1
+STACK stage=started name=uart_event_task number=12 free=1452 used=596 stack=2048 raw=1452 unit_bytes=1
+STACK stage=started name=uart_event_task number=14 free=1456 used=592 stack=2048 raw=1456 unit_bytes=1
+STACK_SNAPSHOT stage=started workers=4 expected=4
+IS+00:00:00.534921 probe-app(0x3ffb8c60) channel.cpp:170] (serial1) Transmitter and receiver are now connecting.
+IS+00:00:00.537069 probe-app(0x3ffb8c60) channel.cpp:170] (serial2) Transmitter and receiver are now connecting.
+IS+00:00:00.537173 probe-tx0(0x3ffbcbec) channel.cpp:336] (serial1) Handshake packet sent: CONN 124109348:426
+IS+00:00:00.546932 probe-tx1(0x3ffc7ed8) channel.cpp:336] (serial2) Handshake packet sent: CONN 600195393:3816
+IS+00:00:00.557935 probe-tx0(0x3ffbcbec) channel.cpp:336] (serial1) Handshake packet sent: CONN 124109348:426
+IS+00:00:00.565946 uart_event_task(0x3ffc88d0) channel.cpp:355] (serial2) Handshake packet received: CONN 124109348:426
+IS+00:00:00.575521 uart_event_task(0x3ffc570c) channel.cpp:355] (serial1) Handshake packet received: CONN 600195393:3816
+IS+00:00:00.585986 uart_event_task(0x3ffc88d0) channel.cpp:404] (serial2) Receiver is now connected.
+IS+00:00:00.596512 uart_event_task(0x3ffc570c) channel.cpp:404] (serial1) Receiver is now connected.
+IS+00:00:00.605359 uart_event_task(0x3ffc88d0) channel.cpp:355] (serial2) Handshake packet received: CONN 124109348:426
+IS+00:00:00.624547 probe-tx1(0x3ffc7ed8) channel.cpp:336] (serial2) Handshake packet sent: CONN/ACK 600195393:3816/124109348
+IS+00:00:00.624608 probe-tx0(0x3ffbcbec) channel.cpp:336] (serial1) Handshake packet sent: CONN/ACK 124109348:426/600195393
+IS+00:00:00.635448 probe-tx1(0x3ffc7ed8) channel.cpp:336] (serial2) Handshake packet sent: CONN/ACK 600195393:3816/124109348
+IS+00:00:00.646149 uart_event_task(0x3ffc570c) channel.cpp:355] (serial1) Handshake packet received: CONN/ACK 600195393:3816/124109348
+IS+00:00:00.657014 uart_event_task(0x3ffc88d0) channel.cpp:355] (serial2) Handshake packet received: CONN/ACK 124109348:426/600195393
+IS+00:00:00.668749 uart_event_task(0x3ffc570c) channel.cpp:459] (serial1) Transmitter is now connected.
+IS+00:00:00.680392 uart_event_task(0x3ffc88d0) channel.cpp:459] (serial2) Transmitter is now connected.
+IS+00:00:00.689518 uart_event_task(0x3ffc570c) channel.cpp:355] (serial1) Handshake packet received: CONN/ACK 600195393:3816/124109348
+IS+00:00:00.698562 probe-tx1(0x3ffc7ed8) channel.cpp:336] (serial2) Handshake packet sent: ACK 600195393:3816/124109348
+IS+00:00:00.710295 probe-tx0(0x3ffbcbec) channel.cpp:336] (serial1) Handshake packet sent: ACK 124109348:426/600195393
+IS+00:00:00.731009 uart_event_task(0x3ffc570c) channel.cpp:355] (serial1) Handshake packet received: ACK 600195393:3816/124109348
+IS+00:00:00.731762 uart_event_task(0x3ffc88d0) channel.cpp:355] (serial2) Handshake packet received: ACK 124109348:426/600195393
+STACK stage=connected name=probe-tx0 number=11 free=452 used=1596 stack=2048 raw=452 unit_bytes=1
+STACK stage=connected name=probe-tx1 number=13 free=456 used=1592 stack=2048 raw=456 unit_bytes=1
+STACK stage=connected name=uart_event_task number=12 free=332 used=1716 stack=2048 raw=332 unit_bytes=1
+STACK stage=connected name=uart_event_task number=14 free=336 used=1712 stack=2048 raw=336 unit_bytes=1
+STACK_SNAPSHOT stage=connected workers=4 expected=4
+STACK stage=peer_transport_removed name=probe-tx0 number=11 free=452 used=1596 stack=2048 raw=452 unit_bytes=1
+STACK stage=peer_transport_removed name=uart_event_task number=12 free=332 used=1716 stack=2048 raw=332 unit_bytes=1
+STACK stage=peer_transport_removed name=uart_event_task number=14 free=336 used=1712 stack=2048 raw=336 unit_bytes=1
+STACK_SNAPSHOT stage=peer_transport_removed workers=3 expected=3
+WARN_PENDING frames=2 kind=valid_checksum_cross_talk_ack
+WS+00:00:00.997287 uart_event_task(0x3ffc570c) transmitter.cpp:230] Cross-talk detected. Check wiring and power.
+STACK stage=warnings_finished name=probe-tx0 number=11 free=452 used=1596 stack=2048 raw=452 unit_bytes=1
+STACK stage=warnings_finished name=uart_event_task number=12 free=332 used=1716 stack=2048 raw=332 unit_bytes=1
+STACK stage=warnings_finished name=uart_event_task number=14 free=336 used=1712 stack=2048 raw=336 unit_bytes=1
+STACK_SNAPSHOT stage=warnings_finished workers=3 expected=3
+EXPECTED_FATAL kind=peer_reset local_id=124109348 previous_peer_id=600195393 replacement_peer_id=2254641947 stack=2048 observation=panic_dump_and_reboot_not_stack_bounds
+IS+00:00:01.549263 uart_event_task(0x3ffc570c) channel.cpp:355] (serial1) Handshake packet received: CONN 2254641947:1
+IS+00:00:01.549722 uart_event_task(0x3ffc570c) channel.cpp:428] (serial1) Disconnection detected: 600195393, 2254641947
+IS+00:00:01.559341 uart_event_task(0x3ffc570c) channel.cpp:434] (serial1) Transmitter is now broken.
+IS+00:00:01.568146 uart_event_task(0x3ffc570c) channel.cpp:444] (serial1) Receiver is now broken.
+FS+00:00:01.576705 uart_event_task(0x3ffc570c) main.cpp:514] LinkTransport: peer reset; rebooting (intentional worker-stack probe)
+*** Check failure stack trace: ***
+
+abort() was called at PC 0x400d5b37 on core 1
+
+
+Backtrace: 0x400893a0:0x3ffc7110 0x40089365:0x3ffc7130 0x4008f629:0x3ffc7150 0x400d5b37:0x3ffc71d0 0x400d5b61:0x3ffc71f0 0x400d5beb:0x3ffc7210 0x400d5e8d:0x3ffc7250 0x400d5f05:0x3ffc7270 0x400dc6ff:0x3ffc7290 0x400da683:0x3ffc72c0 0x400da806:0x3ffc72e0 0x400daeb5:0x3ffc73b0 0x400dc30d:0x3ffc7400 0x400dc6df:0x3ffc7420 0x400dc40d:0x3ffc7440 0x400dc489:0x3ffc7480 0x400dc532:0x3ffc74a0 0x400dcb05:0x3ffc74c0 0x400dcb25:0x3ffc74e0 0x400dd3d9:0x3ffc7500 0x40089f7d:0x3ffc7540
+
+
+
+
+ELF file SHA256: ca16124b7
+
+Guru Meditation Error: Core  1 panic'ed (Double exception). 
+
+Core  1 register dump:
+PC      : 0x40091b6a  PS      : 0x00040436  A0      : 0x800f7276  A1      : 0x3ffc6d30  
+A2      : 0x3ffc570c  A3      : 0x00000000  A4      : 0xfffdffff  A5      : 0x3ffc6fc0  
+A6      : 0x00000001  A7      : 0x00000000  A8      : 0x40080080  A9      : 0x3ffc6ea0  
+A10     : 0x00060636  A11     : 0x00040026  A12     : 0x3ffc6f4c  A13     : 0x3ffc3280  
+A14     : 0x3ffc6ec4  A15     : 0x3ffc6e50  SAR     : 0x00000006  EXCCAUSE: 0x00000002  
+EXCVADDR: 0xffffffe0  LBEG    : 0x400858c4  LEND    : 0x400858cf  LCOUNT  : 0xffffffff  
+
+
+Backtrace: 0x40091b67:0x3ffc6d30 0x400f7273:0x3ffc6d50 0x40091b67:0x3ffc6d70 0x40091b67:0x3ffc6d90 0x40091b67:0x3ffc6db0 0x40091b67:0x3ffc6dd0 0x40091b67:0x3ffc6e00 0x40091b67:0x3ffc6ea0 0x4008007d:0x3ffc6d30 0x40087419:0x3ffc6d50 0x40091b67:0x3ffc6d70 0x40091b67:0x3ffc6d90 0x40091b67:0x3ffc6db0 0x40091b67:0x3ffc6dd0 0x40091b67:0x3ffc6e00 0x40091b67:0x3ffc6ea0 0x4008007d:0x3ffc6d30 0x40087419:0x3ffc6d50 0x40091b67:0x3ffc6d70 0x40091b67:0x3ffc6d90 0x40091b67:0x3ffc6db0 0x40091b67:0x3ffc6dd0 0x40091b67:0x3ffc6e00 0x40091b67:0x3ffc6ea0 0x4008007d:0x3ffc6d30 0x40087419:0x3ffc6d50 0x40091b67:0x3ffc6d70 0x40091b67:0x3ffc6d90 0x40091b67:0x3ffc6db0 0x40091b67:0x3ffc6dd0 0x40091b67:0x3ffc6e00 0x40091b67:0x3ffc6ea0 0x4008007d:0x3ffc6d30 0x40087419:0x3ffc6d50 0x40091b67:0x3ffc6d70 0x40091b67:0x3ffc6d90 0x40091b67:0x3ffc6db0 0x40091b67:0x3ffc6dd0 0x40091b67:0x3ffc6e00 0x40091b67:0x3ffc6ea0 0x4008007d:0x3ffc6d30 0x40087419:0x3ffc6d50 0x40091b67:0x3ffc6d70 0x40091b67:0x3ffc6d90 0x40091b67:0x3ffc6db0 0x40091b67:0x3ffc6dd0 0x40091b67:0x3ffc6e00 0x40091b67:0x3ffc6ea0 0x4008007d:0x3ffc6d30 0x40087419:0x3ffc6d50 0x40091b67:0x3ffc6d70 0x40091b67:0x3ffc6d90 0x40091b67:0x3ffc6db0 0x40091b67:0x3ffc6dd0 0x40091b67:0x3ffc6e00 0x40091b67:0x3ffc6ea0 0x4008007d:0x3ffc6d30 0x40087419:0x3ffc6d50 0x40091b67:0x3ffc6d70 0x40091b67:0x3ffc6d90 0x40091b67:0x3ffc6db0 0x40091b67:0x3ffc6dd0 0x40091b67:0x3ffc6e00 0x40091b67:0x3ffc6ea0 0x4008007d:0x3ffc6d30 0x40087419:0x3ffc6d50 0x40091b67:0x3ffc6d70 0x40091b67:0x3ffc6d90 0x40091b67:0x3ffc6db0 0x40091b67:0x3ffc6dd0 0x40091b67:0x3ffc6e00 0x40091b67:0x3ffc6ea0 0x4008007d:0x3ffc6d30 0x40087419:0x3ffc6d50 0x40091b67:0x3ffc6d70 0x40091b67:0x3ffc6d90 0x40091b67:0x3ffc6db0 0x40091b67:0x3ffc6dd0 0x40091b67:0x3ffc6e00 0x40091b67:0x3ffc6ea0 0x4008007d:0x3ffc6d30 0x40087419:0x3ffc6d50 0x40091b67:0x3ffc6d70 0x40091b67:0x3ffc6d90 0x40091b67:0x3ffc6db0 0x40091b67:0x3ffc6dd0 0x40091b67:0x3ffc6e00 0x40091b67:0x3ffc6ea0 0x4008007d:0x3ffc6d30 0x40087419:0x3ffc6d50 0x40091b67:0x3ffc6d70 0x40091b67:0x3ffc6d90 0x40091b67:0x3ffc6db0 0x40091b67:0x3ffc6dd0 0x40091b67:0x3ffc6e00 0x40091b67:0x3ffc6ea0 0x4008007d:0x3ffc6d30 0x40087419:0x3ffc6d50 0x40091b67:0x3ffc6d70 0x40091b67:0x3ffc6d90 0x40091b67:0x3ffc6db0 |<-CONTINUES
+
+
+
+
+ELF file SHA256: ca16124b7
+
+Re-entered core dump! Exception happened during core dump!
+Rebooting...
+ets Jul 29 2019 12:21:46
+
+rst:0xc (SW_CPU_RESET),boot:0x13 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:2
+load:0x3fff0030,len:4640
+load:0x40078000,len:15660
+load:0x40080400,len:3164
+entry 0x4008059c
+COREDUMP_BOOT cookie=1398031952 expected_cookie=1398031952 post_fatal=1 reset_reason=4 check=260 image=260 address=0 size=0 stack=2048
+READY fatal_probe=1 command=run_3_BAUD_WINDOW_LOG_BYTES_RUNS
