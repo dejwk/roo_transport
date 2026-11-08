@@ -9,6 +9,7 @@
 #include "roo_io/data/output_stream_writer.h"
 #include "roo_threads.h"
 #include "roo_threads/thread.h"
+#include "roo_transport/link/config.h"
 #include "roo_transport/link/link.h"
 
 // Measure a reliable byte stream with a tiny request/response protocol: the
@@ -46,7 +47,7 @@ roo::thread server_thread;
 roo::thread::attributes SenderAttributes(const char* name) {
   roo::thread::attributes attributes;
   attributes.set_name(name);
-  attributes.set_stack_size(4096);
+  attributes.set_stack_size(ROO_TRANSPORT_WORKER_STACK_SIZE);
   attributes.set_priority(kIoPriority);
   return attributes;
 }

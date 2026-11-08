@@ -57,6 +57,14 @@ See the [RAM breakdown](benchmarks/esp32/README.md#ram-footprint)
 and [Pico stack validation](benchmarks/pico/README.md#2-kib-worker-stack-validation)
 for configurations, measured headroom and scope.
 
+Transport sender and Roo-owned UART receive workers default to **2 KiB**. Set
+`-DROO_TRANSPORT_WORKER_STACK_SIZE=4096` project-wide to increase their stacks.
+Arduino-ESP32 owns its receive-event task separately; increase that stack with
+`-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096` as well when flash crash dumps are
+needed. See [stack configuration](src/roo_transport/link/config.h) for scope and
+the ESP32 crash-dump limitation. Explicit sender attributes override the Roo
+default.
+
 The benchmark example selects native DMA automatically on supported RP2040
 Arduino-Pico FreeRTOS builds. Its mode, workload and platform settings are
 editable constants in the sketch.

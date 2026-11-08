@@ -6,6 +6,7 @@
 #include "roo_threads.h"
 #include "roo_threads/atomic.h"
 #include "roo_transport/link/arduino/link_stream_transport.h"
+#include "roo_transport/link/config.h"
 
 namespace roo_transport {
 namespace rp2040 {
@@ -36,6 +37,7 @@ class ReliableUartLinkTransport : public LinkStreamTransport {
     running_ = true;
     roo::thread::attributes attrs;
     attrs.set_name(receiver_thread_name_.c_str());
+    attrs.set_stack_size(ROO_TRANSPORT_WORKER_STACK_SIZE);
     // Run at high priority to ensure timely processing of incoming packets.
     attrs.set_priority(configMAX_PRIORITIES - 1);
 #if configNUMBER_OF_CORES > 1 && configUSE_CORE_AFFINITY

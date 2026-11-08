@@ -206,6 +206,7 @@ cc_test(
     name = "sender_thread_attributes_test",
     size = "small",
     srcs = ["test/sender_thread_attributes_test.cpp"],
+    linkopts = ["-Wl,--wrap=xTaskCreatePinnedToCore"],
     linkstatic = 1,
     target_compatible_with = [
         "@roo_testing//roo_testing/platforms:arduino",

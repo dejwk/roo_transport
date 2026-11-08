@@ -47,15 +47,17 @@ class ReliableUartDma {
   ReliableUartDma(const ReliableUartDma&) = delete;
   ReliableUartDma& operator=(const ReliableUartDma&) = delete;
 
-  /// Starts both workers with default attributes; call once before connecting.
+  /// Starts both workers with ROO_TRANSPORT_WORKER_STACK_SIZE bytes each
+  /// (default 2048); call once before connecting.
   void begin();
 
   /// Starts both workers with a complete @p sender_attributes configuration.
   ///
   /// Only the sender uses these copied attributes; the receive worker retains
   /// its existing priority of configMAX_PRIORITIES - 1. Attributes are not
-  /// merged with defaults: specify a 4096-byte stack explicitly to retain the
-  /// default sender stack budget while changing its priority or name.
+  /// merged with defaults: set stack_size to ROO_TRANSPORT_WORKER_STACK_SIZE
+  /// (default 2048 bytes) to retain the default sender stack budget while
+  /// changing its priority or name.
   /// Call once before connecting.
   void begin(const roo::thread::attributes& sender_attributes);
 

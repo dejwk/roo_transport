@@ -68,7 +68,7 @@ def main():
             ["git", "rev-parse", revision], cwd=checkout, text=True).strip()
     shutil.copy2(sketch, output / "src/main.cpp")
     manifest["sketch"] = str(sketch)
-    flags = ["-fno-exceptions", "-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096"]
+    flags = ["-fno-exceptions"]
     if args.uart_event_core is not None:
         flags.append(f"-DARDUINO_SERIAL_EVENT_TASK_RUNNING_CORE={args.uart_event_core}")
     if args.uart_event_priority is not None:

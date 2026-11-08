@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 
+#include "roo_transport/link/config.h"
 #include "roo_transport/link/internal/protocol.h"
 #include "roo_transport/link/internal/retry_backoff.h"
 #include "roo_transport/link/internal/thread_safe/channel.h"
@@ -553,7 +554,7 @@ void Channel::sendLoop() {
 
 void Channel::begin() {
   roo::thread::attributes attrs;
-  attrs.set_stack_size(4096);
+  attrs.set_stack_size(ROO_TRANSPORT_WORKER_STACK_SIZE);
 #if (defined __FREERTOS || defined ESP_PLATFORM)
   // Set the priority just the notch below the receiver thread, so that it
   // doesn't starve the receiver thread (which receives acks) but is still high.

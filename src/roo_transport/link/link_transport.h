@@ -29,7 +29,9 @@ class LinkTransport {
                 LinkBufferSize sendbuf = kBufferSize4KB,
                 LinkBufferSize recvbuf = kBufferSize4KB);
 
-  /// Starts the sender with the transport's default stack, priority and name.
+  /// Starts the sender with ROO_TRANSPORT_WORKER_STACK_SIZE bytes (default
+  /// 2048), and the transport's default priority and name. See link/config.h
+  /// for compile-time overrides and the ESP32 crash-dump limitation.
   void begin() { channel_.begin(); }
 
 #if defined(ROO_THREADS_ATTRIBUTES_SUPPORT_PRIORITY) && \
@@ -37,8 +39,9 @@ class LinkTransport {
   /// Starts the sender using the complete @p sender_attributes configuration.
   ///
   /// Attributes are copied before returning and are not merged with defaults.
-  /// Specify a 4096-byte stack explicitly to retain the default stack budget
-  /// while changing priority or name. Receiver scheduling is unaffected.
+  /// Set stack_size to ROO_TRANSPORT_WORKER_STACK_SIZE (default 2048 bytes)
+  /// to retain the default stack budget while changing priority or name.
+  /// Receiver scheduling is unaffected.
   void begin(const roo::thread::attributes& sender_attributes) {
     channel_.begin(sender_attributes);
   }

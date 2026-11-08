@@ -96,9 +96,13 @@ python3 benchmarks/esp32/build.py --platform /path/to/installed/espressif32 \
 ```
 
 Use `benchmarks/pico/build.py` with an Arduino-Pico-capable platform for Pico.
-Building does not upload. When building ESP32 outside the helper, also set the
-Arduino core build flag `-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096`; the core's
-UART event task has a separate stack from the transport sender.
+Building does not upload. Sender and Roo-owned receive workers default to
+2 KiB; use `-DROO_TRANSPORT_WORKER_STACK_SIZE=4096` project-wide to increase them.
+Arduino-ESP32's UART event task has its own 2 KiB default. With this SDK, the
+tested receive-worker FATAL path reboots without a valid crash dump at 2 KiB;
+use `-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096` to increase that core-owned
+receive stack too when crash dumps are needed. Flags must reach library/core
+compilation, rather than being defined only inside the sketch.
 
 For tested configurations and measurement records, see the [ESP32 guide](../../../benchmarks/esp32/README.md)
 and [Pico guide](../../../benchmarks/pico/README.md). The adjacent

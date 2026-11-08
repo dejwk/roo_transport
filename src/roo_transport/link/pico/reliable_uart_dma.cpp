@@ -12,6 +12,7 @@
 
 #include "roo_threads/atomic.h"
 #include "roo_threads/thread.h"
+#include "roo_transport/link/config.h"
 #include "roo_transport/packets/over_stream/packet_receiver_over_stream.h"
 #include "roo_transport/packets/over_stream/packet_sender_over_stream.h"
 
@@ -134,6 +135,7 @@ struct ReliableUartDma::Impl {
     }
     roo::thread::attributes attrs;
     attrs.set_name("dma-recv");
+    attrs.set_stack_size(ROO_TRANSPORT_WORKER_STACK_SIZE);
     attrs.set_priority(configMAX_PRIORITIES - 1);
     receive_thread = roo::thread(attrs, [this] { receiveLoop(); });
   }

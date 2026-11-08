@@ -80,8 +80,9 @@ class Esp32SerialLinkTransport
   /// Starts the transport with the complete @p sender_attributes configuration.
   ///
   /// Attributes are copied before returning and are not merged with defaults.
-  /// Specify a 4096-byte stack explicitly to retain the default stack budget
-  /// while changing priority or name. UART event-task scheduling is unaffected.
+  /// Set stack_size to ROO_TRANSPORT_WORKER_STACK_SIZE (default 2048 bytes)
+  /// to retain the default stack budget while changing priority or name.
+  /// UART event-task scheduling is unaffected.
   void begin(const roo::thread::attributes& sender_attributes) {
     transport_.begin(sender_attributes);
     registerReceiveCallbacks();
@@ -155,13 +156,16 @@ class Esp32SerialLinkTransport
   std::function<void(const roo::byte* buf, size_t len)> process_fn_;
 };
 
-// NOTE: these clases rely on the event task created by the Arduino core. By
-// default, that task gets created with a very low stack size of just 2048
-// bytes. In practice, it might be insufficient, especially if you enable any
-// connection logging. Therefore, it is recommended to increase the stack size
-// by adding the following line to your platformio.ini or Arduino build flags:
+// The Arduino core owns the receive-event task and defaults to 2048 bytes.
+// This passes the tested normal workloads, including connection logging, but
+// ESP32 flash crash dumps fail on the tested receive-worker FATAL path when
+// CONFIG_ESP_COREDUMP_STACK_SIZE=0. A 4096-byte receive stack produced valid
+// dumps. Set this Arduino core build flag to increase the receive stack:
 //
-// -D ARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=3072
+// -DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096
+//
+// ROO_TRANSPORT_WORKER_STACK_SIZE controls Roo-owned workers only. See
+// roo_transport/link/config.h.
 
 /// Reliable link transport bound to Arduino `Serial` on ESP32.
 class ReliableSerial : public Esp32SerialLinkTransport<decltype(Serial)> {

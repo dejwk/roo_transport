@@ -200,10 +200,11 @@ and [receiver](../../src/roo_transport/packets/over_stream/packet_receiver_over_
 
 ### Task stacks and deeper paths
 
-The RAM profile above reserves **4,096 B per worker**, including its benchmark
-override for the Arduino receive-event task. The transport sender defaults to
-4 KiB; Arduino's own receive-event default is 2 KiB. The recorded clean-transfer
-watermarks for the 4 KiB profile are 1,176 B sender and 1,012–1,044 B receive.
+The measured RAM profile above reserves **4,096 B per worker**, including
+its override for the Arduino receive-event task. The library sender and
+Arduino's receive-event task default to **2 KiB**. The recorded clean-transfer
+watermarks for the measured 4 KiB profile are 1,176 B sender and 1,012–1,044 B
+receive.
 
 **2 KiB sender and receive stacks pass the tested ESP32 hardware workloads with
 connection logging enabled.** The
@@ -266,12 +267,23 @@ short `connect()` disconnect callback can notify application code to handle
 peer reset outside the UART task. A dedicated core-dump stack requires an SDK
 rebuild. Custom fatal paths and logging configurations still need validation.
 
-The illustrative benchmark retains 4 KiB worker reservations. Selecting 2 KiB
-for both workers saves **4 KiB of nominal stack reservations per endpoint**;
-actual heap savings depend on allocation rounding. The narrowest measured
-headroom is 240 B, so applications adding synchronous worker callbacks or
-diagnostics need their own validation. The measurement record contains the
-exact probe sources, flags, manifests and transcripts.
+The illustrative benchmark uses the library's 2 KiB sender default and the
+Arduino core's 2 KiB receive default. Compared with the measured 4 KiB profile,
+this saves **4 KiB of nominal stack reservations per endpoint**; actual heap
+savings depend on allocation rounding. Set these flags project-wide to request
+the larger tested reservations:
+
+```text
+-DROO_TRANSPORT_WORKER_STACK_SIZE=4096
+-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096
+```
+
+The Roo flag controls transport-owned sender and receive workers; it does not
+resize Arduino's core-owned UART event task. Explicit sender attributes take
+precedence over the Roo flag. The narrowest measured operational headroom at
+2 KiB is 240 B, so applications adding synchronous callbacks or diagnostics need
+their own validation. The measurement records preserve the exact probe sources,
+flags, manifests and transcripts.
 
 ### Application buffers and measurement scope
 
@@ -359,8 +371,8 @@ buffering is also not a measurement of equivalent multi-megabit performance.
 
 Roo therefore offers a predictable memory budget for a buffered reliable stream;
 it is not the smallest possible reliable serial implementation. The current
-ESP32 endpoint spends more on its two 4 KiB stacks than on its windows, object
-and framing workspace combined. Tuned lwIP or a polling/callback serial protocol
+ESP32 RAM profile above spends more on its two 4 KiB stacks than on its
+windows, object and framing workspace combined. Tuned lwIP or a polling/callback serial protocol
 can narrow or reverse the memory difference, depending on the required API,
 buffering and existing application infrastructure.
 
@@ -429,14 +441,16 @@ pass complete attributes, including its stack budget:
 ```cpp
 roo::thread::attributes sender;
 sender.set_name("serial1-send");
-sender.set_stack_size(4096);
+sender.set_stack_size(ROO_TRANSPORT_WORKER_STACK_SIZE);
 sender.set_priority(1);
 reliable_serial.begin(sender);
 ```
 
 `begin(attributes)` copies the attributes and does not merge them with defaults.
 It configures only the sender; UART event task scheduling is separate. The
-no-argument `begin()` uses sender priority 23 and a 4096-byte stack on this SDK.
+no-argument `begin()` uses sender priority 23 and the configured worker stack
+(default 2,048 B) on this SDK. Include `roo_transport/link/config.h` to use the
+stack-size macro when supplying explicit attributes.
 
 On receive and error notifications, the transport snapshots the readable UART
 backlog and drains that byte budget, including chunks that contain no complete
@@ -454,8 +468,13 @@ python3 benchmarks/esp32/build.py \
 ```
 
 The output defaults to `~/.cache/roo_transport/esp32-benchmark/firmware`. Builds
-use 240 MHz, disabled exceptions and a 4096-byte Arduino UART event stack. Options
-include `--cpu-mhz`, `--uart-event-core -1/0/1` and `--uart-event-priority N`, where
+use 240 MHz, disabled exceptions and the Arduino core's 2,048-byte UART event
+stack default. Pass `--extra-flag=-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096` to
+use the 4 KiB receive stack from the RAM/fatal-control profiles. The diagnostic
+harness explicitly reserves a 4 KiB sender stack when `--sender-priority` is
+nonzero; the standalone teaching sketch uses the configurable library default.
+Options include `--cpu-mhz`, `--uart-event-core -1/0/1` and
+`--uart-event-priority N`, where
 supported by the core. `--transport-ref REF` selects transport sources without
 changing the checkout; an explicit sender priority requires those sources to
 support `begin(attributes)`. Building does not upload firmware.

@@ -70,11 +70,14 @@ python3 benchmarks/esp32/build.py \
   --sketch benchmarks/stack/results/2026-11-07-fatal/probe-source.txt \
   --output ~/.cache/roo_transport/fatal-4096 \
   --extra-flag=-DSTACK_BYTES=4096 \
+  --extra-flag=-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096 \
   --extra-flag=-DMLOG_roo_transport_reliable_channel_connection=1
 ```
 
-The builder already sets the UART event stack to 4,096 B. The probe asserts that
-its sender and receive stack settings match at compile time.
+The builder follows the Arduino core's 2,048 B receive-stack default; the
+4 KiB control sets its override explicitly. This archived probe uses its own
+`STACK_BYTES` for sender attributes and asserts that its sender and receive
+stack settings match at compile time.
 
 Flash each configuration onto each board, using the
 [ESP32 flashing precautions](../../../esp32/README.md#reproduce-the-two-board-benchmark)

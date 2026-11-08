@@ -106,19 +106,21 @@ The validation enables connection logging and routes stderr through USB:
 -DROO_THREADS_FREERTOS_DEFAULT_THREAD_STACK_SIZE=2048
 ```
 
-Sender attributes explicitly request 2,048 B. The default-thread-size define
-sets the receive workers, which otherwise inherit 3 KiB. It affects all Roo
-FreeRTOS threads using default attributes; this probe explicitly reserves larger
-application stacks. `begin(sender_attributes)` alone changes only the sender.
+In this recorded probe, sender attributes explicitly request 2,048 B and the
+default-thread-size define sets default Roo FreeRTOS attributes, including its
+receive workers. The library sets receive stacks explicitly using
+`ROO_TRANSPORT_WORKER_STACK_SIZE` (default 2,048 B), independently of the global
+Roo thread default. `begin(sender_attributes)` alone changes only the sender.
 The core's debug-port setting is needed for actual stderr transmission; a
 configuration that discards stderr does not test the full USB output path.
 
-The shipped sender default remains 4 KiB and the DMA receive default remains
-3 KiB. Reducing both to 2 KiB saves **3 KiB of nominal stack reservations per
-endpoint**. These results cover the recorded native build and callbacks;
-additional user hooks, floating-point logging and SDK debug output require
-their own stack budget. Fatal handling is not exercised, and the ESP32-specific
-flash-core-dump analysis does not apply to Pico. The generated-pattern stack
+Transport sender and receive workers default to **2 KiB each**, including
+both native DMA and Arduino UART receive workers. Configure transport-owned
+workers project-wide with `-DROO_TRANSPORT_WORKER_STACK_SIZE=4096`, for example;
+explicit sender attributes take precedence. These results cover the recorded
+native build and callbacks; additional user hooks, floating-point logging and
+SDK debug output require their own stack budget. Fatal handling is not exercised,
+and the ESP32-specific flash-core-dump analysis does not apply to Pico. The generated-pattern stack
 probe also differs from the throughput workload, so its rates do not replace
 the throughput table.
 
@@ -149,11 +151,12 @@ selects 8 KiB. To select priority-1 senders, pass complete attributes:
 ```cpp
 roo::thread::attributes sender;
 sender.set_name("uart-send");
-sender.set_stack_size(4096);
+sender.set_stack_size(ROO_TRANSPORT_WORKER_STACK_SIZE);
 sender.set_priority(1);
 uart.begin(sender);
 ```
 
+Include `roo_transport/link/config.h` for the configured stack-size macro.
 The overload copies all attributes without merging defaults. It changes only
 the sender; the receive worker keeps its higher priority. Connect through
 `transport()` and use the resulting `Link`'s roo_io streams. The Arduino UART

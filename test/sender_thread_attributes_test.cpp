@@ -1,4 +1,6 @@
 #include <array>
+#include <atomic>
+#include <cstdint>
 #include <string>
 
 #include "freertos/FreeRTOS.h"
@@ -8,8 +10,29 @@
 #include "roo_threads/mutex.h"
 #include "roo_threads/thread.h"
 #include "roo_time.h"
+#include "roo_transport/link/config.h"
 #include "roo_transport/link/internal/thread_safe/channel.h"
 #include "roo_transport/link/link_transport.h"
+
+namespace {
+std::atomic<uint32_t> last_created_stack_bytes{0};
+}  // namespace
+
+extern "C" BaseType_t __real_xTaskCreatePinnedToCore(
+    TaskFunction_t task, const char* name, uint32_t stack_depth,
+    void* parameter, UBaseType_t priority, TaskHandle_t* handle,
+    BaseType_t core);
+
+// Observe the requested byte budget before the emulator enlarges host stacks.
+// Forward every creation unchanged so the existing real-worker tests still run.
+extern "C" BaseType_t __wrap_xTaskCreatePinnedToCore(
+    TaskFunction_t task, const char* name, uint32_t stack_depth,
+    void* parameter, UBaseType_t priority, TaskHandle_t* handle,
+    BaseType_t core) {
+  last_created_stack_bytes.store(stack_depth * sizeof(StackType_t));
+  return __real_xTaskCreatePinnedToCore(task, name, stack_depth, parameter,
+                                        priority, handle, core);
+}
 
 namespace roo_transport {
 namespace {
@@ -93,8 +116,8 @@ class TransportPair {
 };
 
 // Verifies that no-argument begin retains the unnamed and diagnostic-derived
-// task names and the existing FreeRTOS sender priority.
-TEST(SenderThreadAttributesTest, ChannelDefaultPreservesNameAndPriority) {
+// task names, FreeRTOS priority and configured stack reservation.
+TEST(SenderThreadAttributesTest, ChannelDefaultUsesConfiguredStack) {
   struct NameCase {
     const char* diagnostic_name;
     const char* task_name;
@@ -108,6 +131,8 @@ TEST(SenderThreadAttributesTest, ChannelDefaultPreservesNameAndPriority) {
                     names.diagnostic_name);
     channel.connect();
     channel.begin();
+    EXPECT_EQ(last_created_stack_bytes.load(),
+              static_cast<uint32_t>(ROO_TRANSPORT_WORKER_STACK_SIZE));
     SenderTaskObservation observation;
     ASSERT_TRUE(sender.awaitSend(observation));
     EXPECT_NE(observation.task, nullptr);
@@ -119,8 +144,8 @@ TEST(SenderThreadAttributesTest, ChannelDefaultPreservesNameAndPriority) {
 }
 
 // Verifies that explicit attributes reach the actual Channel worker, including
-// the caller's name instead of the diagnostic-derived default.
-TEST(SenderThreadAttributesTest, ChannelUsesExplicitNameAndPriority) {
+// the caller's name and stack budget instead of the configured defaults.
+TEST(SenderThreadAttributesTest, ChannelUsesExplicitAttributes) {
   ObservingPacketSender sender;
   Channel channel(sender, kBufferSize4KB, kBufferSize4KB, "diagnostic");
   roo::thread::attributes attributes;
@@ -129,6 +154,7 @@ TEST(SenderThreadAttributesTest, ChannelUsesExplicitNameAndPriority) {
   attributes.set_stack_size(8192);
   channel.connect();
   channel.begin(attributes);
+  EXPECT_EQ(last_created_stack_bytes.load(), 8192u);
   SenderTaskObservation observation;
   ASSERT_TRUE(sender.awaitSend(observation));
   EXPECT_NE(observation.task, nullptr);
@@ -149,7 +175,10 @@ TEST(SenderThreadAttributesTest,
   Link first = pair.first.connectAsync();
   Link second = pair.second.connectAsync();
   pair.first.begin(attributes);
+  EXPECT_EQ(last_created_stack_bytes.load(), 12288u);
   pair.second.begin();
+  EXPECT_EQ(last_created_stack_bytes.load(),
+            static_cast<uint32_t>(ROO_TRANSPORT_WORKER_STACK_SIZE));
   ASSERT_TRUE(first.awaitConnected(roo_time::Seconds(5)));
   ASSERT_TRUE(second.awaitConnected(roo_time::Seconds(5)));
   ASSERT_EQ(first.status(), LinkStatus::kConnected);

@@ -5,6 +5,7 @@
 #include <utility>
 
 #include "roo_time.h"
+#include "roo_transport/link/config.h"
 
 namespace roo_transport {
 namespace esp_idf {
@@ -30,7 +31,7 @@ void ReliableUartLinkTransport::begin() {
   running_ = true;
   roo::thread::attributes attrs;
   attrs.set_name(receiver_thread_name_.c_str());
-  attrs.set_stack_size(4096);
+  attrs.set_stack_size(ROO_TRANSPORT_WORKER_STACK_SIZE);
   receiver_thread_ = roo::thread(attrs, [this]() {
     while (running_) {
       if (receiver_.tryReceive(process_fn_) == 0) {
