@@ -26,6 +26,13 @@ raw payload bandwidth**: 5 Mbaud with 8N1 framing carries at most 4 Mbit/s of by
 Accounting for protocol framing, the ideal full-frame payload ceiling is
 3.875 Mbit/s; the measured throughput reaches **98.9% of that ceiling**.
 
+Each reliable UART data frame adds **8 bytes** to up to 248 bytes of application
+payload. That includes a 2-byte transport header, a 4-byte integrity check and
+2 bytes of COBS framing. For the same payload size, uncompressed TCP adds at
+least 40 bytes of TCP/IPv4 headers or 60 bytes of TCP/IPv6 headers before
+link-layer framing. Acknowledgments and retransmissions use additional
+bandwidth. [TCP/IP header sizes (RFC 6691)](https://www.rfc-editor.org/rfc/rfc6691.html#section-2)
+
 Measured short-wire configurations include:
 
 | Platform | Topology | UART baud | Window per direction | Application/sender priority | Payload Mbit/s |
@@ -48,26 +55,16 @@ latency per batch**. A separate 7.5-meter unshielded-cable measurement delivers
 about 2.5 Mbit/s. Cable length and signal quality affect retransmission overhead
 and latency.
 
-The measured ESP32 RAM profile uses about **19.2 KiB of additional heap per
-endpoint**, including the UART driver and two 4 KiB worker stacks. Separate
-hardware tests verify normal operation with **2 KiB transport workers** on
-ESP32 and RP2040, with connection logging enabled. The tested ESP32 fatal path
-produces a valid core dump with **4 KiB worker stacks**, and fails with 2 KiB.
-See the [RAM breakdown](benchmarks/esp32/README.md#ram-footprint)
-and [Pico stack validation](benchmarks/pico/README.md#2-kib-worker-stack-validation)
-for configurations, measured headroom and scope.
-
-Transport sender and Roo-owned UART receive workers default to **2 KiB**. Set
-`-DROO_TRANSPORT_WORKER_STACK_SIZE=4096` project-wide to increase their stacks.
-Arduino-ESP32 owns its receive-event task separately; increase that stack with
-`-DARDUINO_SERIAL_EVENT_TASK_STACK_SIZE=4096` as well when flash crash dumps are
-needed. See [stack configuration](src/roo_transport/link/config.h) for scope and
-the ESP32 crash-dump limitation. Explicit sender attributes override the Roo
-default.
-
 The benchmark example selects native DMA automatically on supported RP2040
 Arduino-Pico FreeRTOS builds. Its mode, workload and platform settings are
 editable constants in the sketch.
+
+## RAM footprint
+
+On classic ESP32 with the Arduino UART backend, the estimated footprint is
+**15.2 KiB of additional heap per endpoint**. This includes the UART driver,
+the benchmark's protocol windows and the default worker stacks. Application
+buffers are separate. See the [ESP32 RAM breakdown](benchmarks/esp32/README.md#ram-footprint).
 
 ## Host emulation
 
