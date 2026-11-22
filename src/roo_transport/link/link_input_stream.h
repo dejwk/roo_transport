@@ -3,6 +3,7 @@
 #include "roo_transport/link/internal/thread_safe/compile_guard.h"
 #ifdef ROO_USE_THREADS
 
+#include "roo_io.h"
 #include "roo_io/core/input_stream.h"
 #include "roo_transport/link/internal/thread_safe/channel.h"
 

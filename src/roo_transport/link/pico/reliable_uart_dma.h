@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <memory>
 
+#include "roo_threads.h"
 #include "roo_threads/thread.h"
 #include "roo_transport/link/link_transport.h"
 

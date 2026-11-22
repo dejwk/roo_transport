@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "roo_io.h"
 #include "roo_io/memory/load.h"
 #include "roo_transport/link/internal/protocol.h"
 #include "roo_transport/link/internal/thread_safe/channel.h"

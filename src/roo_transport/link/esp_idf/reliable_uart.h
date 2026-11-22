@@ -6,6 +6,7 @@
 #include <string>
 
 #include "hal/uart_types.h"
+#include "roo_io.h"
 #include "roo_io/uart/esp32/uart_input_stream.h"
 #include "roo_io/uart/esp32/uart_output_stream.h"
 #include "roo_threads.h"

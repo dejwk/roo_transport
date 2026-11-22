@@ -10,6 +10,7 @@
 #include <cstring>
 #include <memory>
 
+#include "roo_io.h"
 #include "roo_io/data/input_stream_reader.h"
 #include "roo_io/data/output_stream_writer.h"
 #include "roo_threads.h"

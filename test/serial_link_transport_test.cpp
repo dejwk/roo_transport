@@ -1,6 +1,7 @@
 #include "Arduino.h"
 #include "Stream.h"
 #include "gtest/gtest.h"
+#include "roo_io.h"
 #include "roo_io/ringpipe/ringpipe.h"
 #include "roo_testing/microcontrollers/esp32/fake_esp32.h"
 #include "roo_threads.h"

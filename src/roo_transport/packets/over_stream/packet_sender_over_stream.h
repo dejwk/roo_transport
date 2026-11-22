@@ -4,6 +4,7 @@
 
 #include "roo_backport.h"
 #include "roo_backport/byte.h"
+#include "roo_io.h"
 #include "roo_io/core/output_stream.h"
 #include "roo_transport/packets/packet_sender.h"
 

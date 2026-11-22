@@ -12,7 +12,9 @@
 #include <memory>
 
 #include "raw_dma_stream.h"
+#include "roo_collections.h"
 #include "roo_collections/hash.h"
+#include "roo_io.h"
 #include "roo_io/data/input_stream_reader.h"
 #include "roo_io/data/output_stream_writer.h"
 #include "roo_transport/link/arduino/reliable_serial.h"

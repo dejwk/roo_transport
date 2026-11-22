@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "roo_io.h"
 #include "roo_io/memory/store.h"
 #include "roo_io/status.h"
 #include "roo_logging.h"

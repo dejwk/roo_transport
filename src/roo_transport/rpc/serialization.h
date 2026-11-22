@@ -6,6 +6,7 @@
 #include "roo_backport.h"
 #include "roo_backport/byte.h"
 #include "roo_backport/string_view.h"
+#include "roo_io.h"
 #include "roo_io/data/read.h"
 #include "roo_io/data/write.h"
 #include "roo_io/memory/load.h"

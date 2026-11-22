@@ -2,7 +2,9 @@
 
 #include <memory>
 
+#include "roo_io.h"
 #include "roo_io/core/output_stream.h"
+#include "roo_threads.h"
 #include "roo_threads/thread.h"
 #include "roo_transport/link/internal/thread_safe/channel.h"
 #include "roo_transport/link/link.h"

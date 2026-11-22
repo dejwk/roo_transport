@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "roo_io.h"
 #include "roo_io/memory/memory_output_stream.h"
 #include "roo_io/memory/store.h"
 #include "roo_transport/link/arduino/esp32/reliable_serial.h"

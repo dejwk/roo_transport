@@ -11,6 +11,7 @@
 #include "gtest/gtest.h"
 #include "helpers/link_loopback.h"
 #include "helpers/rand.h"
+#include "roo_threads.h"
 #include "roo_threads/atomic.h"
 #include "roo_threads/condition_variable.h"
 #include "roo_threads/mutex.h"

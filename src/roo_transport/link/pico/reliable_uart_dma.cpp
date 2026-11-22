@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cstring>
 
+#include "roo_threads.h"
 #include "roo_threads/atomic.h"
 #include "roo_threads/thread.h"
 #include "roo_transport/link/config.h"

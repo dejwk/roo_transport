@@ -1,6 +1,8 @@
 #include "roo_transport/packets/over_stream/packet_sender_over_stream.h"
 
+#include "roo_collections.h"
 #include "roo_collections/hash.h"
+#include "roo_io.h"
 #include "roo_io/memory/store.h"
 #include "roo_io/third_party/nanocobs/cobs.h"
 #include "roo_logging.h"

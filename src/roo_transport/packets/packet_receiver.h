@@ -4,6 +4,7 @@
 
 #include "roo_backport.h"
 #include "roo_backport/byte.h"
+#include "roo_io.h"
 #include "roo_io/core/input_stream.h"
 
 namespace roo_transport {

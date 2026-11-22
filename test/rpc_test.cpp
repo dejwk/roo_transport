@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "gtest/gtest.h"
+#include "roo_threads.h"
 #include "roo_threads/condition_variable.h"
 #include "roo_threads/thread.h"
 #include "roo_transport/rpc/client.h"

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "roo_io.h"
 #include "roo_io/core/output_stream.h"
 
 namespace roo_transport {

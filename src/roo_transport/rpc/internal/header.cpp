@@ -1,5 +1,6 @@
 #include "roo_transport/rpc/internal/header.h"
 
+#include "roo_io.h"
 #include "roo_io/data/read.h"
 #include "roo_io/data/write.h"
 #include "roo_io/memory/memory_input_iterator.h"

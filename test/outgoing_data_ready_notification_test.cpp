@@ -1,6 +1,7 @@
 #include "roo_transport/link/internal/thread_safe/outgoing_data_ready_notification.h"
 
 #include "gtest/gtest.h"
+#include "roo_threads.h"
 #include "roo_threads/atomic.h"
 #include "roo_threads/thread.h"
 

@@ -31,6 +31,7 @@ struct Emulator {
 // kPinClientTx, and kPinClientRx below. Make sure to cross the wires, i.e. to
 // connect kPinServerTx with kPinClientRx, and kPinServerRx with kPinClientTx.
 
+#include "roo_io.h"
 #include "roo_io/data/read.h"
 #include "roo_io/data/write.h"
 #include "roo_io/memory/memory_input_iterator.h"

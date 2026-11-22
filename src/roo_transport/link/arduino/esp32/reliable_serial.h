@@ -5,6 +5,7 @@
 
 #include "Arduino.h"
 #include "hal/uart_types.h"
+#include "roo_io.h"
 #include "roo_io/uart/arduino/serial_input_stream.h"
 #include "roo_io/uart/arduino/serial_output_stream.h"
 #include "roo_io/uart/esp32/uart_input_stream.h"

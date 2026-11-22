@@ -1,5 +1,6 @@
 #include "roo_transport/messaging/mux_messaging.h"
 
+#include "roo_io.h"
 #include "roo_io/memory/load.h"
 #include "roo_io/memory/store.h"
 #include "roo_logging.h"

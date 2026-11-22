@@ -1,6 +1,7 @@
 #pragma once
 
 #include "noisy_output_stream.h"
+#include "roo_io.h"
 #include "roo_io/ringpipe/ringpipe.h"
 #include "roo_io/ringpipe/ringpipe_input_stream.h"
 #include "roo_io/ringpipe/ringpipe_output_stream.h"

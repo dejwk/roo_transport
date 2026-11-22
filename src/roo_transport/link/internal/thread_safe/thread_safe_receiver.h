@@ -3,6 +3,7 @@
 #include "roo_transport/link/internal/thread_safe/compile_guard.h"
 #ifdef ROO_USE_THREADS
 
+#include "roo_io.h"
 #include "roo_io/status.h"
 #include "roo_transport/link/internal/receiver.h"
 #include "roo_transport/link/internal/thread_safe/outgoing_data_ready_notification.h"

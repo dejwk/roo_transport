@@ -5,7 +5,9 @@
 #include "roo_transport/link/internal/thread_safe/compile_guard.h"
 #ifdef ROO_USE_THREADS
 
+#include "roo_backport.h"
 #include "roo_backport/string_view.h"
+#include "roo_io.h"
 #include "roo_io/core/input_stream.h"
 #include "roo_io/core/output_stream.h"
 #include "roo_io/memory/load.h"
