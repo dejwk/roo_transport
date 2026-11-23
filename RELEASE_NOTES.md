@@ -1,3 +1,16 @@
+# roo_transport 1.3.0
+
+- Added `pico::ReliableUartDma` for RP2040 with Arduino-Pico and FreeRTOS. Hardware benchmarks measured up to 4.74 Mbit/s of validated payload in RP2040 DMA loopback and 3.83 Mbit/s between two classic ESP32 boards, with median round-trip latency of 0.553–0.560 ms across batches.
+- Improved reliable-link throughput with bounded packet bursts, coalesced sender wakeups, and integer retry backoff that keeps jitter within ±20%.
+- Fixed Arduino UART receive stalls by draining the ESP32 backlog on receive and error events and pinning the RP2040 FreeRTOS receive worker to the UART initialization core.
+- Reduced transport-owned worker stacks to 2 KiB by default, configurable with `ROO_TRANSPORT_WORKER_STACK_SIZE`. Added `begin(sender_attributes)` to configure sender stack size, priority, and name. With `CONFIG_ESP_COREDUMP_STACK_SIZE=0`, the tested ESP32 fatal path needed a 4 KiB Arduino UART event stack for valid flash core dumps, set separately with `ARDUINO_SERIAL_EVENT_TASK_STACK_SIZE`.
+- Hardened RPC request parsing to reject malformed, truncated, or overflowing function IDs and timeouts.
+- Updated the serial loopback and benchmark examples, added reproducible hardware benchmarks and RAM measurements, and fixed Arduino dependency discovery.
+- Updated Bazel and PlatformIO dependencies to `roo_collections` 2.0.2, `roo_io` 2.5.0, `roo_logging` 1.6.1, and `roo_threads` 1.4.0. Updated the async RPC example’s Bazel development dependency to `roo_scheduler` 2.4.0.
+- Updated Bazel and CI to `roo_testing` 2.7.0 and made it a regular Bazel dependency. Added host-test profiles for ESP32-S3, ESP32-C3, and RP2040. The new profiles require imports in `.bazelrc` before the nine-profile runner can use them.
+
+---
+
 # roo_transport 1.2.2
 
 - Upgrade the Bazel development dependency `roo_scheduler` from 2.2.1 to 2.3.0.
